@@ -1,5 +1,5 @@
-name: 🐞 버그 리포트
-description: 버그를 발견했을 때 사용
+name: 🐞 Bug
+description: 버그 제보
 title: "[BUG] "
 labels: ["bug"]
 body:
