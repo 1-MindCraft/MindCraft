@@ -1,16 +1,22 @@
 import { lazy, useCallback, useEffect, useState } from 'react';
 import { Handle, Position, useReactFlow } from '@xyflow/react';
+import { getDescendantIds } from '../../utils/mindmapTree';
+import {
+  DEPTH_COLORS,
+  DEPTH_TEXT_COLORS,
+  DEPTH_RING_COLORS,
+  DEFAULT_BG_COLOR,
+  DEFAULT_TEXT_COLOR,
+  DEFAULT_RING_COLOR,
+} from '../../constants/nodeColor';
 
 const MindMapNode = (props) => {
   const { setNodes, setEdges, getNodes, getEdges } = useReactFlow();
   const { id, data, selected } = props;
-  const depthColors = ['bg-blue-600', 'bg-blue-400', 'bg-blue-200'];
-  const depthTextColors = ['text-white', 'text-white', 'text-gray-800'];
-  const depthRingColors = ['ring-blue-300', 'ring-blue-200', 'ring-blue-100'];
-  const ringColor = depthRingColors[data.depth] || 'ring-gray-300';
 
-  const bgColor = depthColors[data.depth] || 'bg-gray-300';
-  const textColor = depthTextColors[data.depth] || 'text-gray-800';
+  const bgColor = DEPTH_COLORS[data.depth] || DEFAULT_BG_COLOR;
+  const textColor = DEPTH_TEXT_COLORS[data.depth] || DEFAULT_TEXT_COLOR;
+  const ringColor = DEPTH_RING_COLORS[data.depth] || DEFAULT_RING_COLOR;
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -94,17 +100,6 @@ const MindMapNode = (props) => {
       )
     );
   }, [id, setNodes, setEdges, getNodes]);
-
-  // 자손 id 배열 구하는 함수
-  const getDescendantIds = (id, nodes) => {
-    // parentId가 id와 같은거 찾기
-    const children = nodes.filter((node) => node.data.parentId === id);
-    // 찾은 배열에 계속 더해가야함
-    return children.reduce(
-      (ids, child) => [...ids, child.id, ...getDescendantIds(child.id, nodes)],
-      []
-    );
-  };
 
   const isRoot = data.depth === 0;
 
