@@ -5,8 +5,8 @@ import './index.css';
 import MindMap from './mindmap/components/TestMindmap';
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
+  <>
     {/* <App /> */}
     <MindMap />
-  </StrictMode>
+  </>
 );
