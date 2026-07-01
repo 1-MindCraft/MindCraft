@@ -46,7 +46,7 @@ class CoverLetterGenerateRequest(BaseModel):
     )
 
 
-# ---------- LLM 구조화 출력 (OpenAI response_format) ----------
+# --------- LLM 구조화 출력 (OpenAI response_format) ---------
 
 class LLMOutput(BaseModel):
     """LLM이 직접 반환하는 형태."""
@@ -54,12 +54,9 @@ class LLMOutput(BaseModel):
     answer: str = Field(..., description="생성된 자소서 본문")
 
 
-# ---------- Response (FastAPI → Spring) ----------
+# ---------- Response (FastAPI -> Spring) ----------
 
 class CoverLetterGenerateResponse(BaseModel):
-    """
-    FastAPI는 본문(answer)만 반환.
-    id / question / source_node 미러링·저장은 Spring이 처리해 외부(201)로 전달.
-    """
+
 
     answer: str = Field(..., description="AI가 생성한 자소서 본문")
