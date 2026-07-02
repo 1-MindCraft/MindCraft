@@ -45,6 +45,8 @@ pip install -r requirements.txt
 
 ```bash
 uvicorn app.main:app --reload
+
+python -m uvicorn app.main:app --reload
 ```
 
 ##  실행 주소
