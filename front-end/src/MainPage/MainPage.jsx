@@ -10,7 +10,8 @@ import FinalCta from './components/FinalCta';
 import Footer from './components/Footer';
 import TopButton from './components/TopButton';
 import FloatingCta from './components/FloatingCta';
-import LoginModal from './components/LoginModal';
+import LoginPage from '../LoginPage/LoginPage';
+import SignupPage from '../SignupPage/SignupPage';
 
 import useScrollButtons from './hooks/useScrollButtons';
 
@@ -51,8 +52,11 @@ function MainPage() {
   });
 
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const openLogin = () => setIsLoginOpen(true);
-  const closeLogin = () => setIsLoginOpen(false);
+  const [isSignupOpen, setIsSignupOpen] = useState(false);
+
+  const openLogin = () => { setIsLoginOpen(true); setIsSignupOpen(false); };
+  const openSignup = () => { setIsSignupOpen(true); setIsLoginOpen(false); };
+  const closeAll = () => { setIsLoginOpen(false); setIsSignupOpen(false); };
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -89,13 +93,23 @@ function MainPage() {
       />
 
       <Faq />
-      <FinalCta />
+      <FinalCta onClick={openLogin} />
       <Footer />
 
-      <FloatingCta visible={showFloatCta} />
+      <FloatingCta visible={showFloatCta} onClick={openLogin} />
       <TopButton visible={showTopBtn} onClick={scrollToTop} />
 
-      <LoginModal open={isLoginOpen} onClose={closeLogin} />
+      <LoginPage
+        open={isLoginOpen}
+        onClose={closeAll}
+        onSignupClick={openSignup}
+      />
+      <SignupPage
+        open={isSignupOpen}
+        onClose={closeAll}
+        onLoginClick={openLogin}
+        theme="blue"
+      />
     </div>
   );
 }
