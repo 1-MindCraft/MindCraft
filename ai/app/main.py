@@ -13,3 +13,4 @@ def status_check():
         "status": "ok",
         "model": settings.LLM_MODEL,    
     }
+
