@@ -15,7 +15,7 @@ def build_node_text(nodes: list[MindMapNode]) -> str:
 
     for node in nodes:
         parent_id = node.parentId
-        # parentId가 None 이거나, 선택된 노드 집합에 없으면 → 최상위로 취급.
+        # parentId가 None 이거나, 선택된 노드 집합에 없으면 -> 최상위로 취급.
         # ("root" 문자열을 무조건 None 처리하지 않음: id="root" 노드가 실제로 있을 수 있음)
         if parent_id is None or parent_id not in all_ids:
             parent_id = None
