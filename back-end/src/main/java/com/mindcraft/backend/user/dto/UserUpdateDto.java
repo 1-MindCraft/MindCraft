@@ -7,9 +7,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-public class UserResponseDto {
+@AllArgsConstructor
+public class UserUpdateDto {
     private String name;
-    private String email;
 }
