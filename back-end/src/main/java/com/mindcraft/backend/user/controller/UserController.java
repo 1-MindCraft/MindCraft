@@ -22,6 +22,9 @@ public class UserController {
     public ResponseEntity createUser(@RequestBody UserJoinDto userJoinDto) {
         User user = userMapper.userJoinDtoToUser(userJoinDto);
         User createdMember = userService.createUser(user);
-        return new ResponseEntity<>(userMapper.userToUserResponseDto(createdMember), HttpStatus.CREATED);
+        return new ResponseEntity<>(
+                userMapper.userToUserResponseDto(createdMember),
+                HttpStatus.CREATED
+        );
     }
 }
