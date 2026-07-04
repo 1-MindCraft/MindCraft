@@ -4,6 +4,7 @@ import com.mindcraft.backend.user.dto.UserJoinDto;
 import com.mindcraft.backend.user.entity.User;
 import com.mindcraft.backend.user.mapper.UserMapper;
 import com.mindcraft.backend.user.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/auth/register")
-    public ResponseEntity createUser(@RequestBody UserJoinDto userJoinDto) {
+    public ResponseEntity createUser(@RequestBody @Valid UserJoinDto userJoinDto) {
         User user = userMapper.userJoinDtoToUser(userJoinDto);
         User createdMember = userService.createUser(user);
         return new ResponseEntity<>(
