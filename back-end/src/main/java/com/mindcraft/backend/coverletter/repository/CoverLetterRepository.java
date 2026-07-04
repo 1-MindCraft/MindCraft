@@ -1,9 +1,12 @@
 package com.mindcraft.backend.coverletter.repository;
 
+import com.mindcraft.backend.coverletter.entity.CoverLetter;
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.mindcraft.backend.user.entity.Member;
 
-public interface CoverLetterRepository extends JpaRepository<Member, Long> {
+import java.util.Optional;
 
-    // 회원 식별자로 자기소개서 목록 조회
+public interface CoverLetterRepository extends JpaRepository<CoverLetter, Long> {
+
+    // Version 1 때는 mindmap : coverletter 가 1 : 1 이라고 했으니까 mindmapId로 단건 조회 설정
+    Optional<CoverLetter> findByMindmapId(Long mindmapId);
 }

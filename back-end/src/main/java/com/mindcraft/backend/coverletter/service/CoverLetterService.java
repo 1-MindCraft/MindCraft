@@ -1,42 +1,65 @@
 package com.mindcraft.backend.coverletter.service;
 
-import com.mindcraft.backend.coverletter.dto.CoverLetterRequestDto;
-import com.mindcraft.backend.coverletter.dto.CoverLetterResponseDto;
+import com.mindcraft.backend.coverletter.dto.CoverLetterDto;
+import com.mindcraft.backend.coverletter.dto.CoverLetterSectionDto;
 import com.mindcraft.backend.coverletter.entity.CoverLetter;
-import com.mindcraft.backend.coverletter.repository.CoverLetterRepository;
-import com.mindcraft.backend.user.repository.MemberRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.mindcraft.backend.coverletter.entity.CoverLetterSection;
+import org.springframework.beans.BeanUtils;
 
-import com.mindcraft.backend.user.entity.Member;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
-    // 자기소개서 로직 관련 처리 서비스
+public interface CoverLetterService {
 
-    @Service
-    @RequiredArgsConstructor
-    @Transactional(readOnly = true)
-    public class CoverLetterService {
+    default CoverLetter dtoToEntity(CoverLetterDto dto) {
+        CoverLetter coverLetter = new CoverLetter();
 
-        // final을 사용한 이유 : 객체의 불변성 보장과 의존성 주입 방식의 권장 사항
-        private final CoverLetterRepository coverLetterRepository;
-        private final MemberRepository memberRepository;
+        /*
+            BeanUtil.copyProperties(dto, coverLetter)
+            (1) dto 객체의 프로퍼티 값을 coverLetter 객체로 복사합니다.
+            (2) 이름과 타입이 같은 필드만 복사합니다.
+            (3) DTO → Entity 변환 또는 Entity → DTO 변환 시 자주 사용됩니다.
+         */
 
-        // 새로운 자기소개서 생성하기
-        @Transactional
-        public CoverLetterResponseDto createCoverLetter(CoverLetterRequestDto requestDto) {
-
-            // 회원 조회 ( 존재하지 않을 경우에는 예외 처리 )
-            Member member = memberRepository.findById(requestDto.getMemberId())
-                    .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다."));
-
-            // 자기소개서 Entity 생성
-            CoverLetter coverLetter = new CoverLetter(member, requestDto.getTitle());
-
-            // 데이터베이스에 저장
-            CoverLetter savedCoverLetter = coverLetterRepository.save(coverLetter);
-
-            return new CoverLetterResponseDto(savedCoverLetter);
-        }
+        BeanUtils.copyProperties(dto, coverLetter);
+        return coverLetter;
     }
+
+    // Sections 없이 coverletter 필드만 변환 ( BeanUtils 는 타입이 다른 sections 필드는 건너뜀 )
+    default CoverLetterDto entityToDto(CoverLetter entity) {
+        CoverLetterDto dto = new CoverLetterDto();
+        BeanUtils.copyProperties(entity, dto);
+        dto.setSections(Collections.emptyList());
+        return dto;
+    }
+
+    // sections 목록은 별도로 채워서 반환
+    default CoverLetterDto entityToDto(CoverLetter entity, List<CoverLetterSection> sections) {
+        CoverLetterDto dto = new CoverLetterDto();
+        BeanUtils.copyProperties(entity, dto);
+
+        List<CoverLetterSectionDto> sectionDtoList = sections.stream()
+                .map(this::sectionEntityToDto)
+                .collect(Collectors.toList());
+        dto.setSections(sectionDtoList);
+
+        return dto;
+    }
+
+    default CoverLetterSectionDto sectionEntityToDto(CoverLetterSection entity) {
+        CoverLetterSectionDto dto = new CoverLetterSectionDto();
+        BeanUtils.copyProperties(entity, dto);
+        dto.setCoverLetterId(entity.getCoverLetter().getId());
+        return dto;
+    }
+
+    // 상세조회 : mindmapId를 기준으로 자소서와 항목 목록들을 찾고, 없으면 null 로 반환
+    CoverLetterDto getDetail(Long mindmapId);
+
+    // 자소서 생성 : 이미 해당 mindmapId로 생성된 자소서가 있으면 그 데이터롤 가져옴
+    // 만약 없으면 새로 만든 뒤 반환 ( 이때 항목은 비어있는 상태 )
+    CoverLetterDto insert(CoverLetterDto dto);
+
+    boolean update(CoverLetterDto dto);
 }
