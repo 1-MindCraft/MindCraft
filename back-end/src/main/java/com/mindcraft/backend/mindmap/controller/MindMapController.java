@@ -1,10 +1,48 @@
 package com.mindcraft.backend.mindmap.controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.mindcraft.backend.mindmap.dto.MindMapSaveDto;
+import com.mindcraft.backend.mindmap.entity.MindMap;
+import com.mindcraft.backend.mindmap.mapper.MindMapMapper;
+import com.mindcraft.backend.mindmap.service.MindMapService;
+import com.mindcraft.backend.user.dto.UserSecurityDto;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/mindmaps")
+@RequiredArgsConstructor
 public class MindMapController {
 
+    private final MindMapService mindMapService;
+    private final MindMapMapper mindMapMapper;
+
+    @GetMapping
+    public ResponseEntity getMindMap(
+            @AuthenticationPrincipal UserSecurityDto userSecurityDto) {
+        long userId = userSecurityDto.getId();
+
+        MindMap mindMap = mindMapService.getOrCreateMindMap(userId);
+        return new ResponseEntity<>(
+                mindMapMapper.mindMapToMindMapResponseDto(mindMap),
+                HttpStatus.OK
+        );
+    }
+
+    @PutMapping
+    public ResponseEntity saveMindMap(
+            @AuthenticationPrincipal UserSecurityDto userSecurityDto,
+            @RequestBody MindMapSaveDto mindMapSaveDto
+            ) {
+        long userId = userSecurityDto.getId();
+        MindMap mindMap = mindMapMapper.mindMapSaveDtoToMindMap(mindMapSaveDto);
+        MindMap savedMindMap = mindMapService.saveMindMap(mindMap, userId);
+
+        return new ResponseEntity<>(
+                mindMapMapper.mindMapToMindMapResponseDto(savedMindMap),
+                HttpStatus.OK
+        );
+    }
 }
