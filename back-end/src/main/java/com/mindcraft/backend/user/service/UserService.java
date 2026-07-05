@@ -14,5 +14,5 @@ public interface UserService {
     public User updateMyInfo(User User);
 
     // 회원 탈퇴
-    public void deleteUser(long userId);
+    public void deleteUser(long userId, String password);
 }

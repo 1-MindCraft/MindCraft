@@ -1,6 +1,8 @@
 package com.mindcraft.backend.user.service;
 
 import com.mindcraft.backend.global.exception.DuplicateEmailException;
+import com.mindcraft.backend.global.exception.InvalidPasswordException;
+import com.mindcraft.backend.global.exception.UserNotFoundException;
 import com.mindcraft.backend.user.entity.Provider;
 import com.mindcraft.backend.user.entity.User;
 import com.mindcraft.backend.user.repository.UserRepository;
@@ -38,17 +40,40 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User getMyInfo(long userId) {
-        return null;
+        User user = findUserById(userId);
+        return user;
     }
 
     @Override
     public User updateMyInfo(User user) {
-        return null;
+        User findUser = findUserById(user.getId());
+
+        Optional.ofNullable(user.getName())
+                .ifPresent(name -> findUser.setName(name));
+        Optional.ofNullable(user.getPassword())
+                .ifPresent(password -> findUser.setPassword(
+                        passwordEncoder.encode(password)
+                ));
+        findUser.setUpdatedAt(LocalDateTime.now());
+
+        User updatedUser = userRepository.save(findUser);
+        return updatedUser;
     }
 
     @Override
-    public void deleteUser(long userId) {
+    public void deleteUser(long userId, String password) {
+        User user = findUserById(userId);
+        boolean isPasswordCorrect = passwordEncoder.matches(password, user.getPassword());
+        if(!isPasswordCorrect) {
+            throw new InvalidPasswordException("비밀번호가 일치하지 않습니다.");
+        }
 
+        userRepository.delete(user);
     }
 
+    private User findUserById(long userId) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        User user = optionalUser.orElseThrow(() -> new UserNotFoundException("일치하는 회원이 없습니다."));
+        return user;
+    }
 }

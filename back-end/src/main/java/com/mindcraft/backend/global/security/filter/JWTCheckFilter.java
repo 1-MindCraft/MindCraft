@@ -42,6 +42,9 @@ public class JWTCheckFilter extends OncePerRequestFilter {
         if (path.startsWith("/users/email-check")) {
             return true;
         }
+        if (path.startsWith("/users/refresh")) {
+            return true;
+        }
 
         return false;
     }
