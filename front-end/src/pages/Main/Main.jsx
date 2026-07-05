@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
-import './MainPage.css';
+import './Main.css';
 
-import Nav from '../components/MainPage/Nav';
-import Hero from '../components/MainPage/Hero';
-import HowItWorks from '../components/MainPage/HowItWorks';
-import FeatureSection from '../components/MainPage/FeatureSection';
-import Faq from '../components/MainPage/Faq';
-import FinalCta from '../components/MainPage/FinalCta';
-import Footer from '../components/MainPage/Footer';
-import TopButton from '../components/MainPage/TopButton';
-import FloatingCta from '../components/MainPage/FloatingCta';
-import LoginPage from './LoginPage';
-import SignupPage from './SignupPage';
+import Nav from '../../components/Main/Nav';
+import Hero from '../../components/Main/Hero';
+import HowItWorks from '../../components/Main/HowItWorks';
+import FeatureSection from '../../components/Main/FeatureSection';
+import Faq from '../../components/Main/Faq';
+import FinalCta from '../../components/Main/FinalCta';
+import Footer from '../../components/Main/Footer';
+import TopButton from '../../components/Main/TopButton';
+import FloatingCta from '../../components/Main/FloatingCta';
+import LoginPage from '../Login/Login';
+import SignupPage from '../Signup/Signup';
 
-import useScrollButtons from '../hooks/useScrollButtons';
+import useScrollButtons from '../../hooks/useScrollButtons';
 
 const mindmapEditorFeatures = [
   {

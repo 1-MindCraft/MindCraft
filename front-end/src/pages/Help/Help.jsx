@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './HelpPage.css';
-import LOGO_SRC from '../assets/MindCraft-Logo1.png';
+import './Help.css';
+import LOGO_SRC from '../../assets/MindCraft-Logo1.png';
 
 const FAQS = [
   {

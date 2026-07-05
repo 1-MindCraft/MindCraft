@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react';
-import SignupSide from '../components/SignupPage/SignupSide';
-import SignupForm from '../components/SignupPage/SignupForm';
+import LoginSide from '../../components/Login/LoginSide';
+import LoginForm from '../../components/Login/LoginForm';
 
 /**
- * SignupPage
- * open/onClose/onLoginClick/theme prop을 받아 모달 형태로 표시됩니다.
- * theme: 'blue' (기본, 파란색) | 'green' (초록색)
+ * LoginPage
+ * MainPage에서 open/onClose prop을 받아 모달 형태로 표시됩니다.
  */
-function SignupPage({ open, onClose, onLoginClick, theme = 'blue' }) {
+function LoginPage({ open, onClose, onSignupClick }) {
+  // ESC 키로 닫기 + 모달이 열려있는 동안 배경 스크롤 막기
   useEffect(() => {
     if (!open) return;
 
@@ -26,6 +26,7 @@ function SignupPage({ open, onClose, onLoginClick, theme = 'blue' }) {
 
   if (!open) return null;
 
+  // 오버레이(어두운 배경) 클릭 시에만 닫힘
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) onClose();
   };
@@ -36,11 +37,11 @@ function SignupPage({ open, onClose, onLoginClick, theme = 'blue' }) {
         <button className="login-close" onClick={onClose} aria-label="닫기">
           ✕
         </button>
-        <SignupSide theme={theme} />
-        <SignupForm theme={theme} onLoginClick={onLoginClick} />
+        <LoginSide />
+        <LoginForm onSignupClick={onSignupClick} />
       </div>
     </div>
   );
 }
 
-export default SignupPage;
+export default LoginPage;

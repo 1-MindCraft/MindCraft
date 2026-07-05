@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import './CoverLetterPage.css';
+import './CoverLetter.css';
 
-import CLHeader from '../components/CoverLetterPage/CLHeader';
-import CLToolbar from '../components/CoverLetterPage/CLToolbar';
-import CLMindMap from '../components/CoverLetterPage/CLMindMap';
-import CLDraft from '../components/CoverLetterPage/CLDraft';
-import CLSettings from '../components/CoverLetterPage/CLSettings';
+import CLHeader from '../../components/CoverLetter/CLHeader';
+import CLToolbar from '../../components/CoverLetter/CLToolbar';
+import CLMindMap from '../../components/CoverLetter/CLMindMap';
+import CLDraft from '../../components/CoverLetter/CLDraft';
+import CLSettings from '../../components/CoverLetter/CLSettings';
 
 // 문항 데이터를 최상위(CoverLetterPage)에서 관리해서
 // CLDraft(문항 목록/상세)와 CLSettings(문항 구성 라디오)가 같은 상태를 공유합니다.

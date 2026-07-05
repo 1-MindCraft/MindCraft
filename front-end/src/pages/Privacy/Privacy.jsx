@@ -1,6 +1,6 @@
 import React from 'react';
-import './PrivacyPage.css';
-import LOGO_SRC from '../assets/MindCraft-Logo1.png';
+import './Privacy.css';
+import LOGO_SRC from '../../assets/MindCraft-Logo1.png';
 
 function PrivacyPage() {
   return (

@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './AccountPage.css';
-import LOGO_SRC from '../assets/MindCraft-Logo1.png';
+import './Account.css';
+import LOGO_SRC from '../../assets/MindCraft-Logo1.png';
+
 
 // 목업 데이터 — 실제 API 연동 전까지 화면 구조 확인용
 const MOCK_MINDMAPS = [
