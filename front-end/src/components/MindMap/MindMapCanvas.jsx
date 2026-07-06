@@ -1,12 +1,14 @@
 import React from 'react';
 import SAVE_SRC from '../../assets/save.png';
+import MindMap from './MindMap';
 
 function MindMapCanvas({ isSaving, onSave }) {
   return (
     <div className="mm-canvas">
+      <MindMap />
       <div className="mm-canvas-placeholder">
-        <p>마인드맵 캔버스</p>
-        <p className="mm-canvas-hint">실제 마인드맵 라이브러리 연동 예정</p>
+        {/* <p>마인드맵 캔버스</p>
+        <p className="mm-canvas-hint">실제 마인드맵 라이브러리 연동 예정</p> */}
       </div>
 
       {/* 미니맵 */}
