@@ -1,10 +1,10 @@
 import React, { useState, useCallback } from 'react';
-import './MindMapPage.css';
+import './MindMap.css';
 
-import MindMapHeader from '../components/MindMapPage/MindMapHeader';
-import MindMapToolbar from '../components/MindMapPage/MindMapToolbar';
-import MindMapSidebar from '../components/MindMapPage/MindMapSidebar';
-import MindMapCanvas from '../components/MindMapPage/MindMapCanvas';
+import MindMapHeader from '../../components/MindMap/MindMapHeader';
+import MindMapToolbar from '../../components/MindMap/MindMapToolbar';
+import MindMapSidebar from '../../components/MindMap/MindMapSidebar';
+import MindMapCanvas from '../../components/MindMap/MindMapCanvas';
 
 function MindMapPage({ userName = '사용자' }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);

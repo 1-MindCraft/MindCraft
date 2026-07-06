@@ -1,6 +1,6 @@
 import React from 'react';
-import './TermsPage.css';
-import LOGO_SRC from '../assets/MindCraft-Logo1.png';
+import './Terms.css';
+import LOGO_SRC from '../../assets/MindCraft-Logo1.png';
 
 function TermsPage() {
   return (

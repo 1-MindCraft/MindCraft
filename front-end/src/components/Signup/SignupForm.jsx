@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import SocialButtons from '../LoginPage/SocialButtons';
+import SocialButtons from '../Login/SocialButtons';
 
 const validate = {
   name: (v) => {

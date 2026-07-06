@@ -1,13 +1,13 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
-import MainPage from './pages/MainPage';
-import MindMapPage from './pages/MindMapPage';
-import CoverLetterPage from './pages/CoverLetterPage';
-import TermsPage from './pages/TermsPage';
-import PrivacyPage from './pages/PrivacyPage';
-import AccountPage from './pages/AccountPage';
-import HelpPage from './pages/HelpPage';
+import MainPage from './pages/Main/Main';
+import MindMapPage from './pages/MindMap/MindMap';
+import CoverLetterPage from './pages/CoverLetter/CoverLetter';
+import TermsPage from './pages/Terms/Terms';
+import PrivacyPage from './pages/Privacy/Privacy';
+import AccountPage from './pages/Account/Account';
+import HelpPage from './pages/Help/Help';
 import DevNav from './components/common/DevNav';
 
 function App() {
