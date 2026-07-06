@@ -1,5 +1,6 @@
 package com.mindcraft.backend.coverletter.dto;
 
+import com.mindcraft.backend.coverletter.section.dto.CoverLetterSectionDto;
 import lombok.*;
 
 import java.util.List;

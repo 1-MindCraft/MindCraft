@@ -2,9 +2,9 @@ package com.mindcraft.backend.coverletter.service;
 
 import com.mindcraft.backend.coverletter.dto.CoverLetterDto;
 import com.mindcraft.backend.coverletter.entity.CoverLetter;
-import com.mindcraft.backend.coverletter.entity.CoverLetterSection;
 import com.mindcraft.backend.coverletter.repository.CoverLetterRepository;
-import com.mindcraft.backend.coverletter.repository.CoverLetterSectionRepository;
+import com.mindcraft.backend.coverletter.section.entity.CoverLetterSection;
+import com.mindcraft.backend.coverletter.section.repository.CoverLetterSectionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

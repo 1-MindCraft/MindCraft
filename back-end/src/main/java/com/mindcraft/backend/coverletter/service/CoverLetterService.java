@@ -1,11 +1,10 @@
 package com.mindcraft.backend.coverletter.service;
 
 import com.mindcraft.backend.coverletter.dto.CoverLetterDto;
-import com.mindcraft.backend.coverletter.dto.CoverLetterSectionDto;
 import com.mindcraft.backend.coverletter.entity.CoverLetter;
-import com.mindcraft.backend.coverletter.entity.CoverLetterSection;
+import com.mindcraft.backend.coverletter.section.dto.CoverLetterSectionDto;
+import com.mindcraft.backend.coverletter.section.entity.CoverLetterSection;
 import org.springframework.beans.BeanUtils;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
