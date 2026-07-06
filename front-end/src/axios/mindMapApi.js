@@ -1,14 +1,5 @@
+import jwtAxios from '../utils/JwtUtil';
 import ApiURL from './ApiUrl';
-import axios from 'axios';
-
-const resDummy = {
-  mindMapId: 4,
-  title: '테스3의 마인드 맵',
-  nodes:
-    '[{"id": "6-root-node", "data": {"depth": 0, "label": "테스3"}, "position": {"x": 400, "y": 0}}]',
-};
-
-// TODO : 이후에 JWT 관련 Axios 코드 작성되면 추가(변경)해야함
 
 // 마인드맵 url
 const mindMapURL = `${ApiURL}/mindmaps`;
@@ -40,7 +31,7 @@ const mindMapURL = `${ApiURL}/mindmaps`;
   */
 // 응답을 역직렬화한 뒤, nodes를 또 다시 역직렬화 해야함
 const getMindMap = async () => {
-  const response = await axios.get(mindMapURL);
+  const response = await jwtAxios.get(mindMapURL);
   return response.data;
 };
 
@@ -55,9 +46,9 @@ const saveMindMap = async (mindMapId, title, nodes) => {
     nodes: JSON.stringify(nodes),
   };
 
-  const response = await axios.put(mindMapURL, reqData);
+  const response = await jwtAxios.put(mindMapURL, reqData);
 
-  return response;
+  return response.data;
 };
 
 export { getMindMap, saveMindMap };
