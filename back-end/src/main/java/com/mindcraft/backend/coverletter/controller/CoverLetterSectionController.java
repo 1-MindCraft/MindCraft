@@ -36,8 +36,8 @@ public class CoverLetterSectionController {
         boolean result = coverLetterSectionService.update(coverLetterSectionDto);
 
         if (!result) {
-            return Map.of("RESULT", "항목을 찾을 수 없습니다.");
+            return Map.of("message", "항목을 찾을 수 없습니다.");
         }
-        return Map.of("RESULT", "수정이 완료되었습니다.");
+        return Map.of("message", "수정이 완료되었습니다.");
     }
 }

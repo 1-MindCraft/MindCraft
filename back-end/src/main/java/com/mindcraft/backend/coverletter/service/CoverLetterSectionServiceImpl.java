@@ -3,7 +3,7 @@ package com.mindcraft.backend.coverletter.service;
 import com.mindcraft.backend.coverletter.dto.CoverLetterSectionDto;
 import com.mindcraft.backend.coverletter.entity.CoverLetterSection;
 import com.mindcraft.backend.coverletter.repository.CoverLetterSectionRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
