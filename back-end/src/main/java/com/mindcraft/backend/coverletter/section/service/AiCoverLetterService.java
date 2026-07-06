@@ -1,11 +1,11 @@
 package com.mindcraft.backend.coverletter.section.service;
 
-import com.mindcraft.backend.common.exception.AiGenerationException;
 import com.mindcraft.backend.coverletter.section.dto.AiGenerateRequest;
 import com.mindcraft.backend.coverletter.section.dto.AiGenerateResponse;
 import com.mindcraft.backend.coverletter.section.dto.AiNodeDto;
 import com.mindcraft.backend.coverletter.section.dto.ReactNode;
 import com.mindcraft.backend.coverletter.section.mapper.NodeFlattener;
+import com.mindcraft.backend.global.exception.AiGenerationException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
