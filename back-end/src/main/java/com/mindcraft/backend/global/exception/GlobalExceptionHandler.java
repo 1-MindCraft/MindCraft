@@ -47,4 +47,13 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(Map.of("error", e.getMessage()));
     }
+
+    @ExceptionHandler(InvalidMindMapException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidMindMap(InvalidMindMapException e) {
+        log.error("Invalid MindMap : {}", e.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", e.getMessage()));
+    }
 }
