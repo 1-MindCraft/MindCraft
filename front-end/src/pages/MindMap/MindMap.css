@@ -171,6 +171,18 @@
 }
 
 /* 공통 아이콘 버튼 */
+.mm-icon-btn:disabled,
+.mm-tool-btn:disabled,
+.mm-color-dot:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+.mm-icon-btn:disabled:hover,
+.mm-tool-btn:disabled:hover {
+  background: transparent;
+  color: inherit;
+}
+
 .mm-icon-btn {
   background: none;
   border: none;
@@ -270,6 +282,25 @@
   color: #444;
   user-select: none;
 }
+.mm-node-delete-btn {
+  opacity: 0;
+  border: none;
+  background: transparent;
+  color: #b0aec2;
+  font-size: 0.68rem;
+  cursor: pointer;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  line-height: 1;
+}
+.mm-node-item:hover .mm-node-delete-btn {
+  opacity: 1;
+}
+.mm-node-delete-btn:hover {
+  background: #ffe3e3;
+  color: #e03131;
+}
+
 .mm-node-item:hover {
   background: #f0eeff;
   color: #6c63ff;

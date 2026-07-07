@@ -1,24 +1,23 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useReactFlow, useViewport } from '@xyflow/react';
 import HAND_SRC from '../../assets/hand-tool.png';
 import SAVE_SRC from '../../assets/save.png';
 
-const COLORS = [
-  { id: 'blue', hex: '#6c63ff' },
-  { id: 'green', hex: '#22c55e' },
-  { id: 'purple', hex: '#a855f7' },
-  { id: 'orange', hex: '#f97316' },
-  { id: 'pink', hex: '#ec4899' },
-  { id: 'gray', hex: '#94a3b8' },
-];
-
-function MindMapToolbar({ isSaving, lastSaved, onSave }) {
-  const [tool, setTool] = useState('drag');
-  const [zoom, setZoom] = useState(100);
-  const [activeColor, setActiveColor] = useState('blue');
-
-  const handleZoom = (delta) => {
-    setZoom((prev) => Math.min(200, Math.max(25, prev + delta)));
-  };
+function MindMapToolbar({
+  isSaving,
+  lastSaved,
+  onSave,
+  tool,
+  onToolChange,
+  canUndo,
+  canRedo,
+  onUndo,
+  onRedo,
+}) {
+  // 실제 캔버스 확대/축소를 제어 (ReactFlowProvider 하위에서만 동작)
+  const { zoomIn, zoomOut, fitView } = useReactFlow();
+  const { zoom } = useViewport();
+  const zoomPercent = Math.round(zoom * 100);
 
   const savedTime = lastSaved
     ? lastSaved.toLocaleTimeString('ko-KR', {
@@ -55,20 +54,20 @@ function MindMapToolbar({ isSaving, lastSaved, onSave }) {
         )}
       </div>
 
-      {/* ── 중앙: 도구 / undo/redo / 줌 / 색상 / 테마 ── */}
+      {/* ── 중앙: 도구 / undo/redo / 줌 ── */}
       <div className="mm-toolbar-center">
         <div className="mm-toolbar-group">
           <button
             className={`mm-tool-btn mm-tool-img-btn ${tool === 'drag' ? 'active' : ''}`}
-            onClick={() => setTool('drag')}
+            onClick={() => onToolChange('drag')}
             title="드래그 (공간 이동)"
           >
             <img src={HAND_SRC} alt="드래그" className="mm-tool-icon" />
           </button>
           <button
             className={`mm-tool-btn mm-tool-img-btn ${tool === 'select' ? 'active' : ''}`}
-            onClick={() => setTool('select')}
-            title="선택"
+            onClick={() => onToolChange('select')}
+            title="선택 (드래그로 여러 노드 선택)"
           >
             <svg
               className="mm-tool-icon"
@@ -80,10 +79,20 @@ function MindMapToolbar({ isSaving, lastSaved, onSave }) {
             </svg>
           </button>
           {/* undo/redo: 드래그 도구 바로 옆 */}
-          <button className="mm-icon-btn" title="실행 취소">
+          <button
+            className="mm-icon-btn"
+            title="실행 취소"
+            onClick={onUndo}
+            disabled={!canUndo}
+          >
             ↩
           </button>
-          <button className="mm-icon-btn" title="다시 실행">
+          <button
+            className="mm-icon-btn"
+            title="다시 실행"
+            onClick={onRedo}
+            disabled={!canRedo}
+          >
             ↪
           </button>
         </div>
@@ -93,36 +102,26 @@ function MindMapToolbar({ isSaving, lastSaved, onSave }) {
         <div className="mm-toolbar-group">
           <button
             className="mm-tool-btn"
-            onClick={() => handleZoom(-10)}
+            onClick={() => zoomOut({ duration: 200 })}
             title="축소"
           >
             −
           </button>
-          <span className="mm-zoom-label">{zoom}%</span>
+          <span className="mm-zoom-label">{zoomPercent}%</span>
           <button
             className="mm-tool-btn"
-            onClick={() => handleZoom(10)}
+            onClick={() => zoomIn({ duration: 200 })}
             title="확대"
           >
             +
           </button>
-          <button className="mm-tool-btn" title="화면에 맞추기">
+          <button
+            className="mm-tool-btn"
+            onClick={() => fitView({ duration: 300 })}
+            title="화면에 맞추기"
+          >
             ⛶
           </button>
-        </div>
-
-        <div className="mm-toolbar-divider" />
-
-        <div className="mm-toolbar-group">
-          {COLORS.map((c) => (
-            <button
-              key={c.id}
-              className={`mm-color-dot ${activeColor === c.id ? 'active' : ''}`}
-              style={{ background: c.hex }}
-              onClick={() => setActiveColor(c.id)}
-              title={c.id}
-            />
-          ))}
         </div>
 
         <div className="mm-toolbar-divider" />
