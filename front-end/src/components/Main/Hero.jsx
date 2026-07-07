@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Hero({ onStartClick }) {
+function Hero({ onStartClick, ctaLabel = '마인드맵 시작하기' }) {
   return (
     <section className="hero">
       <div className="hero-container">
@@ -19,7 +19,7 @@ function Hero({ onStartClick }) {
           </p>
           <div className="hero-cta">
             <button className="btn-primary" onClick={onStartClick}>
-              마인드맵 시작하기
+              {ctaLabel}
             </button>
             {/* <button className="btn-secondary">서비스 소개 보기</button>  */}
           </div>
