@@ -1,21 +1,20 @@
-package com.mindcraft.backend.coverletter.service;
+package com.mindcraft.backend.coverletter.section.service;
 
-import com.mindcraft.backend.coverletter.dto.CoverLetterSectionDto;
-import com.mindcraft.backend.coverletter.entity.CoverLetterSection;
-import com.mindcraft.backend.coverletter.repository.CoverLetterSectionRepository;
-import org.springframework.transaction.annotation.Transactional;
+import com.mindcraft.backend.coverletter.section.dto.CoverLetterSectionDto;
+import com.mindcraft.backend.coverletter.section.entity.CoverLetterSection;
+import com.mindcraft.backend.coverletter.section.repository.CoverLetterSectionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Service
+//@Service
 @RequiredArgsConstructor
 @Slf4j
-public class CoverLetterSectionServiceImpl implements CoverLetterSectionService {
+public class CoverLetterSectionServiceImplTemp implements CoverLetterSectionService {
 
     private final CoverLetterSectionRepository coverLetterSectionRepository;
 

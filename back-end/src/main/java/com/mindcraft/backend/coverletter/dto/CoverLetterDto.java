@@ -1,6 +1,7 @@
 package com.mindcraft.backend.coverletter.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.mindcraft.backend.coverletter.section.dto.CoverLetterSectionDto;
 import lombok.*;
 
 import java.util.List;

@@ -2,9 +2,9 @@ package com.mindcraft.backend.coverletter.service;
 
 import com.mindcraft.backend.coverletter.dto.CoverLetterDto;
 import com.mindcraft.backend.coverletter.entity.CoverLetter;
-import com.mindcraft.backend.coverletter.entity.CoverLetterSection;
+import com.mindcraft.backend.coverletter.section.entity.CoverLetterSection;
 import com.mindcraft.backend.coverletter.repository.CoverLetterRepository;
-import com.mindcraft.backend.coverletter.repository.CoverLetterSectionRepository;
+import com.mindcraft.backend.coverletter.section.repository.CoverLetterSectionRepository;
 import com.mindcraft.backend.mindmap.entity.MindMap;
 import com.mindcraft.backend.mindmap.repository.MindMapRepository;
 import com.mindcraft.backend.user.entity.User;

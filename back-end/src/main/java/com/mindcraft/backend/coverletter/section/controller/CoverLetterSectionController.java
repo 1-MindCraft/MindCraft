@@ -1,9 +1,11 @@
-package com.mindcraft.backend.coverletter.controller;
+package com.mindcraft.backend.coverletter.section.controller;
 
-import com.mindcraft.backend.coverletter.dto.CoverLetterSectionDto;
-import com.mindcraft.backend.coverletter.service.CoverLetterSectionService;
+import com.mindcraft.backend.coverletter.section.dto.CoverLetterSectionDto;
+import com.mindcraft.backend.coverletter.section.service.CoverLetterSectionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,14 +19,22 @@ public class CoverLetterSectionController {
 
     private final CoverLetterSectionService coverLetterSectionService;
 
-    // 항목 목록 조회
     @GetMapping(value = "")
     public List<CoverLetterSectionDto> getList(@PathVariable("coverletterId") Long coverletterId) {
         log.info("coverletterId......" + coverletterId);
         return coverLetterSectionService.getList(coverletterId);
     }
 
-    // 항목 하나에 대한 답변 / 설정 수정
+    @PostMapping(value = "")
+    public ResponseEntity<CoverLetterSectionDto> create(
+            @PathVariable("coverletterId") Long coverletterId,
+            @RequestBody CoverLetterSectionDto coverLetterSectionDto) {
+        log.info("create......" + coverLetterSectionDto);
+
+        CoverLetterSectionDto createdSection = coverLetterSectionService.create(coverletterId, coverLetterSectionDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdSection);
+    }
+
     @PutMapping(value = "/{sectionId}")
     public Map<String, String> update(
             @PathVariable("coverletterId") Long coverletterId,
@@ -33,7 +43,7 @@ public class CoverLetterSectionController {
         log.info("update......" + coverLetterSectionDto);
 
         coverLetterSectionDto.setId(sectionId);
-        boolean result = coverLetterSectionService.update(coverLetterSectionDto);
+        boolean result = coverLetterSectionService.update(coverletterId, coverLetterSectionDto);
 
         if (!result) {
             return Map.of("message", "항목을 찾을 수 없습니다.");

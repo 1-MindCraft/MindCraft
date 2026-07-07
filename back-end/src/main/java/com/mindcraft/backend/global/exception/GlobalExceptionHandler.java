@@ -56,4 +56,40 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", e.getMessage()));
     }
+
+    @ExceptionHandler(CoverLetterNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleCoverLetterNotFound(CoverLetterNotFoundException e) {
+        log.error("CoverLetter Not Found : {}", e.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", e.getMessage()));
+    }
+
+    @ExceptionHandler(CoverLetterSectionNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleCoverLetterSectionNotFound(CoverLetterSectionNotFoundException e) {
+        log.error("CoverLetter Section Not Found : {}", e.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", e.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidCoverLetterSectionException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidCoverLetterSection(InvalidCoverLetterSectionException e) {
+        log.error("Invalid CoverLetter Section : {}", e.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", e.getMessage()));
+    }
+
+    @ExceptionHandler(AiGenerationException.class)
+    public ResponseEntity<Map<String, String>> handleAiGeneration(AiGenerationException e) {
+        log.error("AI Generation Exception : {}", e.getMessage(), e);
+
+        return ResponseEntity
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(Map.of("error", e.getMessage()));
+    }
 }
