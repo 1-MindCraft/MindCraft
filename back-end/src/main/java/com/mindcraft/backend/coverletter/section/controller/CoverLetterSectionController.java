@@ -50,4 +50,18 @@ public class CoverLetterSectionController {
         }
         return Map.of("message", "수정이 완료되었습니다.");
     }
+
+    @DeleteMapping(value = "/{sectionId}")
+    public Map<String, String> delete(
+            @PathVariable("coverletterId") Long coverletterId,
+            @PathVariable("sectionId") Long sectionId) {
+        log.info("delete...... coverletterId={}, sectionId={}", coverletterId, sectionId);
+
+        boolean result = coverLetterSectionService.delete(coverletterId, sectionId);
+
+        if (!result) {
+            return Map.of("message", "section not found");
+        }
+        return Map.of("message", "section deleted");
+    }
 }

@@ -1,50 +1,41 @@
 package com.mindcraft.backend.coverletter.section.service;
 
-import com.mindcraft.backend.global.exception.AiGenerationException;
-import com.mindcraft.backend.coverletter.section.dto.AiGenerateRequest;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.mindcraft.backend.coverletter.section.dto.AiGenerateResponse;
 import com.mindcraft.backend.coverletter.section.dto.AiNodeDto;
 import com.mindcraft.backend.coverletter.section.dto.ReactNode;
 import com.mindcraft.backend.coverletter.section.mapper.NodeFlattener;
+import com.mindcraft.backend.global.exception.AiGenerationException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
-/**
- * FastAPI AI 서버 연동 서비스 (AI 도메인).
- *
- * 역할:
- *  1. React 원본 노드 → FastAPI 노드 평탄화
- *  2. FastAPI 자소서 생성 API 호출 (RestClient)
- *  3. answer 반환 / 실패 시 AiGenerationException
- *
- * 저장/DB는 담당하지 않음 (호출한 쪽에서 처리).
- */
 @Service
+@Slf4j
 public class AiCoverLetterService {
 
-    private final RestClient aiRestClient;
+    private final Gson gson = new Gson();
+    private final HttpClient httpClient = HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_1_1)
+            .build();
+    private final String aiServerBaseUrl;
 
-    // RestClientConfig에서 만든 aiRestClient 빈 주입
-    public AiCoverLetterService(RestClient aiRestClient) {
-        this.aiRestClient = aiRestClient;
+    public AiCoverLetterService(@Value("${ai.server.base-url}") String aiServerBaseUrl) {
+        this.aiServerBaseUrl = aiServerBaseUrl;
     }
 
-    /**
-     * 자소서 본문(answer) 생성.
-     *
-     * @param coverLetterId 경로용 id (FastAPI는 저장 안 하지만 계약상 경로에 필요)
-     * @param companyName 회사명
-     * @param companyIdeal 인재상 (nullable)
-     * @param jobDescription 직무 (nullable)
-     * @param question 자소서 문항
-     * @param writingStyle 문체
-     * @param maxChars 최대 글자수
-     * @param allowCreativity AI 창의적 보완 허용
-     * @param reactNodes 친구가 넘긴 React 원본 노드
-     * @return 생성된 자소서 본문
-     */
     public String generateAnswer(
             Long coverLetterId,
             String companyName,
@@ -56,40 +47,51 @@ public class AiCoverLetterService {
             boolean allowCreativity,
             List<ReactNode> reactNodes
     ) {
-        // 1. 평탄화 (React 노드 → FastAPI 노드)
         List<AiNodeDto> flattenedNodes = NodeFlattener.flatten(reactNodes);
 
-        // 2. FastAPI 요청 DTO 조립
-        AiGenerateRequest request = new AiGenerateRequest(
-                companyName,
-                companyIdeal,
-                jobDescription,
-                question,
-                writingStyle,
-                maxChars,
-                allowCreativity,
-                flattenedNodes
-        );
+        Map<String, Object> requestPayload = new LinkedHashMap<>();
+        requestPayload.put("company_name", companyName);
+        requestPayload.put("company_ideal", companyIdeal);
+        requestPayload.put("job_description", jobDescription);
+        requestPayload.put("question", question);
+        requestPayload.put("writing_style", writingStyle);
+        requestPayload.put("max_chars", maxChars);
+        requestPayload.put("allow_creativity", allowCreativity);
+        requestPayload.put("source_node", flattenedNodes);
 
-        // 3. FastAPI 호출
+        String requestJson = gson.toJson(requestPayload);
+        log.info("AI request payload coverLetterId={} request={}", coverLetterId, requestJson);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(aiServerBaseUrl + "/coverletters/" + coverLetterId + "/sections"))
+                .timeout(Duration.ofSeconds(60))
+                .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(requestJson, StandardCharsets.UTF_8))
+                .build();
+
         try {
-            AiGenerateResponse response = aiRestClient.post()
-                    .uri("/coverletters/{id}/sections", coverLetterId)
-                    .body(request)
-                    .retrieve()
-                    .body(AiGenerateResponse.class);
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
 
-            if (response == null || response.answer() == null) {
-                throw new AiGenerationException("AI 서버가 빈 응답을 반환했습니다.");
+            if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                log.error("AI server response error. status={} body={}", response.statusCode(), response.body());
+                throw new AiGenerationException(
+                        "AI 자소서 생성 실패: status=" + response.statusCode() + ", body=" + response.body()
+                );
             }
 
-            return response.answer();
+            AiGenerateResponse parsedResponse = gson.fromJson(response.body(), AiGenerateResponse.class);
 
-        } catch (AiGenerationException e) {
-            throw e;  // 위에서 던진 건 그대로
-        } catch (Exception e) {
-            // 연결 실패, 422, 타임아웃 등 모든 호출 오류
-            throw new AiGenerationException("AI 자소서 생성 중 오류가 발생했습니다.", e);
+            if (parsedResponse == null || parsedResponse.answer() == null) {
+                throw new AiGenerationException("AI server returned an empty response.");
+            }
+
+            return parsedResponse.answer();
+        } catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new AiGenerationException("AI 자소서 생성 중 통신 오류가 발생했습니다.", e);
+        } catch (JsonSyntaxException e) {
+            throw new AiGenerationException("AI 응답 JSON 파싱에 실패했습니다.", e);
         }
     }
 }
