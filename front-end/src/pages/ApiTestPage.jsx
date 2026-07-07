@@ -7,6 +7,7 @@ import {
   deleteMe,
 } from '../axios/userApi';
 import { getCookie, removeCookie, setCookie } from '../utils/cookieUtil';
+import { getMindMap, saveMindMap } from '../axios/mindMapApi';
 
 function ApiTestPage() {
   const testRegister = async () => {
@@ -69,6 +70,32 @@ function ApiTestPage() {
     console.log('현재 쿠키(user):', getCookie('user'));
   };
 
+  const testGetMindMap = async () => {
+    try {
+      const rdata = await getMindMap();
+      const parseNodes = JSON.parse(rdata.nodes);
+      const mindMap = { ...rdata, nodes: parseNodes };
+      console.log('get MindMap 성공: ', mindMap);
+    } catch (error) {
+      console.log('get MindMap 실패: ', error.response?.data || error);
+    }
+  };
+
+  const testSaveMindMap = async () => {
+    try {
+      const rdata = await saveMindMap(6, '테스트 제목', [
+        {
+          id: '1-root',
+          data: { depth: 0, label: '테스트' },
+          position: { x: 400, y: 0 },
+        },
+      ]); // saveMindMap이 인자를 받으니 테스트용 값 전달
+      console.log('save MindMap 성공: ', rdata);
+    } catch (error) {
+      console.log('save MindMap 실패: ', error.response?.data || error);
+    }
+  };
+
   return (
     <div style={{ padding: 20 }}>
       <h2>API 테스트 페이지 (임시)</h2>
@@ -83,6 +110,10 @@ function ApiTestPage() {
       <button onClick={testDeleteMe}>회원 탈퇴 테스트</button>
       <br />
       <button onClick={checkCookie}>쿠키 확인</button>
+      <br />
+      <button onClick={testGetMindMap}>마인드맵 조회(혹은 최초 생성)</button>
+      <br />
+      <button onClick={testSaveMindMap}>마인드맵 저장</button>
     </div>
   );
 }
