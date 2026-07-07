@@ -4,6 +4,8 @@ import SocialButtons from './SocialButtons';
 function LoginForm({ onSignupClick }) {
   const [showPassword, setShowPassword] = useState(false);
 
+  
+
   return (
     <div className="login-form">
       <h2>로그인</h2>

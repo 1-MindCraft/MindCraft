@@ -9,6 +9,7 @@ import PrivacyPage from './pages/Privacy/Privacy';
 import AccountPage from './pages/Account/Account';
 import HelpPage from './pages/Help/Help';
 import DevNav from './components/common/DevNav';
+import ApiTestPage from './pages/ApiTestPage';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/account" element={<AccountPage />} />
         <Route path="/help" element={<HelpPage />} />
+        <Route path="/test" element={<ApiTestPage />} />
       </Routes>
       <DevNav />
     </>
