@@ -1,5 +1,6 @@
 package com.mindcraft.backend.coverletter.entity;
 
+import com.mindcraft.backend.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor                 // 모든 필드를 매개변수로 받는 생성자를 자동으로 생성
 @Getter                             // 모든 필드의 Getter 메서드를 자동으로 생성
 @Setter                             // 모든 필드의 Setter 메서드를 자동으로 생성
-@ToString
+@ToString(exclude = "user")
 @Table(name = "coverletter")        // 엔티티와 매핑할 테이블 이름을 지정
 @DynamicUpdate                      // 엔티티 수정 시 변경된 컬럼만 UPDATE SQL에 포함됨
 public class CoverLetter {
@@ -20,7 +21,12 @@ public class CoverLetter {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userId;    // 나중에 users와 연관 관계 설정 필요 ( DBeaver )
+    // userid에 FK (외래키) 연결하기
+    // mindmap.java와 똑같은 방식
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     private Long mindmapId; // 나중에 mindmap과 연관 관계 설정 필요 ( DBeaver )
 
     private String title;
