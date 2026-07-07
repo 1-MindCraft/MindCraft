@@ -25,9 +25,7 @@ export function MindMapNodesProvider({ setNodes, nodes, children }) {
 export function useMindMapNodes() {
   const ctx = useContext(MindMapNodesContext);
   if (!ctx) {
-    throw new Error(
-      'useMindMapNodes은 MindMapNodesProvider 내부에서만 사용할 수 있어요'
-    );
+    throw new Error('useMindMapNodes은 MindMapNodesProvider 내부에서만 사용할 수 있어요');
   }
   return ctx;
 }

@@ -135,6 +135,7 @@ export default function MindMap({ initialData, onNodesUpdate, tool = 'drag' }) {
           onNodeDrag={handleNodeDrag}
           onNodeDragStart={handleNodeDragStart}
           fitView
+          fitViewOptions={{ maxZoom: 1 }}
           colorMode="light"
           panOnDrag={tool === 'select' ? [1, 2] : true}
           selectionOnDrag={tool === 'select'}

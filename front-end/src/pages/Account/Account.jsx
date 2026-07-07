@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Account.css';
-import LOGO_SRC from '../../assets/MindCraft-Logo1.png';
+import AppHeader from '../../components/common/AppHeader';
 
 
 // 목업 데이터 — 실제 API 연동 전까지 화면 구조 확인용
@@ -73,15 +73,7 @@ function AccountPage() {
   return (
     <div className="account-page">
       {/* 상단 바 */}
-      <header className="account-header">
-        <div className="account-header-logo" onClick={() => navigate('/')}>
-          <img src={LOGO_SRC} alt="" className="account-logo-img" />
-          <span className="account-logo-text">MIND <span>CRAFT</span></span>
-        </div>
-        <button className="account-back-btn" onClick={() => navigate(-1)}>
-          ← 돌아가기
-        </button>
-      </header>
+      <AppHeader actionLabel="← 돌아가기" onAction={() => navigate(-1)} />
 
       {/* 마이 페이지 타이틀 */}
       <div className="account-page-title">마이 페이지</div>

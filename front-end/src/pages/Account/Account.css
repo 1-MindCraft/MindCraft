@@ -6,54 +6,7 @@
   color: #1a1a2e;
 }
 
-/* ─── 상단 바 ─── */
-.account-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 64px;
-  padding: 0 2rem;
-  background: #fff;
-  border-bottom: 1px solid #e8e4f8;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-.account-header-logo {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  cursor: pointer;
-}
-.account-logo-img {
-  height: 30px;
-  width: auto;
-  display: block;
-}
-.account-logo-text {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #1a1a2e;
-}
-.account-logo-text span {
-  color: #6c63ff;
-}
-.account-back-btn {
-  padding: 0.45rem 1rem;
-  border: 1.5px solid #e8e4f8;
-  border-radius: 8px;
-  background: #fff;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #555;
-  cursor: pointer;
-  font-family: inherit;
-  transition: border-color 0.2s, color 0.2s;
-}
-.account-back-btn:hover {
-  border-color: #6c63ff;
-  color: #6c63ff;
-}
+/* ─── 상단 바: 공통 AppHeader(components/common/AppHeader.css) 사용 ─── */
 
 /* ─── 마이 페이지 타이틀: 헤더 로고와 같은 왼쪽 기준선에 고정 ─── */
 .account-page-title {
@@ -266,18 +219,6 @@
   background: #16161f;
   color: #e8e6f5;
 }
-[data-theme='dark'] .account-header {
-  background: #1c1c2b;
-  border-color: #2f2f45;
-}
-[data-theme='dark'] .account-logo-text {
-  color: #e8e6f5;
-}
-[data-theme='dark'] .account-back-btn {
-  background: #1c1c2b;
-  border-color: #3a3a55;
-  color: #b8b6cc;
-}
 [data-theme='dark'] .account-page-title {
   color: #e8e6f5;
 }
@@ -365,9 +306,6 @@
 }
 
 @media (max-width: 600px) {
-  .account-header {
-    padding: 0 1rem;
-  }
   .account-page-title,
   .account-layout {
     padding-left: 1rem;
