@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './CoverLetter.css';
 
 import CLHeader from '../../components/CoverLetter/CLHeader';
@@ -7,48 +7,72 @@ import CLMindMap from '../../components/CoverLetter/CLMindMap';
 import CLDraft from '../../components/CoverLetter/CLDraft';
 import CLSettings from '../../components/CoverLetter/CLSettings';
 
-// 문항 데이터를 최상위(CoverLetterPage)에서 관리해서
-// CLDraft(문항 목록/상세)와 CLSettings(문항 구성 라디오)가 같은 상태를 공유합니다.
-const INITIAL_SECTIONS = [
-  {
-    id: 1,
-    title: '지원 동기',
-    content: `저는 사람과 조직을 연결하고, 목표를 달성하는 데 기여하는 프로젝트 매니저의 역할에 매력을 느껴 지원하게 되었습니다.
+import { getOrCreateCoverLetter, getCoverLetterDetail } from '../../axios/coverLetterApi';
+import { createSection } from '../../axios/sectionApi';
+import { getMindMap } from '../../axios/mindMapApi';
 
-다양한 프로젝트를 경험하며 기획부터 실행, 성과 도출까지 전 과정을 주도적으로 이끌어 왔습니다. 특히 A회사 프로젝트에서는 팀원들과의 긴밀한 협업을 통해 정해진 기간 내에 목표를 달성하여 고객 만족도를 높였고, B회사 프로젝트에서는 리스크 관리를 통해 문제를 사전에 예방하고 프로젝트의 안정적인 진행을 이끌었습니다.
+// 백엔드 문항(section) → 화면 형태로 변환
+const mapSection = (s) => ({
+  id: s.id,
+  title: s.question,        // question → title
+  content: s.answer,        // answer → content
+  sourceNodes: (s.sourceNode || []).map((node) => node?.data?.label).filter(Boolean),
+});
 
-이러한 경험을 바탕으로 귀사에서 더 큰 가치를 만들어가고 싶습니다.`,
-    sourceNodes: ['주요 역량 > 기획력', '주요 역량 > 일정 관리', '경험 > A회사 프로젝트'],
-  },
-  {
-    id: 2,
-    title: '성장과정',
-    content: `어릴 때부터 팀을 이끄는 것에 자연스럽게 흥미를 느꼈습니다. 학창 시절 다양한 팀 프로젝트를 통해 협업의 중요성을 깨달았고, 이를 바탕으로 꾸준히 역량을 키워왔습니다.`,
-    sourceNodes: ['성과 > 프로세스 개선', '강점 > 책임감'],
-  },
-  {
-    id: 3,
-    title: '강점과 보완점',
-    content: `저의 가장 큰 강점은 문제 해결 능력과 팀워크입니다. 어떤 상황에서도 냉정하게 문제를 분석하고 최선의 해결책을 찾아왔습니다.`,
-    sourceNodes: ['강점 > 문제 해결 능력', '강점 > 팀워크'],
-  },
-  {
-    id: 4,
-    title: '입사 후 포부',
-    content: `입사 후에는 귀사의 프로젝트 성공에 실질적으로 기여하는 PM이 되고 싶습니다. 단순히 일정을 관리하는 것을 넘어, 팀의 역량을 극대화하고 고객 가치를 창출하는 데 집중하겠습니다.`,
-    sourceNodes: ['성과 > 매출 증대 기여', '주요 역량 > 리스크 관리'],
-  },
-];
+function CoverLetterPage({ onBackToMindMap }) {
+  const [sections, setSections] = useState([]);
+  const [coverLetterId, setCoverLetterId] = useState(null);
+  const [userName, setUserName] = useState('자기소개서');
+  const [companyInfo, setCompanyInfo] = useState({
+    companyName: '',
+    companyIdeal: '',
+    jobDescription: '',
+  });
+  const [mindMapNodes, setMindMapNodes] = useState([]);   // 마인드맵 전체 노드 (sourceNode로 넘길 것)
 
-function CoverLetterPage({ userName = '프로젝트 매니저 지원', onBackToMindMap }) {
-  const [sections, setSections] = useState(INITIAL_SECTIONS);
-  const [selectedId, setSelectedId] = useState(1);
-  const [nextId, setNextId] = useState(100); // 새 문항용 내부 고유 id (화면 노출 X)
+  const [selectedId, setSelectedId] = useState(null);
+  const [nextId, setNextId] = useState(100);
   const [settingsOpen, setSettingsOpen] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);   // AI 생성 중 여부
+
+  // 페이지 진입 시: 자소서 조회 + 문항 로드 + 마인드맵 노드 로드
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setLoading(true);
+        const cover = await getOrCreateCoverLetter();
+        setCoverLetterId(cover.id);
+
+        const detail = await getCoverLetterDetail(cover.id);
+        setUserName(detail.title || '자기소개서');
+        setCompanyInfo({
+          companyName: detail.company_name || '',
+          companyIdeal: detail.company_ideal || '',
+          jobDescription: detail.job_description || '',
+        });
+
+        const mapped = (detail.sections || []).map(mapSection);
+        setSections(mapped);
+        if (mapped.length > 0) setSelectedId(mapped[0].id);
+
+        // 마인드맵 노드 로드 (생성 시 sourceNode로 넘김)
+        const mindmap = await getMindMap();
+        const nodes = typeof mindmap.nodes === 'string'
+          ? JSON.parse(mindmap.nodes)   // 문자열이면 파싱
+          : mindmap.nodes;              // 이미 배열이면 그대로
+        setMindMapNodes(nodes || []);
+      } catch (error) {
+        console.error('자소서 로드 실패:', error.response?.data || error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   const toggleSettings = () => setSettingsOpen((p) => !p);
 
-  // "+ 직접 문항 추가" 클릭 시: 새 문항 생성 + 선택 + 생성 설정 사이드바 자동 오픈
   const addSection = () => {
     const customCount = sections.filter((s) => s.id >= 100).length;
     const newSection = {
@@ -60,25 +84,64 @@ function CoverLetterPage({ userName = '프로젝트 매니저 지원', onBackToM
     setSections((prev) => [...prev, newSection]);
     setSelectedId(nextId);
     setNextId((p) => p + 1);
-    setSettingsOpen(true); // 자동으로 열기
+    setSettingsOpen(true);
   };
 
   const updateSectionTitle = (id, title) => {
     setSections((prev) => prev.map((s) => (s.id === id ? { ...s, title } : s)));
   };
 
+  // "생성하기" → 현재 선택 문항을 마인드맵 노드 참고해 AI 생성
+  const handleGenerate = async (settings) => {
+    const current = sections.find((s) => s.id === selectedId);
+    if (!current) {
+      alert('생성할 문항을 선택해주세요.');
+      return;
+    }
+    if (!current.title || !current.title.trim()) {
+      alert('문항(질문)을 먼저 입력해주세요.');
+      return;
+    }
+    if (mindMapNodes.length === 0) {
+      alert('마인드맵 노드가 없습니다. 마인드맵을 먼저 작성해주세요.');
+      return;
+    }
+
+    try {
+      setGenerating(true);
+      const created = await createSection(coverLetterId, {
+        question: current.title,
+        writingStyle: settings.writingStyle,
+        maxChars: settings.maxChars,
+        allowCreativity: settings.allowCreativity,
+        sourceNode: mindMapNodes,   // 마인드맵 전체 노드 참고
+      });
+      // 임시 문항 → 실제 저장된 문항으로 교체 (answer 채워짐)
+      const mapped = mapSection(created);
+      setSections((prev) => prev.map((s) => (s.id === selectedId ? mapped : s)));
+      setSelectedId(mapped.id);
+    } catch (error) {
+      console.error('생성 실패:', error.response?.data || error);
+      alert('생성 중 오류가 발생했습니다.');
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  if (loading) {
+    return <div className="cl-page">자소서를 불러오는 중...</div>;
+  }
+
   return (
     <div className="cl-page">
       <CLHeader userName={userName} onBackToMindMap={onBackToMindMap} />
 
       <div className="cl-body">
-        {/* 툴바 */}
         <CLToolbar
           settingsOpen={settingsOpen}
           onSettingsToggle={toggleSettings}
         />
 
-        {/* 콘텐츠: 마인드맵 | 자소서 | 생성설정 */}
         <div className="cl-content">
           <CLMindMap />
           <div className="cl-content-divider" />
@@ -94,6 +157,8 @@ function CoverLetterPage({ userName = '프로젝트 매니저 지원', onBackToM
           <CLSettings
             open={settingsOpen}
             onToggle={toggleSettings}
+            onGenerate={handleGenerate}
+            generating={generating}
           />
         </div>
       </div>

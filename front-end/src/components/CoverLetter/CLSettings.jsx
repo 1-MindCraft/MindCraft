@@ -6,13 +6,28 @@ const STYLE_PRESETS = [
   '따뜻하고 진정성 있는 문체',
   '직접 입력',
 ];
-const CHAR_LIMITS = ['500자 이하', '500 ~ 1,000자', '1,000 ~ 1,500자', '1,500 ~ 2,000자', '2,000자 이상'];
 
-function CLSettings({ open, onToggle }) {
+const CHAR_LIMITS = [
+  { label: '500자 이하', value: 500 },
+  { label: '1,000자 이하', value: 1000 },
+  { label: '1,500자 이하', value: 1500 },
+  { label: '2,000자 이하', value: 2000 },
+];
+
+function CLSettings({ open, onToggle, onGenerate, generating }) {
   const [stylePreset, setStylePreset] = useState('적극적이고 자신감 있는 문체');
   const [customStyle, setCustomStyle] = useState('');
-  const [charLimit, setCharLimit] = useState('1,000 ~ 1,500자');
+  const [maxChars, setMaxChars] = useState(1000);   // 값으로 관리
   const [allowCreativity, setAllowCreativity] = useState(true);
+
+  const handleGenerate = () => {
+    const writingStyle = stylePreset === '직접 입력' ? customStyle : stylePreset;
+    onGenerate({
+      writingStyle,
+      maxChars,
+      allowCreativity,
+    });
+  };
 
   return (
     <>
@@ -61,17 +76,17 @@ function CLSettings({ open, onToggle }) {
           {/* 2. 글자 수 (max_chars) */}
           <section className="cl-setting-section">
             <div className="cl-setting-label">글자 수</div>
-            <div className="cl-setting-desc">생성할 답변의 최대 글자 수 범위를 선택하세요.</div>
+            <div className="cl-setting-desc">생성할 답변의 최대 글자 수를 선택하세요.</div>
             <div className="cl-radio-group">
               {CHAR_LIMITS.map((opt) => (
-                <label key={opt} className="cl-radio-item">
+                <label key={opt.value} className="cl-radio-item">
                   <input
                     type="radio"
                     name="chars"
-                    checked={charLimit === opt}
-                    onChange={() => setCharLimit(opt)}
+                    checked={maxChars === opt.value}
+                    onChange={() => setMaxChars(opt.value)}
                   />
-                  <span>{opt}</span>
+                  <span>{opt.label}</span>
                 </label>
               ))}
             </div>
@@ -107,12 +122,20 @@ function CLSettings({ open, onToggle }) {
           </section>
         </div>
 
-        {/* 생성하기 버튼 */}
+        {/* 생성하기 */}
         <div className="cl-settings-footer">
-          <button className="cl-btn-generate">
-            ✦ 생성하기
+          <button
+            className="cl-btn-generate"
+            onClick={handleGenerate}
+            disabled={generating}
+          >
+            {generating ? '✦ 생성 중...' : '✦ 생성하기'}
           </button>
-          <div className="cl-generate-hint">마인드맵의 구조와 내용을 기반으로 AI가 자기소개서 초안을 생성합니다.</div>
+          <div className="cl-generate-hint">
+            {generating
+              ? 'AI가 자기소개서를 작성하고 있습니다. 잠시만 기다려주세요.'
+              : '마인드맵의 구조와 내용을 기반으로 AI가 자기소개서 초안을 생성합니다.'}
+          </div>
         </div>
       </aside>
 
