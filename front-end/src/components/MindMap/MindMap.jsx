@@ -3,21 +3,40 @@ import {
   ReactFlow,
   Controls,
   Background,
-  useNodesState,
-  useEdgesState,
+  // useNodesState,
+  // useEdgesState,
+  applyNodeChanges,
+  applyEdgeChanges,
 } from '@xyflow/react';
 import MindMapNode from './MindMapNode';
-import { initialEdges, initialNodes } from '../../data/dummyData';
 import { getDescendantIds } from '../../utils/mindmapTree';
 import { useRef } from 'react';
+// import { getMindMap } from '../../axios/mindMapApi';
+import useMindMapStore from '../../zustand/mindMapStore';
 
 const nodeTypes = {
   mapNode: MindMapNode,
 };
 
 export default function MindMap() {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  // const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  // const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+
+  const nodes = useMindMapStore((state) => state.nodes);
+  const edges = useMindMapStore((state) => state.edges);
+  const setNodes = useMindMapStore((state) => state.setNodes);
+  const setEdges = useMindMapStore((state) => state.setEdges);
+  const fetchMindMap = useMindMapStore((state) => state.fetchMindMap);
+
+  const onNodesChange = useCallback(
+    (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
+    [setNodes]
+  );
+
+  const onEdgesChange = useCallback(
+    (changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
+    [setEdges]
+  );
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -110,6 +129,39 @@ export default function MindMap() {
 
     dragStartPositionRef.current = { ...node.position };
   };
+
+  useEffect(() => {
+    // const fetchMindMap = async () => {
+    //   try {
+    //     const rdata = await getMindMap();
+    //     const parsedNodes = JSON.parse(rdata.nodes).map((node) => ({
+    //       ...node,
+    //       type: 'mapNode',
+    //     }));
+
+    //     console.log(rdata);
+
+    //     const parsedEdges = parsedNodes
+    //       .filter((node) => node.data.parentId)
+    //       .map((node) => ({
+    //         id: `${node.data.parentId}-${node.id}`,
+    //         source: node.data.parentId,
+    //         target: node.id,
+    //       }));
+    //     setNodes(parsedNodes);
+    //     setEdges(parsedEdges);
+    //   } catch (error) {
+    //     console.log('get MindMap 실패: ', error.response?.data || error);
+    //     alert(error.response?.data?.error || '마인드맵을 불러오지 못했습니다.');
+    //   }
+    // };
+
+    // fetchMindMap();
+
+    fetchMindMap().catch(() => {
+      alert('마인드맵을 불러오지 못했습니다.');
+    });
+  }, []);
 
   return (
     <div
