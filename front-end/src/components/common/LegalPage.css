@@ -1,4 +1,8 @@
-.privacy-page {
+/* ═══════════════════════════════════
+   LegalPage — 이용약관 / 개인정보처리방침 공통 본문 스타일
+   (예전 Terms.css + Privacy.css를 하나로 합침)
+═══════════════════════════════════ */
+.legal-page {
   min-height: 100vh;
   width: 100%;
   background: #f4f6fb;
@@ -6,67 +10,22 @@
   color: #1a1a2e;
 }
 
-/* ─── 상단 바 ─── */
-.privacy-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 64px;
-  padding: 0 2rem;
-  background: #fff;
-  border-bottom: 1px solid #e8e4f8;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-.privacy-header-logo {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-.privacy-logo-img {
-  height: 30px;
-  width: auto;
-  display: block;
-}
-.privacy-logo-text {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #1a1a2e;
-}
-.privacy-logo-text span {
-  color: #6c63ff;
-}
-.privacy-close-btn {
-  padding: 0.45rem 1rem;
-  border: 1.5px solid #e8e4f8;
-  border-radius: 8px;
-  background: #fff;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #555;
-  cursor: pointer;
-  font-family: inherit;
-  transition: border-color 0.2s, color 0.2s;
-}
-.privacy-close-btn:hover {
-  border-color: #6c63ff;
-  color: #6c63ff;
-}
-
-/* ─── 본문 ─── */
-.privacy-body {
+.legal-body {
   max-width: 760px;
   margin: 0 auto;
   padding: 3rem 1.5rem 5rem;
 }
-.privacy-title {
+
+.legal-title {
   font-size: 1.6rem;
   font-weight: 900;
   color: #1a1a2e;
   margin-bottom: 1rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 2px solid #ede9f9;
 }
-.privacy-intro {
+
+.legal-intro {
   font-size: 0.9rem;
   color: #555;
   line-height: 1.9;
@@ -74,29 +33,31 @@
   padding-bottom: 1.6rem;
   border-bottom: 2px solid #ede9f9;
 }
-.privacy-section {
+
+.legal-section {
   margin-bottom: 2rem;
 }
-.privacy-section h2 {
+.legal-section h2 {
   font-size: 1.02rem;
   font-weight: 800;
   color: #1a1a2e;
   margin-bottom: 0.7rem;
 }
-.privacy-section p {
+.legal-section p {
   font-size: 0.9rem;
   color: #444;
   line-height: 1.85;
   margin-bottom: 0.6rem;
 }
-.privacy-list {
+
+.legal-list {
   list-style: none;
-  counter-reset: privacy-counter;
+  counter-reset: legal-counter;
   padding: 0;
   margin: 0;
 }
-.privacy-list > li {
-  counter-increment: privacy-counter;
+.legal-list > li {
+  counter-increment: legal-counter;
   position: relative;
   padding-left: 1.6rem;
   font-size: 0.9rem;
@@ -104,25 +65,26 @@
   line-height: 1.85;
   margin-bottom: 0.6rem;
 }
-.privacy-list > li::before {
-  content: counter(privacy-counter) '.';
+.legal-list > li::before {
+  content: counter(legal-counter) '.';
   position: absolute;
   left: 0;
   font-weight: 700;
   color: #6c63ff;
 }
-.privacy-list strong {
+.legal-list strong {
   color: #1a1a2e;
   font-weight: 800;
 }
-.privacy-sublist {
+
+.legal-sublist {
   list-style: none;
-  counter-reset: privacy-sub-counter;
+  counter-reset: legal-sub-counter;
   padding: 0;
   margin: 0.6rem 0 0;
 }
-.privacy-sublist > li {
-  counter-increment: privacy-sub-counter;
+.legal-sublist > li {
+  counter-increment: legal-sub-counter;
   position: relative;
   padding-left: 1.8rem;
   font-size: 0.87rem;
@@ -130,13 +92,14 @@
   line-height: 1.8;
   margin-bottom: 0.4rem;
 }
-.privacy-sublist > li::before {
-  content: counter(privacy-sub-counter) ')';
+.legal-sublist > li::before {
+  content: counter(legal-sub-counter) ')';
   position: absolute;
   left: 0.2rem;
   color: #999;
 }
-.privacy-note {
+
+.legal-note {
   font-size: 0.83rem;
   color: #888;
   line-height: 1.8;
@@ -146,14 +109,15 @@
   border-radius: 0 8px 8px 0;
   margin-top: 0.6rem;
 }
-.privacy-contact-box {
+
+.legal-contact-box {
   background: #faf9ff;
   border: 1.5px solid #ede9f9;
   border-radius: 10px;
   padding: 1rem 1.2rem;
   margin: 0.8rem 0;
 }
-.privacy-contact-row {
+.legal-contact-row {
   display: flex;
   align-items: center;
   gap: 0.8rem;
@@ -161,20 +125,23 @@
   color: #444;
   padding: 0.3rem 0;
 }
-.privacy-contact-label {
+.legal-contact-label {
   font-weight: 700;
   color: #1a1a2e;
   min-width: 120px;
   flex-shrink: 0;
 }
-.privacy-appendix {
+
+.legal-appendix {
   padding-top: 1.5rem;
   border-top: 1px solid #ede9f9;
 }
-.privacy-appendix p {
+.legal-appendix p {
   color: #888;
+  font-style: normal;
 }
-.privacy-disclaimer {
+
+.legal-disclaimer {
   margin-top: 2rem;
   padding: 1rem 1.2rem;
   background: #fffbf0;
@@ -186,18 +153,34 @@
 }
 
 @media (max-width: 600px) {
-  .privacy-header {
-    padding: 0 1rem;
-  }
-  .privacy-body {
+  .legal-body {
     padding: 2rem 1rem 3rem;
   }
-  .privacy-title {
+  .legal-title {
     font-size: 1.3rem;
   }
-  .privacy-contact-row {
+  .legal-contact-row {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.2rem;
   }
+}
+
+[data-theme='dark'] .legal-page {
+  background: #101018;
+  color: #e8e6f5;
+}
+[data-theme='dark'] .legal-title,
+[data-theme='dark'] .legal-section h2 {
+  color: #e8e6f5;
+}
+[data-theme='dark'] .legal-intro,
+[data-theme='dark'] .legal-section p,
+[data-theme='dark'] .legal-list > li {
+  color: #cfcfe0;
+}
+[data-theme='dark'] .legal-note,
+[data-theme='dark'] .legal-contact-box {
+  background: #1b1b28;
+  border-color: #3a3a55;
 }

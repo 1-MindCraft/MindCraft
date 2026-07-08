@@ -1,0 +1,117 @@
+/* ═══════════════════════════════════
+   AppHeader — 모든 페이지 공통 상단 헤더
+   (Account/Help/Terms/Privacy: 로고 + 버튼 하나)
+   (MindMap/CoverLetter: logoAreaWidth + center/right 슬롯으로 확장해서 사용)
+═══════════════════════════════════ */
+.app-header {
+  display: flex;
+  align-items: center;
+  height: 64px;
+  padding: 0 1.5rem;
+  background: #fff;
+  border-bottom: 1px solid #e8e4f8;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* MindMap/CoverLetter처럼 아래 사이드바와 폭을 맞춰야 하는 경우:
+   좌측 여백을 없애고, 로고 영역 자체 padding으로 여백을 대신함 */
+.app-header--sidebar-aligned {
+  padding-left: 0;
+  padding-right: 1.5rem;
+}
+
+.app-header-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.app-header-logo--fixed {
+  padding: 0 1rem 0 1.5rem;
+  box-sizing: border-box;
+}
+.app-header-logo-img {
+  height: 30px;
+  width: auto;
+  display: block;
+}
+.app-header-logo-text {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1a1a2e;
+  white-space: nowrap;
+}
+.app-header-logo-text span {
+  color: #6c63ff;
+}
+
+/* center 슬롯이 있을 때만 표시되는 구분선 */
+.app-header-divider {
+  width: 1px;
+  height: 24px;
+  background: #e0ddf0;
+  flex-shrink: 0;
+}
+
+.app-header-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.app-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.app-header-action-btn {
+  padding: 0.45rem 1rem;
+  border: 1.5px solid #e8e4f8;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.2s, color 0.2s;
+}
+.app-header-action-btn:hover {
+  border-color: #6c63ff;
+  color: #6c63ff;
+}
+
+@media (max-width: 600px) {
+  .app-header {
+    padding: 0 1rem;
+  }
+  .app-header--sidebar-aligned {
+    padding-left: 0;
+    padding-right: 1rem;
+  }
+}
+
+[data-theme='dark'] .app-header {
+  background: #16161f;
+  border-bottom-color: #3a3a55;
+}
+[data-theme='dark'] .app-header-logo-text {
+  color: #e8e6f5;
+}
+[data-theme='dark'] .app-header-action-btn {
+  background: #16161f;
+  border-color: #3a3a55;
+  color: #cfcfe0;
+}
+[data-theme='dark'] .app-header-divider {
+  background: #3a3a55;
+}

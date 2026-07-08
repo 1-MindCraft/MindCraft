@@ -6,53 +6,7 @@
   color: #1a1a2e;
 }
 
-.help-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 64px;
-  padding: 0 2rem;
-  background: #fff;
-  border-bottom: 1px solid #e8e4f8;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-.help-header-logo {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  cursor: pointer;
-}
-.help-logo-img {
-  height: 30px;
-  width: auto;
-  display: block;
-}
-.help-logo-text {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #1a1a2e;
-}
-.help-logo-text span {
-  color: #6c63ff;
-}
-.help-back-btn {
-  padding: 0.45rem 1rem;
-  border: 1.5px solid #e8e4f8;
-  border-radius: 8px;
-  background: #fff;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #555;
-  cursor: pointer;
-  font-family: inherit;
-  transition: border-color 0.2s, color 0.2s;
-}
-.help-back-btn:hover {
-  border-color: #6c63ff;
-  color: #6c63ff;
-}
+/* ─── 상단 바: 공통 AppHeader(components/common/AppHeader.css) 사용 ─── */
 
 .help-body {
   max-width: 720px;
@@ -146,18 +100,6 @@
   background: #16161f;
   color: #e8e6f5;
 }
-[data-theme='dark'] .help-header {
-  background: #1c1c2b;
-  border-color: #2f2f45;
-}
-[data-theme='dark'] .help-logo-text {
-  color: #e8e6f5;
-}
-[data-theme='dark'] .help-back-btn {
-  background: #1c1c2b;
-  border-color: #3a3a55;
-  color: #b8b6cc;
-}
 [data-theme='dark'] .help-sub {
   color: #9694ac;
 }
@@ -176,9 +118,6 @@
 }
 
 @media (max-width: 600px) {
-  .help-header {
-    padding: 0 1rem;
-  }
   .help-body {
     padding: 2rem 1rem 3rem;
   }

@@ -12,50 +12,7 @@
   color: #1a1a2e;
 }
 
-/* ─── HEADER ─── */
-.mm-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 1.5rem 0 0;
-  height: 70px;
-  min-width: 0;
-  background: #fff;
-  border-bottom: 1px solid #e8e4f8;
-  flex-shrink: 0;
-  width: 100%;
-  z-index: 50;
-  gap: 0;
-  box-sizing: border-box;
-}
-
-/* 헤더 로고 영역: 사이드바 너비(260px)에 고정 */
-.mm-header-logo-area {
-  width: 260px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0 1rem 0 1.5rem;
-}
-.mm-logo-img {
-  height: 32px;
-  width: auto;
-}
-.mm-logo-text {
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: #1a1a2e;
-  white-space: nowrap;
-}
-.mm-logo-text span {
-  color: #6c63ff;
-}
-
-/* 헤더 가운데 */
-.mm-header-center {
-  display: none;
-}
+/* ─── HEADER: 공통 AppHeader(components/common/AppHeader.css) 사용, 여기는 내용물만 ─── */
 .mm-doc-title {
   display: flex;
   align-items: center;
@@ -86,13 +43,6 @@
   flex-shrink: 0;
 }
 
-/* 헤더 오른쪽 */
-.mm-header-right {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  flex-shrink: 0;
-}
 /* 헤더 오른쪽 */
 .mm-header-right {
   display: flex;
@@ -171,6 +121,18 @@
 }
 
 /* 공통 아이콘 버튼 */
+.mm-icon-btn:disabled,
+.mm-tool-btn:disabled,
+.mm-color-dot:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+.mm-icon-btn:disabled:hover,
+.mm-tool-btn:disabled:hover {
+  background: transparent;
+  color: inherit;
+}
+
 .mm-icon-btn {
   background: none;
   border: none;
@@ -270,6 +232,25 @@
   color: #444;
   user-select: none;
 }
+.mm-node-delete-btn {
+  opacity: 0;
+  border: none;
+  background: transparent;
+  color: #b0aec2;
+  font-size: 0.68rem;
+  cursor: pointer;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  line-height: 1;
+}
+.mm-node-item:hover .mm-node-delete-btn {
+  opacity: 1;
+}
+.mm-node-delete-btn:hover {
+  background: #ffe3e3;
+  color: #e03131;
+}
+
 .mm-node-item:hover {
   background: #f0eeff;
   color: #6c63ff;
@@ -656,12 +637,6 @@
 }
 
 /* ─── 헤더 로고-이름 구분선 ─── */
-.mm-header-divider {
-  width: 1px;
-  height: 22px;
-  background: #e0ddf0;
-  flex-shrink: 0;
-}
 
 /* ══════════════════════════════════════
    다크 모드 팔레트
@@ -671,13 +646,11 @@
   background: #16161f;
   color: #e8e6f5;
 }
-[data-theme='dark'] .mm-header,
 [data-theme='dark'] .mm-toolbar,
 [data-theme='dark'] .mm-sidebar {
   background: #1c1c2b;
   border-color: #2f2f45;
 }
-[data-theme='dark'] .mm-logo-text,
 [data-theme='dark'] .mm-user-name,
 [data-theme='dark'] .mm-sidebar-title,
 [data-theme='dark'] .mm-node-item.is-root {
@@ -693,7 +666,6 @@
   background: #2c2a4d;
   color: #a99cff;
 }
-[data-theme='dark'] .mm-header-divider,
 [data-theme='dark'] .mm-toolbar-divider {
   background: #34344c;
 }

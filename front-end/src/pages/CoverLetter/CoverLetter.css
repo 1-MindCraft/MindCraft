@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════
-   CoverLetterPage
+    CoverLetterPage
 ═══════════════════════════════════ */
 .cl-page {
   display: flex;
@@ -13,39 +13,13 @@
   color-scheme: light;
 }
 
-/* ─── HEADER ─── */
-.cl-header {
-  display: flex;
-  align-items: center;
-  height: 70px;
-  padding: 0 1.5rem 0 0;
-  background: #fff;
-  border-bottom: 1px solid #e8e4f8;
-  flex-shrink: 0;
-  gap: 0;
-  box-sizing: border-box;
-  width: 100%;
-  z-index: 50;
-}
-.cl-header-logo {
-  width: 260px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0 1rem 0 1.5rem;
-}
+/* ─── HEADER: 공통 AppHeader(components/common/AppHeader.css) 사용, 여기는 내용물만 ─── */
 .cl-doc-title {
   display: flex;
   align-items: center;
   gap: 0.4rem;
   padding-left: 0.6rem;
   flex-shrink: 0;
-}
-.cl-header-center {
-  flex: 1;
-  display: flex;
-  justify-content: center;
 }
 .cl-btn-back {
   background: none;
@@ -334,6 +308,11 @@
   font-weight: 700;
   color: #1a1a2e;
   line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .cl-section-chars {
   font-size: 0.7rem;
@@ -372,15 +351,23 @@
 }
 .cl-detail-title-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
   width: 100%;
 }
+
 .cl-detail-title {
   font-size: 1rem;
   font-weight: 800;
   color: #1a1a2e;
+  flex: 1;
+  min-width: 0;
 }
+
+.cl-detail-edit-btn {
+  flex-shrink: 0;
+}
+
 .cl-detail-title-num {
   font-size: 1rem;
   font-weight: 800;
@@ -409,7 +396,7 @@
   transition: opacity 0.15s;
 }
 .cl-detail-title-row .mm-icon-img-btn:hover .cl-detail-pencil {
-  opacity: 0.9;
+  flex-shrink: 0;
 }
 .cl-detail-content {
   font-size: 0.88rem;
@@ -721,26 +708,6 @@
 }
 
 /* ─── MindMapPage 공용 스타일 (자체 포함) ─── */
-.mm-logo-img {
-  height: 32px;
-  width: auto;
-  display: block;
-}
-.mm-logo-text {
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: #1a1a2e;
-  white-space: nowrap;
-}
-.mm-logo-text span {
-  color: #6c63ff;
-}
-.mm-header-divider {
-  width: 1px;
-  height: 22px;
-  background: #e0ddf0;
-  flex-shrink: 0;
-}
 .mm-user-name {
   font-size: 0.95rem;
   font-weight: 700;
@@ -916,7 +883,6 @@
   background: #16161f;
   color: #e8e6f5;
 }
-[data-theme='dark'] .cl-header,
 [data-theme='dark'] .cl-toolbar,
 [data-theme='dark'] .cl-draft,
 [data-theme='dark'] .cl-settings {

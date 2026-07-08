@@ -1,23 +1,27 @@
-import { useState, useCallback, useEffect } from 'react';
-import {
-  ReactFlow,
-  Controls,
-  Background,
-  useNodesState,
-  useEdgesState,
-} from '@xyflow/react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { ReactFlow, Background, applyNodeChanges } from '@xyflow/react';
 import MindMapNode from './MindMapNode';
-import { initialEdges, initialNodes } from '../../data/dummyData';
-import { getDescendantIds } from '../../utils/mindmapTree';
-import { useRef } from 'react';
+import { getDescendantIds, buildEdgesFromNodes } from '../../utils/mindmapTree';
+import { MindMapNodesProvider } from '../../context/MindMapNodesContext';
+import useMindMapStore from '../../zustand/mindMapStore';
 
 const nodeTypes = {
   mapNode: MindMapNode,
 };
 
-export default function MindMap() {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+// initialData: 부모(페이지)가 들고 있는 flat 노드 배열 (dummyData 기반, 사이드바와 공유)
+// onNodesUpdate: 노드가 바뀔 때마다 부모로 최신 노드 배열을 올려보내는 콜백 (사이드바 동기화용)
+// tool: 'drag'(빈 캔버스를 드래그하면 화면 이동) | 'select'(빈 캔버스를 드래그하면 다중 선택)
+export default function MindMap({ tool = 'drag' }) {
+  const nodes = useMindMapStore((state) => state.nodes);
+  const setNodes = useMindMapStore((state) => state.setNodes);
+  const edges = useMemo(() => buildEdgesFromNodes(nodes), [nodes]);
+  const fetchMindMap = useMindMapStore((state) => state.fetchMindMap);
+
+  const onNodesChange = useCallback(
+    (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
+    [setNodes]
+  );
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -42,14 +46,6 @@ export default function MindMap() {
           type: 'mapNode',
         };
         setNodes((nds) => [...nds, newNode]);
-        setEdges((eds) => [
-          ...eds,
-          {
-            id: `${selectedNode.id}-${newNode.id}`,
-            source: selectedNode.id,
-            target: newNode.id,
-          },
-        ]);
       } else if (e.key === 'Delete' || e.key === 'Backspace') {
         const idsToDelete = [
           selectedNode.id,
@@ -62,19 +58,12 @@ export default function MindMap() {
         )
           return;
         setNodes((nds) => nds.filter((n) => !idsToDelete.includes(n.id)));
-        setEdges((eds) =>
-          eds.filter(
-            (ed) =>
-              !idsToDelete.includes(ed.source) &&
-              !idsToDelete.includes(ed.target)
-          )
-        );
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [nodes, setNodes, setEdges]);
+  }, [nodes, setNodes]);
 
   // 드래그 시작 시점의 부모 position 저장
   const dragStartPositionRef = useRef(null);
@@ -114,30 +103,31 @@ export default function MindMap() {
   return (
     <div
       style={{
-        height: '500px', // 고정 높이
-        width: '1800px', // 고정 너비
-        border: '1px solid #ddd', // 캔버스 경계 표시
-        margin: '0 auto', // 가운데 정렬
+        height: '100%', // 부모(.mm-canvas)를 꽉 채움
+        width: '100%',
       }}
     >
-      <ReactFlow
-        nodesConnectable={false}
-        nodes={nodes}
-        edges={edges}
-        nodeTypes={nodeTypes}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onNodeDrag={handleNodeDrag}
-        onNodeDragStart={handleNodeDragStart}
-        fitView
-        colorMode="system"
-        defaultEdgeOptions={{
-          style: { strokeWidth: 2 },
-        }}
-      >
-        <Background />
-        <Controls />
-      </ReactFlow>
+      <MindMapNodesProvider setNodes={setNodes} nodes={nodes}>
+        <ReactFlow
+          nodesConnectable={false}
+          nodes={nodes}
+          edges={edges}
+          nodeTypes={nodeTypes}
+          onNodesChange={onNodesChange}
+          onNodeDrag={handleNodeDrag}
+          onNodeDragStart={handleNodeDragStart}
+          fitView
+          fitViewOptions={{ maxZoom: 1 }}
+          colorMode="light"
+          panOnDrag={tool === 'select' ? [1, 2] : true}
+          selectionOnDrag={tool === 'select'}
+          defaultEdgeOptions={{
+            style: { strokeWidth: 2 },
+          }}
+        >
+          <Background />
+        </ReactFlow>
+      </MindMapNodesProvider>
     </div>
   );
 }

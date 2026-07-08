@@ -1,24 +1,26 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { useNodeActions } from '../../hooks/useNodeActions';
-import {
-  DEPTH_COLORS,
-  DEPTH_TEXT_COLORS,
-  DEPTH_RING_COLORS,
-  DEFAULT_BG_COLOR,
-  DEFAULT_TEXT_COLOR,
-  DEFAULT_RING_COLOR,
-} from '../../constants/nodeColor';
+import './MindMapNode.css';
 
 const MindMapNode = (props) => {
   const { id, data, selected } = props;
   const position = { x: props.positionAbsoluteX, y: props.positionAbsoluteY };
   const [isEditing, setIsEditing] = useState(false);
+  const [labelDraft, setLabelDraft] = useState(data.label);
+  const inputRef = useRef(null);
 
-  const bgColor = DEPTH_COLORS[data.depth] || DEFAULT_BG_COLOR;
-  const textColor = DEPTH_TEXT_COLORS[data.depth] || DEFAULT_TEXT_COLOR;
-  const ringColor = DEPTH_RING_COLORS[data.depth] || DEFAULT_RING_COLOR;
+  // 편집 모드로 들어가는 순간(더블클릭) input에 실제로 포커스를 줌
+  // (이게 없으면 input은 화면에 보이기만 하고, 실제 키보드 입력은 다른 곳으로 감)
+  useEffect(() => {
+    if (isEditing) {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }
+  }, [isEditing]);
+
   const isRoot = data.depth === 0;
+  const depthClass = data.depth <= 2 ? `depth-${data.depth}` : 'depth-default';
 
   const { handleLabelChange, handleAddNode, handleDeleteNode } = useNodeActions(
     id,
@@ -26,9 +28,20 @@ const MindMapNode = (props) => {
     position
   );
 
+  const startEditing = () => {
+    setLabelDraft(data.label);
+    setIsEditing(true);
+  };
+
+  const finishEditing = () => {
+    const trimmed = labelDraft.trim();
+    handleLabelChange(trimmed || data.label);
+    setIsEditing(false);
+  };
+
   return (
     <div
-      className={`${bgColor} rounded-2xl ${isRoot ? 'px-8 py-6' : 'px-6 py-3'} shadow-md group relative flex flex-col items-center transition-all duration-200 ${selected ? `ring-4 ${ringColor}` : `ring-0 hover:ring-4 ${ringColor}`}`}
+      className={`mm-map-node ${depthClass} ${isRoot ? 'is-root' : ''} ${selected ? 'selected' : ''}`}
     >
       <Handle
         type="target"
@@ -38,18 +51,17 @@ const MindMapNode = (props) => {
 
       {isEditing ? (
         <input
-          value={data.label}
-          onChange={handleLabelChange}
-          onBlur={() => setIsEditing(false)}
+          ref={inputRef}
+          value={labelDraft}
+          onChange={(e) => setLabelDraft(e.target.value)}
+          onBlur={finishEditing}
+          onKeyDown={(e) => e.key === 'Enter' && finishEditing()}
           onFocus={(e) => e.target.select()}
-          style={{ width: `${Math.max(data.label.length * 1.8, 3)}ch` }}
-          className={`text-center bg-transparent outline-none nodrag ${textColor} ${isRoot ? 'text-2xl font-semibold' : 'text-base'}`}
+          style={{ width: `${Math.max(labelDraft.length * 1.8, 3)}ch` }}
+          className="mm-node-input nodrag"
         />
       ) : (
-        <div
-          onDoubleClick={() => setIsEditing(true)}
-          className={`text-center ${textColor} ${isRoot ? 'text-2xl font-semibold' : 'text-base'}`}
-        >
+        <div onDoubleClick={startEditing} className="mm-node-label">
           {data.label}
         </div>
       )}
@@ -60,18 +72,12 @@ const MindMapNode = (props) => {
         style={{ opacity: 0, top: '50%', left: '50%' }}
       />
 
-      <div className="max-h-0 group-hover:max-h-8 overflow-hidden transition-all duration-300 ease-out w-full">
-        <div className="flex justify-between w-full pt-1">
-          <button
-            className="opacity-0 group-hover:opacity-100 transition-opacity delay-100 w-6 h-6 flex items-center justify-center rounded-full bg-white/30 text-sm leading-none"
-            onClick={handleDeleteNode}
-          >
+      <div className="mm-node-actions-wrap">
+        <div className="mm-node-actions">
+          <button className="mm-node-action-btn" onClick={handleDeleteNode}>
             -
           </button>
-          <button
-            className="opacity-0 group-hover:opacity-100 transition-opacity delay-100 w-6 h-6 flex items-center justify-center rounded-full bg-white/30 text-sm leading-none"
-            onClick={handleAddNode}
-          >
+          <button className="mm-node-action-btn" onClick={handleAddNode}>
             +
           </button>
         </div>
