@@ -9,6 +9,9 @@ import {
 import { getCookie, removeCookie, setCookie } from '../utils/cookieUtil';
 import { getMindMap, saveMindMap } from '../axios/mindMapApi';
 
+import { getOrCreateCoverLetter, getCoverLetterDetail, } from '../axios/coverLetterApi';
+import { createSection, deleteSection, getSectionList, } from '../axios/sectionApi';
+
 function ApiTestPage() {
   const testRegister = async () => {
     try {
@@ -96,9 +99,65 @@ function ApiTestPage() {
     }
   };
 
+  // ===== 자소서 마스터 =====
+  const testGetCoverLetter = async () => {
+    try {
+      const rdata = await getOrCreateCoverLetter();
+      console.log('자소서 조회/생성 성공:', rdata);
+    } catch (error) {
+      console.log('자소서 조회/생성 실패:', error.response?.data || error);
+    }
+  };
+
+  const testGetDetail = async () => {
+    try {
+      const rdata = await getCoverLetterDetail(21); 
+      console.log('상세조회 성공:', rdata);
+    } catch (error) {
+      console.log('상세조회 실패:', error.response?.data || error);
+    }
+  };
+
+
+  // ===== 문항,AI =====
+  const testGetSectionList = async () => {
+    try {
+      const rdata = await getSectionList(21);
+      console.log('문항 목록 성공:', rdata);
+    } catch (error) {
+      console.log('문항 목록 실패:', error.response?.data || error);
+    }
+  };
+
+  const testCreateSection = async () => {
+    try {
+      const rdata = await createSection(21, {
+        question: '지원 동기를 작성해줘',
+        writingStyle: '간결하고 명확한 문체',
+        maxChars: 500,
+        allowCreativity: false,
+        sourceNode: [
+          { id: '1-root', data: { label: '프로젝트 경험', parentId: null, depth: 0 } },
+        ],
+      });
+      console.log('문항 추가 성공:', rdata);
+    } catch (error) {
+      console.log('문항 추가 실패:', error.response?.data || error);
+    }
+  };
+
+  const testDeleteSection = async () => {
+    try {
+      const rdata = await deleteSection(21, 12); 
+      console.log('문항 삭제 성공:', rdata);
+    } catch (error) {
+      console.log('문항 삭제 실패:', error.response?.data || error);
+    }
+  };
+
   return (
     <div style={{ padding: 20 }}>
-      <h2>API 테스트 페이지 (임시)</h2>
+      <h1>API 테스트 페이지 (임시)</h1>
       <button onClick={testRegister}>회원가입 테스트</button>
       <br />
       <button onClick={testLogin}>로그인 테스트</button>
@@ -114,6 +173,20 @@ function ApiTestPage() {
       <button onClick={testGetMindMap}>마인드맵 조회(혹은 최초 생성)</button>
       <br />
       <button onClick={testSaveMindMap}>마인드맵 저장</button>
+      <hr />
+
+      <h1>자소서 마스터</h1>
+      <button onClick={testGetCoverLetter}>자소서 조회/생성</button>
+      <br />
+      <button onClick={testGetDetail}>자소서 상세조회</button>
+      <br />
+      <hr />
+      <h1>문항 & AI</h1>
+      <button onClick={testGetSectionList}>문항 목록 조회</button>
+      <br />
+      <button onClick={testCreateSection}>문항 추가 (+AI)</button>
+      <br />
+      <button onClick={testDeleteSection}>문항 삭제</button>
     </div>
   );
 }
