@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import './MindMap.css';
+import useMindMapStore from '../../zustand/mindMapStore';
 
 import MindMapHeader from '../../components/MindMap/MindMapHeader';
 import MindMapToolbar from '../../components/MindMap/MindMapToolbar';
@@ -10,15 +11,21 @@ function MindMapPage({ userName = '사용자' }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [lastSaved, setLastSaved] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+  const saveMindMap = useMindMapStore((state) => state.saveMindMap);
 
   const handleSave = useCallback(async () => {
     if (isSaving) return;
     setIsSaving(true);
-    // TODO: 실제 저장 API 호출
-    await new Promise((res) => setTimeout(res, 400));
-    setLastSaved(new Date());
-    setIsSaving(false);
-  }, [isSaving]);
+    try {
+      await saveMindMap();
+      setLastSaved(new Date());
+    } catch (error) {
+      console.log('저장 실패: ', error.response?.data || error);
+      alert(error.response?.data?.error || '저장 중 오류가 발생했습니다.');
+    } finally {
+      setIsSaving(false);
+    }
+  }, [isSaving, saveMindMap]);
 
   return (
     <div className="mm-page">
@@ -36,10 +43,7 @@ function MindMapPage({ userName = '사용자' }) {
             lastSaved={lastSaved}
             onSave={handleSave}
           />
-          <MindMapCanvas
-            isSaving={isSaving}
-            onSave={handleSave}
-          />
+          <MindMapCanvas isSaving={isSaving} onSave={handleSave} />
         </div>
       </div>
     </div>

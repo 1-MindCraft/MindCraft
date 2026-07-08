@@ -3,11 +3,14 @@ import LOGO_SRC from '../../assets/MindCraft-Logo1.png';
 import PENCIL_SRC from '../../assets/pencil.png';
 import EXPORT_SRC from '../../assets/export.png';
 import ProfileDropdown from '../common/ProfileDropdown';
+import useMindMapStore from '../../zustand/mindMapStore';
 
 function MindMapHeader({ userName = '사용자' }) {
-  const [title, setTitle] = useState(userName);
+  // const [title, setTitle] = useState(userName);
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef(null);
+  const title = useMindMapStore((state) => state.title);
+  const setTitle = useMindMapStore((state) => state.setTitle);
 
   useEffect(() => {
     if (isEditing) {
@@ -17,14 +20,14 @@ function MindMapHeader({ userName = '사용자' }) {
   }, [isEditing]);
 
   const handleEditConfirm = () => {
-    if (!title.trim()) setTitle(userName);
+    if (!title.trim()) setTitle('이름없는 마인드맵');
     setIsEditing(false);
   };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') handleEditConfirm();
     if (e.key === 'Escape') {
-      setTitle(userName);
+      setTitle('이름없는 마인드맵');
       setIsEditing(false);
     }
   };
