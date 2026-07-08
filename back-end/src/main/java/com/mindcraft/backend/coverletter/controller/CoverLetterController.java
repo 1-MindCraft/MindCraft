@@ -1,6 +1,7 @@
 package com.mindcraft.backend.coverletter.controller;
 
 import com.mindcraft.backend.coverletter.dto.CoverLetterDto;
+import com.mindcraft.backend.coverletter.dto.CoverLetterRequestDto;
 import com.mindcraft.backend.coverletter.service.CoverLetterService;
 import com.mindcraft.backend.user.dto.UserSecurityDto;
 import lombok.RequiredArgsConstructor;
@@ -72,5 +73,23 @@ public class CoverLetterController {
                     .body(Map.of("error", "문서를 찾을 수 없습니다."));
         }
         return ResponseEntity.ok(Map.of("message", "자소서 기본 정보가 수정되었습니다."));
+    }
+
+
+    @PostMapping
+    public ResponseEntity createCoverLetter(@RequestBody CoverLetterRequestDto) {
+        // TODO : mapper 로 entity 변환
+        // TODO: service 호출
+        // TODO : 결과 response DTO 변환
+        return new ResponseEntity<>();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity deleteCoverLetter(@PathVariable("id") long id) {
+        // TODO : service 호출
+        return new ResponseEntity<>(
+                Map.of("message", "자소서 및 하위 문항이 일괄 삭제되었습니다."),
+                HttpStatus.OK
+        );
     }
 }
