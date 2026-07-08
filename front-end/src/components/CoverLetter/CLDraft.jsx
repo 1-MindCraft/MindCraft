@@ -92,7 +92,7 @@ function CLDraft({ sections, selectedId, onSelect, onAddSection, onUpdateTitle }
                     onBlur={confirmTitle}
                     onKeyDown={handleTitleKeyDown}
                     placeholder={originalTitle}
-                    maxLength={40}
+                    maxLength={500}
                   />
                 </div>
               ) : (

@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════
-   CoverLetterPage
+    CoverLetterPage
 ═══════════════════════════════════ */
 .cl-page {
   display: flex;
@@ -308,6 +308,11 @@
   font-weight: 700;
   color: #1a1a2e;
   line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .cl-section-chars {
   font-size: 0.7rem;
@@ -346,15 +351,23 @@
 }
 .cl-detail-title-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
   width: 100%;
 }
+
 .cl-detail-title {
   font-size: 1rem;
   font-weight: 800;
   color: #1a1a2e;
+  flex: 1;
+  min-width: 0;
 }
+
+.cl-detail-edit-btn {
+  flex-shrink: 0;
+}
+
 .cl-detail-title-num {
   font-size: 1rem;
   font-weight: 800;
@@ -383,7 +396,7 @@
   transition: opacity 0.15s;
 }
 .cl-detail-title-row .mm-icon-img-btn:hover .cl-detail-pencil {
-  opacity: 0.9;
+  flex-shrink: 0;
 }
 .cl-detail-content {
   font-size: 0.88rem;
