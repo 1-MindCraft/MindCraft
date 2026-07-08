@@ -1,0 +1,18 @@
+1. application-local.properties 파일을 생성한다
+    이 파일에 뒤에 .example 이 빠진 이름입니다.
+    이 파일명을 수정하면 설명이 담긴 이 파일은 github에서 사라지게되니, 새 파일을 만들거나 복사해서 사용해주세요.
+
+2. 아래 내용을 추가한다.
+spring.datasource.url=jdbc:postgresql://<RDS-엔드포인트>:5432/<DB이름>
+spring.datasource.username=<사용자명>
+spring.datasource.password=<비밀번호>
+jwt.secret=<비밀키>
+
+3. AWS RDS 콘솔에서 배포된 우리의 데이터베이스 정보를 입력한다.
+    필요한 내용
+    1) RDS 엔드포인트
+    2) DB 이름
+    3) 사용자명
+    4) 비밀번호
+
+4. application-local.properties에 저장된 데이터는 외부 유출(github)되지 않도록 꼭!!!!!!!!!!! 주의 해주세요.

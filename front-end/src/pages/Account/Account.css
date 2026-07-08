@@ -1,0 +1,314 @@
+.account-page {
+  min-height: 100vh;
+  width: 100%;
+  background: #fff;
+  font-family: 'Pretendard', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+  color: #1a1a2e;
+}
+
+/* ─── 상단 바: 공통 AppHeader(components/common/AppHeader.css) 사용 ─── */
+
+/* ─── 마이 페이지 타이틀: 헤더 로고와 같은 왼쪽 기준선에 고정 ─── */
+.account-page-title {
+  width: 100%;
+  margin: 0;
+  padding: 1.8rem 2rem 1rem;
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: #1a1a2e;
+  box-sizing: border-box;
+}
+.account-title-divider {
+  width: 100%;
+  margin: 0;
+  border-bottom: 1.5px solid #ede9f9;
+}
+
+/* ─── 좌: 세로 네비 / 우: 콘텐츠 레이아웃 (왼쪽 고정) ─── */
+.account-layout {
+  width: 100%;
+  margin: 0;
+  display: flex;
+  align-items: flex-start;
+  min-height: 500px;
+  padding: 0 2rem;
+  box-sizing: border-box;
+}
+
+.account-nav {
+  width: 180px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 1.5rem 1rem 1.5rem 0;
+}
+.account-nav-item {
+  text-align: left;
+  padding: 0.7rem 0.8rem;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+}
+.account-nav-item:hover {
+  background: #f5f3ff;
+  color: #6c63ff;
+}
+.account-nav-item.active {
+  background: #ede9ff;
+  color: #6c63ff;
+  font-weight: 800;
+}
+
+.account-vertical-divider {
+  width: 1px;
+  align-self: stretch;
+  background: #ede9f9;
+  flex-shrink: 0;
+}
+
+.account-content {
+  flex: 1;
+  min-width: 0;
+  padding: 1.5rem 0 3rem 1.8rem;
+}
+
+/* ─── 프로필: 세로 필드 목록 (값-버튼 간격이 벌어지지 않도록 폭 제한) ─── */
+.account-profile {
+  display: flex;
+  flex-direction: column;
+  max-width: 640px;
+  margin: 0 auto;
+}
+.account-field {
+  padding: 1.2rem 0;
+}
+.account-field-label {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #1a1a2e;
+  margin-bottom: 0.6rem;
+}
+.account-field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.account-field-value {
+  font-size: 0.88rem;
+  color: #333;
+}
+.account-field-value--muted {
+  color: #aaa;
+}
+.account-field-input {
+  font-size: 0.88rem;
+  color: #1a1a2e;
+  border: none;
+  border-bottom: 2px solid #6c63ff;
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+  padding: 0 2px;
+  flex: 1;
+}
+.account-field-warning {
+  font-size: 0.8rem;
+  color: #d97706;
+  flex: 1;
+}
+.account-field-btn {
+  padding: 0.5rem 1rem;
+  border: 1.5px solid #e8e4f8;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: border-color 0.2s, color 0.2s;
+}
+.account-field-btn:hover {
+  border-color: #6c63ff;
+  color: #6c63ff;
+}
+.account-field-btn--danger {
+  border-color: #f5c2c2;
+  color: #ef4444;
+}
+.account-field-btn--danger:hover {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+.account-field-divider {
+  height: 1px;
+  background: #f0eef8;
+}
+
+/* ─── 마인드맵 / 자소서 카드 그리드 ─── */
+.account-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+.account-card {
+  background: #fff;
+  border: 1.5px solid #ede9f9;
+  border-radius: 14px;
+  padding: 1.2rem;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
+}
+.account-card:hover {
+  box-shadow: 0 8px 24px rgba(108, 99, 255, 0.12);
+  transform: translateY(-2px);
+  border-color: #d4cdfa;
+}
+.account-card-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #f0eeff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  margin-bottom: 0.8rem;
+}
+.account-card-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 0.3rem;
+}
+.account-card-meta {
+  font-size: 0.74rem;
+  color: #aaa;
+}
+.account-card--add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px dashed #d4d0f0;
+  background: none;
+  text-align: center;
+  gap: 0.4rem;
+}
+.account-card-add-icon {
+  font-size: 1.6rem;
+  color: #6c63ff;
+}
+.account-card-add-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6c63ff;
+}
+
+/* ─── 다크 모드 ─── */
+[data-theme='dark'] .account-page {
+  background: #16161f;
+  color: #e8e6f5;
+}
+[data-theme='dark'] .account-page-title {
+  color: #e8e6f5;
+}
+[data-theme='dark'] .account-title-divider {
+  border-color: #2f2f45;
+}
+[data-theme='dark'] .account-nav-item {
+  color: #b8b6cc;
+}
+[data-theme='dark'] .account-nav-item:hover {
+  background: #2c2a4d;
+  color: #a99cff;
+}
+[data-theme='dark'] .account-nav-item.active {
+  background: #302f56;
+  color: #a99cff;
+}
+[data-theme='dark'] .account-vertical-divider {
+  background: #2f2f45;
+}
+[data-theme='dark'] .account-field-label {
+  color: #e8e6f5;
+}
+[data-theme='dark'] .account-field-value {
+  color: #d8d6ec;
+}
+[data-theme='dark'] .account-field-value--muted {
+  color: #6c6a86;
+}
+[data-theme='dark'] .account-field-input {
+  color: #e8e6f5;
+  border-bottom-color: #8b7fff;
+}
+[data-theme='dark'] .account-field-btn {
+  background: #1c1c2b;
+  border-color: #3a3a55;
+  color: #b8b6cc;
+}
+[data-theme='dark'] .account-field-btn:hover {
+  border-color: #8b7fff;
+  color: #a99cff;
+}
+[data-theme='dark'] .account-field-btn--danger {
+  border-color: #6b3a3a;
+  color: #ff6b6b;
+}
+[data-theme='dark'] .account-field-btn--danger:hover {
+  background: #3a2530;
+  border-color: #ff6b6b;
+}
+[data-theme='dark'] .account-field-divider {
+  background: #2f2f45;
+}
+[data-theme='dark'] .account-card {
+  background: #1e1e2e;
+  border-color: #2f2f45;
+}
+[data-theme='dark'] .account-card-thumb {
+  background: #2c2a4d;
+}
+[data-theme='dark'] .account-card-title {
+  color: #f0eefc;
+}
+[data-theme='dark'] .account-card--add {
+  border-color: #3a3a55;
+}
+
+@media (max-width: 700px) {
+  .account-layout {
+    flex-direction: column;
+  }
+  .account-nav {
+    flex-direction: row;
+    width: 100%;
+    padding: 1rem 0;
+    overflow-x: auto;
+  }
+  .account-vertical-divider {
+    display: none;
+  }
+  .account-content {
+    padding: 1rem 0 3rem;
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .account-page-title,
+  .account-layout {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}

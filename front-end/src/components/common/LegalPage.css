@@ -1,0 +1,186 @@
+/* ═══════════════════════════════════
+   LegalPage — 이용약관 / 개인정보처리방침 공통 본문 스타일
+   (예전 Terms.css + Privacy.css를 하나로 합침)
+═══════════════════════════════════ */
+.legal-page {
+  min-height: 100vh;
+  width: 100%;
+  background: #f4f6fb;
+  font-family: 'Pretendard', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+  color: #1a1a2e;
+}
+
+.legal-body {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+}
+
+.legal-title {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #1a1a2e;
+  margin-bottom: 1rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 2px solid #ede9f9;
+}
+
+.legal-intro {
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.9;
+  margin-bottom: 2rem;
+  padding-bottom: 1.6rem;
+  border-bottom: 2px solid #ede9f9;
+}
+
+.legal-section {
+  margin-bottom: 2rem;
+}
+.legal-section h2 {
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: #1a1a2e;
+  margin-bottom: 0.7rem;
+}
+.legal-section p {
+  font-size: 0.9rem;
+  color: #444;
+  line-height: 1.85;
+  margin-bottom: 0.6rem;
+}
+
+.legal-list {
+  list-style: none;
+  counter-reset: legal-counter;
+  padding: 0;
+  margin: 0;
+}
+.legal-list > li {
+  counter-increment: legal-counter;
+  position: relative;
+  padding-left: 1.6rem;
+  font-size: 0.9rem;
+  color: #444;
+  line-height: 1.85;
+  margin-bottom: 0.6rem;
+}
+.legal-list > li::before {
+  content: counter(legal-counter) '.';
+  position: absolute;
+  left: 0;
+  font-weight: 700;
+  color: #6c63ff;
+}
+.legal-list strong {
+  color: #1a1a2e;
+  font-weight: 800;
+}
+
+.legal-sublist {
+  list-style: none;
+  counter-reset: legal-sub-counter;
+  padding: 0;
+  margin: 0.6rem 0 0;
+}
+.legal-sublist > li {
+  counter-increment: legal-sub-counter;
+  position: relative;
+  padding-left: 1.8rem;
+  font-size: 0.87rem;
+  color: #666;
+  line-height: 1.8;
+  margin-bottom: 0.4rem;
+}
+.legal-sublist > li::before {
+  content: counter(legal-sub-counter) ')';
+  position: absolute;
+  left: 0.2rem;
+  color: #999;
+}
+
+.legal-note {
+  font-size: 0.83rem;
+  color: #888;
+  line-height: 1.8;
+  background: #faf9ff;
+  border-left: 3px solid #d4d0f0;
+  padding: 0.7rem 1rem;
+  border-radius: 0 8px 8px 0;
+  margin-top: 0.6rem;
+}
+
+.legal-contact-box {
+  background: #faf9ff;
+  border: 1.5px solid #ede9f9;
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  margin: 0.8rem 0;
+}
+.legal-contact-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.87rem;
+  color: #444;
+  padding: 0.3rem 0;
+}
+.legal-contact-label {
+  font-weight: 700;
+  color: #1a1a2e;
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+.legal-appendix {
+  padding-top: 1.5rem;
+  border-top: 1px solid #ede9f9;
+}
+.legal-appendix p {
+  color: #888;
+  font-style: normal;
+}
+
+.legal-disclaimer {
+  margin-top: 2rem;
+  padding: 1rem 1.2rem;
+  background: #fffbf0;
+  border: 1px solid #fde8b8;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  color: #92721c;
+  line-height: 1.7;
+}
+
+@media (max-width: 600px) {
+  .legal-body {
+    padding: 2rem 1rem 3rem;
+  }
+  .legal-title {
+    font-size: 1.3rem;
+  }
+  .legal-contact-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+  }
+}
+
+[data-theme='dark'] .legal-page {
+  background: #101018;
+  color: #e8e6f5;
+}
+[data-theme='dark'] .legal-title,
+[data-theme='dark'] .legal-section h2 {
+  color: #e8e6f5;
+}
+[data-theme='dark'] .legal-intro,
+[data-theme='dark'] .legal-section p,
+[data-theme='dark'] .legal-list > li {
+  color: #cfcfe0;
+}
+[data-theme='dark'] .legal-note,
+[data-theme='dark'] .legal-contact-box {
+  background: #1b1b28;
+  border-color: #3a3a55;
+}

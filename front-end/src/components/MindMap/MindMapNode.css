@@ -1,0 +1,124 @@
+/* ═══════════════════════════════════
+   MindMapNode — 마인드맵 노드 하나의 스타일
+   (예전엔 Tailwind 유틸리티 클래스로 처리했으나,
+    Tailwind가 실제로 적용되지 않아 일반 CSS로 옮김)
+═══════════════════════════════════ */
+
+.mm-map-node {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+
+  /* 좌우 여백(양쪽 여백) — 자식 노드 기본값 */
+  padding: 0.75rem 2rem; /* 세로 12px / 좌우 32px */
+}
+
+.mm-map-node.is-root {
+  /* 루트 노드는 좀 더 넉넉하게 */
+  padding: 1.5rem 2.5rem; /* 세로 24px / 좌우 40px */
+}
+
+/* ─── depth별 배경색 (기존 Tailwind bg-blue-600 / 400 / 200 / gray-300과 동일) ─── */
+.mm-map-node.depth-0 {
+  background: #2563eb;
+}
+.mm-map-node.depth-1 {
+  background: #60a5fa;
+}
+.mm-map-node.depth-2 {
+  background: #bfdbfe;
+}
+.mm-map-node.depth-default {
+  background: #d1d5db;
+}
+
+/* ─── 글자 색 (depth 0,1은 흰색 글자 / depth 2, 기본은 어두운 글자) ─── */
+.mm-map-node.depth-0 .mm-node-label,
+.mm-map-node.depth-0 .mm-node-input,
+.mm-map-node.depth-1 .mm-node-label,
+.mm-map-node.depth-1 .mm-node-input {
+  color: #ffffff;
+}
+.mm-map-node.depth-2 .mm-node-label,
+.mm-map-node.depth-2 .mm-node-input,
+.mm-map-node.depth-default .mm-node-label,
+.mm-map-node.depth-default .mm-node-input {
+  color: #1f2937;
+}
+
+/* ─── 글자 크기 (루트는 크게, 자식은 기본) ─── */
+.mm-node-label,
+.mm-node-input {
+  text-align: center;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 1rem;
+}
+.mm-map-node.is-root .mm-node-label,
+.mm-map-node.is-root .mm-node-input {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* ─── 선택/호버 시 링(테두리) 효과 ─── */
+.mm-map-node {
+  --mm-ring-color: rgba(191, 219, 254, 0.7);
+}
+.mm-map-node.depth-0 {
+  --mm-ring-color: rgba(147, 197, 253, 0.7);
+}
+.mm-map-node.depth-1 {
+  --mm-ring-color: rgba(191, 219, 254, 0.7);
+}
+.mm-map-node.depth-2,
+.mm-map-node.depth-default {
+  --mm-ring-color: rgba(219, 234, 254, 0.8);
+}
+.mm-map-node.selected,
+.mm-map-node:hover {
+  box-shadow: 0 0 0 4px var(--mm-ring-color), 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* ─── 호버 시 나타나는 +/− 노드 추가·삭제 버튼 ─── */
+.mm-node-actions-wrap {
+  width: 100%;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+.mm-map-node:hover .mm-node-actions-wrap {
+  max-height: 32px;
+}
+.mm-node-actions {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding-top: 0.25rem;
+}
+.mm-node-action-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.3);
+  font-size: 0.875rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease 0.1s;
+}
+.mm-map-node:hover .mm-node-action-btn {
+  opacity: 1;
+}
+.mm-node-action-btn:hover {
+  background: rgba(255, 255, 255, 0.5);
+}

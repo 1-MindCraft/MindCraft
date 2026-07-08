@@ -1,0 +1,761 @@
+/* ═══════════════════════════════════
+   MindMapPage — 전체 레이아웃
+═══════════════════════════════════ */
+.mm-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  font-family: 'Pretendard', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+  background: #f4f6fb;
+  color: #1a1a2e;
+}
+
+/* ─── HEADER: 공통 AppHeader(components/common/AppHeader.css) 사용, 여기는 내용물만 ─── */
+.mm-doc-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  padding-left: 0.6rem;
+}
+.mm-user-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+.mm-save-status {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  color: #888;
+  flex-shrink: 0;
+}
+.mm-save-icon {
+  color: #22c55e;
+  font-weight: 700;
+}
+.mm-history-btns {
+  display: flex;
+  gap: 0.2rem;
+  flex-shrink: 0;
+}
+
+/* 헤더 오른쪽 */
+.mm-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+.mm-btn-keyword {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.85rem;
+  border: 1.5px solid #e8e4f8;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #1a1a2e;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.2s;
+  white-space: nowrap;
+}
+.mm-btn-keyword:hover {
+  border-color: #6c63ff;
+  color: #6c63ff;
+}
+
+.mm-btn-save {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #6c63ff, #48cae4);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.mm-btn-export {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.85rem;
+  border: 1.5px solid #e8e4f8;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #1a1a2e;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.2s;
+  white-space: nowrap;
+}
+.mm-btn-export:hover {
+  border-color: #6c63ff;
+  color: #6c63ff;
+}
+
+.mm-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #f0eeff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  border: 1.5px solid #e8e4f8;
+}
+
+/* 공통 아이콘 버튼 */
+.mm-icon-btn:disabled,
+.mm-tool-btn:disabled,
+.mm-color-dot:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+.mm-icon-btn:disabled:hover,
+.mm-tool-btn:disabled:hover {
+  background: transparent;
+  color: inherit;
+}
+
+.mm-icon-btn {
+  background: none;
+  border: none;
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #555;
+  transition: background 0.15s;
+  line-height: 1;
+}
+.mm-icon-btn:hover {
+  background: #f0eeff;
+  color: #6c63ff;
+}
+
+/* ─── BODY ─── */
+.mm-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  min-height: 0;
+}
+
+/* ─── SIDEBAR ─── */
+.mm-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background: #fff;
+  border-right: 1px solid #e8e4f8;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition:
+    width 0.25s ease,
+    opacity 0.25s ease;
+}
+.mm-sidebar.closed {
+  width: 0;
+  opacity: 0;
+  border-right: none;
+}
+
+.mm-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1rem 0.7rem;
+  border-bottom: 1px solid #f0eef8;
+}
+.mm-sidebar-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #1a1a2e;
+  letter-spacing: 0.02em;
+}
+
+.mm-sidebar-search {
+  padding: 0.6rem 0.8rem;
+}
+.mm-sidebar-search input {
+  width: 100%;
+  padding: 0.45rem 0.75rem;
+  border: 1.5px solid #e8e4f8;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-family: inherit;
+  outline: none;
+  color: #1a1a2e;
+  background: #faf9ff;
+}
+.mm-sidebar-search input:focus {
+  border-color: #6c63ff;
+}
+
+.mm-sidebar-tree {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.4rem 0.6rem;
+}
+
+/* 노드 트리 */
+.mm-node-tree {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.mm-node-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.28rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  color: #444;
+  user-select: none;
+}
+.mm-node-delete-btn {
+  opacity: 0;
+  border: none;
+  background: transparent;
+  color: #b0aec2;
+  font-size: 0.68rem;
+  cursor: pointer;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  line-height: 1;
+}
+.mm-node-item:hover .mm-node-delete-btn {
+  opacity: 1;
+}
+.mm-node-delete-btn:hover {
+  background: #ffe3e3;
+  color: #e03131;
+}
+
+.mm-node-item:hover {
+  background: #f0eeff;
+  color: #6c63ff;
+}
+.mm-node-item.is-root {
+  font-weight: 800;
+  color: #1a1a2e;
+  font-size: 0.82rem;
+  background: #f5f3ff;
+  border-radius: 8px;
+  margin-bottom: 0.2rem;
+}
+.mm-node-chevron {
+  font-size: 0.55rem;
+  color: #aaa;
+  width: 12px;
+  flex-shrink: 0;
+}
+.mm-node-dot {
+  font-size: 0.6rem;
+  color: #ccc;
+  width: 12px;
+  flex-shrink: 0;
+}
+
+.mm-sidebar-add {
+  margin: 0.6rem 0.8rem 0.8rem;
+  padding: 0.55rem;
+  border: 1.5px dashed #d4d0f0;
+  border-radius: 8px;
+  background: none;
+  color: #6c63ff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+  transition: background 0.15s;
+}
+.mm-sidebar-add:hover {
+  background: #f0eeff;
+}
+
+/* 사이드바 토글 버튼: 사이드바 끝에 세로 중앙 */
+.mm-sidebar-toggle {
+  position: absolute;
+  left: 260px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 30;
+  width: 20px;
+  height: 48px;
+  border: 1px solid #e8e4f8;
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  background: #fff;
+  color: #888;
+  font-size: 0.65rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    left 0.25s ease,
+    color 0.2s;
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.06);
+}
+.mm-sidebar-toggle:hover {
+  color: #6c63ff;
+  background: #f0eeff;
+}
+.mm-sidebar-toggle.open {
+  left: 260px;
+}
+.mm-sidebar-toggle:not(.open) {
+  left: 0;
+  border-left: 1px solid #e8e4f8;
+  border-radius: 8px;
+}
+
+/* ─── MAIN (툴바 + 캔버스) ─── */
+.mm-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ─── TOOLBAR ─── */
+.mm-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.8rem 2rem;
+  background: #fff;
+  border-bottom: 1px solid #e8e4f8;
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+.mm-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.mm-toolbar-divider {
+  width: 1px;
+  height: 24px;
+  background: #e8e4f8;
+  margin: 0 1.2rem;
+}
+
+.mm-tool-btn {
+  padding: 0.3rem 0.55rem;
+  border: none;
+  border-radius: 7px;
+  background: none;
+  font-size: 0.85rem;
+  color: #555;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+  font-family: inherit;
+  line-height: 1;
+}
+.mm-tool-btn:hover {
+  background: #f0eeff;
+  color: #6c63ff;
+}
+.mm-tool-btn.active {
+  background: #ede9ff;
+  color: #6c63ff;
+  font-weight: 700;
+}
+.mm-zoom-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #555;
+  min-width: 36px;
+  text-align: center;
+}
+.mm-btn-theme {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.3rem 0.75rem;
+  border: 1.5px solid #e8e4f8 !important;
+  border-radius: 7px;
+  color: #555;
+}
+
+/* 색상 팔레트 */
+.mm-color-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition:
+    transform 0.15s,
+    border-color 0.15s;
+  padding: 0;
+}
+.mm-color-dot:hover {
+  transform: scale(1.2);
+}
+.mm-color-dot.active {
+  border-color: #1a1a2e;
+  transform: scale(1.15);
+}
+
+/* ─── CANVAS ─── */
+.mm-canvas {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(circle, #ddd 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-color: #f4f6fb;
+}
+.mm-canvas-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #bbb;
+  font-size: 1rem;
+  font-weight: 600;
+  pointer-events: none;
+}
+.mm-canvas-hint {
+  font-size: 0.78rem;
+  font-weight: 400;
+}
+
+/* 미니맵 */
+.mm-minimap {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  width: 140px;
+  height: 100px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid #e8e4f8;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+.mm-minimap-inner {
+  position: absolute;
+  inset: 8px;
+  background: linear-gradient(
+    135deg,
+    rgba(108, 99, 255, 0.1),
+    rgba(72, 202, 228, 0.1)
+  );
+  border-radius: 4px;
+}
+
+/* ─── 검색 하이라이트 / 결과 없음 ─── */
+.mm-highlight {
+  background: #ede9ff;
+  color: #6c63ff;
+  border-radius: 2px;
+  font-weight: 700;
+  padding: 0 1px;
+}
+.mm-no-result {
+  text-align: center;
+  font-size: 0.76rem;
+  color: #bbb;
+  margin-top: 1.5rem;
+}
+
+/* ─── 저장 버튼 + 상태 묶음 ─── */
+.mm-save-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.mm-save-status {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.72rem;
+  color: #888;
+  white-space: nowrap;
+}
+.mm-save-icon {
+  color: #22c55e;
+  font-weight: 700;
+}
+.mm-btn-save.saving {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+/* ─── 툴바 이미지 아이콘 크기 ─── */
+.mm-tool-img-btn {
+  padding: 0.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mm-tool-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  display: block;
+  opacity: 0.6;
+}
+.mm-tool-img-btn.active .mm-tool-icon,
+.mm-tool-img-btn:hover .mm-tool-icon {
+  opacity: 1;
+}
+
+/* ─── 헤더 아이콘 이미지 크기 ─── */
+.mm-header-icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  display: block;
+  opacity: 0.55;
+  transition: opacity 0.15s;
+}
+.mm-icon-img-btn:hover .mm-header-icon {
+  opacity: 0.9;
+}
+.mm-header-btn-icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  display: block;
+  filter: brightness(0) invert(1); /* 버튼 안에서 흰색으로 */
+}
+.mm-btn-export .mm-header-btn-icon {
+  filter: brightness(0.3); /* 내보내기는 어두운 버튼이 아니므로 원색 유지 */
+}
+
+/* ─── 툴바 재설계: 왼쪽 고정 + 중앙 ─── */
+.mm-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+.mm-toolbar-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+.mm-toolbar-saved {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.72rem;
+  color: #888;
+  white-space: nowrap;
+}
+
+/* 툴바 저장 버튼 */
+.mm-btn-save-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #6c63ff, #48cae4);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+.mm-btn-save-toolbar.saving {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.mm-btn-save-toolbar .mm-tool-icon {
+  filter: brightness(0) invert(1);
+  opacity: 1;
+}
+
+/* ─── 캔버스 우하단 저장 버튼 ─── */
+.mm-canvas-save-btn {
+  position: absolute;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  width: 64px;
+  height: 64px;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6c63ff, #48cae4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+  z-index: 10;
+}
+.mm-canvas-save-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(108, 99, 255, 0.5);
+}
+.mm-canvas-save-btn.saving {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.mm-canvas-save-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+/* ─── 헤더 로고-이름 구분선 ─── */
+
+/* ══════════════════════════════════════
+   다크 모드 팔레트
+   [data-theme="dark"]가 <html>에 설정되면 아래 스타일이 적용됩니다.
+══════════════════════════════════════ */
+[data-theme='dark'] .mm-page {
+  background: #16161f;
+  color: #e8e6f5;
+}
+[data-theme='dark'] .mm-toolbar,
+[data-theme='dark'] .mm-sidebar {
+  background: #1c1c2b;
+  border-color: #2f2f45;
+}
+[data-theme='dark'] .mm-user-name,
+[data-theme='dark'] .mm-sidebar-title,
+[data-theme='dark'] .mm-node-item.is-root {
+  color: #e8e6f5;
+}
+[data-theme='dark'] .mm-node-item.is-root {
+  background: #262640;
+}
+[data-theme='dark'] .mm-node-item {
+  color: #b8b6cc;
+}
+[data-theme='dark'] .mm-node-item:hover {
+  background: #2c2a4d;
+  color: #a99cff;
+}
+[data-theme='dark'] .mm-toolbar-divider {
+  background: #34344c;
+}
+[data-theme='dark'] .mm-icon-btn {
+  color: #b8b6cc;
+}
+[data-theme='dark'] .mm-icon-btn:hover {
+  background: #2c2a4d;
+  color: #a99cff;
+}
+[data-theme='dark'] .mm-tool-btn {
+  color: #b8b6cc;
+}
+[data-theme='dark'] .mm-tool-btn:hover {
+  background: #2c2a4d;
+  color: #a99cff;
+}
+[data-theme='dark'] .mm-tool-btn.active {
+  background: #302f56;
+  color: #a99cff;
+}
+[data-theme='dark'] .mm-zoom-label {
+  color: #b8b6cc;
+}
+[data-theme='dark'] .mm-btn-theme {
+  border-color: #3a3a55 !important;
+  color: #b8b6cc;
+}
+[data-theme='dark'] .mm-btn-keyword,
+[data-theme='dark'] .mm-btn-export {
+  background: #1c1c2b;
+  border-color: #3a3a55;
+  color: #d8d6ec;
+}
+[data-theme='dark'] .mm-btn-keyword:hover,
+[data-theme='dark'] .mm-btn-export:hover {
+  border-color: #8b7fff;
+  color: #a99cff;
+}
+[data-theme='dark'] .mm-sidebar-search input {
+  background: #16161f;
+  border-color: #3a3a55;
+  color: #e8e6f5;
+}
+[data-theme='dark'] .mm-sidebar-search input:focus {
+  border-color: #8b7fff;
+}
+[data-theme='dark'] .mm-sidebar-add {
+  border-color: #3a3a55;
+  color: #a99cff;
+}
+[data-theme='dark'] .mm-sidebar-add:hover {
+  background: #2c2a4d;
+}
+[data-theme='dark'] .mm-sidebar-toggle {
+  background: #1c1c2b;
+  border-color: #3a3a55;
+  color: #b8b6cc;
+}
+[data-theme='dark'] .mm-sidebar-toggle:hover {
+  background: #2c2a4d;
+  color: #a99cff;
+}
+[data-theme='dark'] .mm-canvas {
+  background-color: #101018;
+  background-image: radial-gradient(circle, #2c2a44 1px, transparent 1px);
+}
+[data-theme='dark'] .mm-canvas-placeholder,
+[data-theme='dark'] .mm-canvas-hint {
+  color: #6c6a86;
+}
+[data-theme='dark'] .mm-minimap {
+  background: rgba(28, 28, 43, 0.85);
+  border-color: #3a3a55;
+}
+[data-theme='dark'] .mm-highlight {
+  background: #3a3560;
+  color: #b3a8ff;
+}
+[data-theme='dark'] .mm-no-result {
+  color: #6c6a86;
+}
+[data-theme='dark'] .mm-title-input {
+  color: #e8e6f5;
+  border-bottom-color: #8b7fff;
+}
+[data-theme='dark'] .mm-save-status {
+  color: #9694ac;
+}
+[data-theme='dark'] .mm-avatar {
+  background: #2c2a4d;
+  border-color: #3a3a55;
+}

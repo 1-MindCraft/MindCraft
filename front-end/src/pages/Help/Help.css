@@ -1,0 +1,124 @@
+.help-page {
+  min-height: 100vh;
+  width: 100%;
+  background: #f4f6fb;
+  font-family: 'Pretendard', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+  color: #1a1a2e;
+}
+
+/* ─── 상단 바: 공통 AppHeader(components/common/AppHeader.css) 사용 ─── */
+
+.help-body {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+.help-title {
+  font-size: 1.5rem;
+  font-weight: 900;
+  margin-bottom: 0.4rem;
+}
+.help-sub {
+  font-size: 0.88rem;
+  color: #888;
+  margin-bottom: 2rem;
+}
+
+.help-faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin-bottom: 2.5rem;
+}
+.help-faq-item {
+  background: #fff;
+  border: 1.5px solid #ede9f9;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.help-faq-item.open {
+  border-color: #c9c3f0;
+}
+.help-faq-question {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  border: none;
+  background: none;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+.help-faq-chevron {
+  flex-shrink: 0;
+  color: #6c63ff;
+  font-size: 1.1rem;
+  font-weight: 400;
+}
+.help-faq-answer {
+  padding: 0 1.2rem 1.1rem;
+  font-size: 0.85rem;
+  color: #555;
+  line-height: 1.8;
+}
+
+.help-contact-box {
+  background: linear-gradient(135deg, #6c63ff, #48cae4);
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  color: #fff;
+}
+.help-contact-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  margin-bottom: 0.4rem;
+}
+.help-contact-sub {
+  font-size: 0.82rem;
+  opacity: 0.9;
+  margin-bottom: 0.9rem;
+}
+.help-contact-email {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.18);
+  padding: 0.5rem 1.1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* ─── 다크 모드 ─── */
+[data-theme='dark'] .help-page {
+  background: #16161f;
+  color: #e8e6f5;
+}
+[data-theme='dark'] .help-sub {
+  color: #9694ac;
+}
+[data-theme='dark'] .help-faq-item {
+  background: #1e1e2e;
+  border-color: #2f2f45;
+}
+[data-theme='dark'] .help-faq-item.open {
+  border-color: #4d4680;
+}
+[data-theme='dark'] .help-faq-question {
+  color: #f0eefc;
+}
+[data-theme='dark'] .help-faq-answer {
+  color: #b8b6cc;
+}
+
+@media (max-width: 600px) {
+  .help-body {
+    padding: 2rem 1rem 3rem;
+  }
+}
