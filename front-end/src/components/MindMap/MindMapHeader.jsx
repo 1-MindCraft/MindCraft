@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PENCIL_SRC from '../../assets/pencil.png';
 import EXPORT_SRC from '../../assets/export.png';
 import ProfileDropdown from '../common/ProfileDropdown';
@@ -6,6 +7,7 @@ import AppHeader from '../common/AppHeader';
 import useMindMapStore from '../../zustand/mindMapStore';
 
 function MindMapHeader({ userName = '사용자' }) {
+  const navigate = useNavigate(); // 새로 추가된 부분 // React Router의 navigate 함수 가져오기
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef(null);
   const title = useMindMapStore((state) => state.title);
@@ -63,9 +65,9 @@ function MindMapHeader({ userName = '사용자' }) {
           <button className="mm-btn-keyword">
             <span>✦</span> 키워드 추출
           </button>
-          <button className="mm-btn-export">
-            <img src={EXPORT_SRC} alt="내보내기" className="mm-header-btn-icon" />{' '}
-            내보내기
+          <button className="mm-btn-export" onClick={() => navigate('/coverletter')}> // 새로 추가된 부분 // navigate 함수를 사용하여 '/coverletter' 경로로 이동
+            <img src={EXPORT_SRC} alt="생성하기" className="mm-header-btn-icon" />{' '}
+            생성하기
           </button>
           <ProfileDropdown userName={userName} />
         </div>
