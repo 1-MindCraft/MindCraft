@@ -65,7 +65,7 @@ function MindMapHeader({ userName = '사용자' }) {
           <button className="mm-btn-keyword">
             <span>✦</span> 키워드 추출
           </button>
-          <button className="mm-btn-export" onClick={() => navigate('/coverletter')}> // 새로 추가된 부분 // navigate 함수를 사용하여 '/coverletter' 경로로 이동
+          <button className="mm-btn-export" onClick={() => navigate('/coverletter')}> {/* // 새로 추가된 부분 // navigate 함수를 사용하여 '/coverletter' 경로로 이동 */}
             <img src={EXPORT_SRC} alt="생성하기" className="mm-header-btn-icon" />{' '}
             생성하기
           </button>
