@@ -2,12 +2,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
 import './ProfileDropdown.css';
+import { useLoginActions } from '../../hooks/useLoginActions';
+import { useNavigation } from '../../hooks/useNavigation';
 
 function ProfileDropdown({ userName = '사용자' }) {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const { doLogout } = useLoginActions();
+  const { moveToMain } = useNavigation();
 
   // 바깥 클릭 시 닫기
   useEffect(() => {
@@ -36,8 +40,8 @@ function ProfileDropdown({ userName = '사용자' }) {
 
   const handleLogout = () => {
     setOpen(false);
-    // TODO: 실제 인증 붙으면 여기서 토큰/세션 초기화 로직 추가
-    navigate('/');
+    doLogout();
+    moveToMain();
   };
 
   return (
