@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Account.css';
+import AppHeader from '../../components/common/AppHeader';
+
 import LOGO_SRC from '../../assets/MindCraft-Logo1.png';
 import { getMyInfo, updateMyInfo } from '../../axios/userApi';
 import { deleteMe } from '../../axios/userApi';
@@ -177,17 +179,7 @@ function AccountPage() {
   return (
     <div className="account-page">
       {/* 상단 바 */}
-      <header className="account-header">
-        <div className="account-header-logo" onClick={() => navigate('/')}>
-          <img src={LOGO_SRC} alt="" className="account-logo-img" />
-          <span className="account-logo-text">
-            MIND <span>CRAFT</span>
-          </span>
-        </div>
-        <button className="account-back-btn" onClick={() => navigate(-1)}>
-          ← 돌아가기
-        </button>
-      </header>
+      <AppHeader actionLabel="← 돌아가기" onAction={() => navigate(-1)} />
 
       {/* 마이 페이지 타이틀 */}
       <div className="account-page-title">마이 페이지</div>

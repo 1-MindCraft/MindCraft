@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Help.css';
-import LOGO_SRC from '../../assets/MindCraft-Logo1.png';
+import AppHeader from '../../components/common/AppHeader';
 
 const FAQS = [
   {
@@ -37,15 +37,7 @@ function HelpPage() {
   return (
     <div className="help-page">
       {/* 상단 바 */}
-      <header className="help-header">
-        <div className="help-header-logo" onClick={() => navigate('/')}>
-          <img src={LOGO_SRC} alt="" className="help-logo-img" />
-          <span className="help-logo-text">MIND <span>CRAFT</span></span>
-        </div>
-        <button className="help-back-btn" onClick={() => navigate(-1)}>
-          ← 돌아가기
-        </button>
-      </header>
+      <AppHeader actionLabel="← 돌아가기" onAction={() => navigate(-1)} />
 
       <div className="help-body">
         <h1 className="help-title">도움말</h1>

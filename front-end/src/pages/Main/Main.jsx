@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Main.css';
 
 import Nav from '../../components/Main/Nav';
@@ -12,6 +13,7 @@ import TopButton from '../../components/Main/TopButton';
 import FloatingCta from '../../components/Main/FloatingCta';
 import LoginPage from '../Login/Login';
 import SignupPage from '../Signup/Signup';
+import { getCookie, removeCookie } from '../../utils/cookieUtil';
 
 import useScrollButtons from '../../hooks/useScrollButtons';
 
@@ -46,6 +48,7 @@ const aiGenerationFeatures = [
 ];
 
 function MainPage() {
+  const navigate = useNavigate();
   const { showTopBtn, showFloatCta } = useScrollButtons({
     threshold: 0.5,
     bottomOffset: 80,
@@ -58,14 +61,34 @@ function MainPage() {
   const openSignup = () => { setIsSignupOpen(true); setIsLoginOpen(false); };
   const closeAll = () => { setIsLoginOpen(false); setIsSignupOpen(false); };
 
+  // 회원 여부: 쿠키에 로그인 정보(accessToken 등)가 있으면 회원으로 간주
+  const isMember = Boolean(getCookie('user'));
+
+  // 비회원: 로그인 모달을 띄움 (기존과 동일)
+  // 회원: 로그인 절차 없이 바로 마인드맵 편집 화면으로 이동
+  const handleCtaClick = () => {
+    if (isMember) {
+      navigate('/mindmap');
+    } else {
+      openLogin();
+    }
+  };
+  const ctaLabel = isMember ? '마인드맵 바로가기' : undefined; // undefined면 각 컴포넌트 기본 문구 사용
+
+  // 헤더 맨 오른쪽 버튼(Nav)의 로그아웃 처리: 쿠키 지우고 새로고침해서 비회원 화면으로 되돌림
+  const handleLogout = () => {
+    removeCookie('user');
+    window.location.reload();
+  };
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <div className="mindcraft-page">
-      <Nav onLoginClick={openLogin} />
-      <Hero onStartClick={openLogin} />
+      <Nav isMember={isMember} onLoginClick={openLogin} onLogout={handleLogout} />
+      <Hero onStartClick={handleCtaClick} ctaLabel={ctaLabel} />
       <HowItWorks />
 
       {/* 마인드맵 에디터 */}
@@ -93,10 +116,10 @@ function MainPage() {
       />
 
       <Faq />
-      <FinalCta onClick={openLogin} />
+      <FinalCta onClick={handleCtaClick} ctaLabel={ctaLabel} />
       <Footer />
 
-      <FloatingCta visible={showFloatCta} onClick={openLogin} />
+      <FloatingCta visible={showFloatCta} onClick={handleCtaClick} ctaLabel={ctaLabel} />
       <TopButton visible={showTopBtn} onClick={scrollToTop} />
 
       <LoginPage

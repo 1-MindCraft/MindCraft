@@ -1,5 +1,5 @@
 import jwtAxios from '../utils/JwtUtil';
-import ApiURL from './ApiUrl';
+import ApiURL from './ApiURL';
 
 // 마인드맵 url
 const mindMapURL = `${ApiURL}/mindmaps`;

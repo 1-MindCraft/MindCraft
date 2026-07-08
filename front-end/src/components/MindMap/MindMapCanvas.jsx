@@ -2,10 +2,10 @@ import React from 'react';
 import SAVE_SRC from '../../assets/save.png';
 import MindMap from './MindMap';
 
-function MindMapCanvas({ isSaving, onSave }) {
+function MindMapCanvas({ isSaving, onSave, nodes, onNodesUpdate, tool }) {
   return (
     <div className="mm-canvas">
-      <MindMap />
+      <MindMap initialData={nodes} onNodesUpdate={onNodesUpdate} tool={tool} />
       <div className="mm-canvas-placeholder">
         {/* <p>마인드맵 캔버스</p>
         <p className="mm-canvas-hint">실제 마인드맵 라이브러리 연동 예정</p> */}
