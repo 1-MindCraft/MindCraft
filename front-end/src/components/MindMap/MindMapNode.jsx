@@ -7,6 +7,7 @@ const MindMapNode = (props) => {
   const { id, data, selected } = props;
   const position = { x: props.positionAbsoluteX, y: props.positionAbsoluteY };
   const [isEditing, setIsEditing] = useState(false);
+  const [labelDraft, setLabelDraft] = useState(data.label);
   const inputRef = useRef(null);
 
   // 편집 모드로 들어가는 순간(더블클릭) input에 실제로 포커스를 줌
@@ -27,6 +28,17 @@ const MindMapNode = (props) => {
     position
   );
 
+  const startEditing = () => {
+    setLabelDraft(data.label);
+    setIsEditing(true);
+  };
+
+  const finishEditing = () => {
+    const trimmed = labelDraft.trim();
+    handleLabelChange(trimmed || data.label);
+    setIsEditing(false);
+  };
+
   return (
     <div
       className={`mm-map-node ${depthClass} ${isRoot ? 'is-root' : ''} ${selected ? 'selected' : ''}`}
@@ -40,15 +52,16 @@ const MindMapNode = (props) => {
       {isEditing ? (
         <input
           ref={inputRef}
-          value={data.label}
-          onChange={handleLabelChange}
-          onBlur={() => setIsEditing(false)}
+          value={labelDraft}
+          onChange={(e) => setLabelDraft(e.target.value)}
+          onBlur={finishEditing}
+          onKeyDown={(e) => e.key === 'Enter' && finishEditing()}
           onFocus={(e) => e.target.select()}
-          style={{ width: `${Math.max(data.label.length * 1.8, 3)}ch` }}
+          style={{ width: `${Math.max(labelDraft.length * 1.8, 3)}ch` }}
           className="mm-node-input nodrag"
         />
       ) : (
-        <div onDoubleClick={() => setIsEditing(true)} className="mm-node-label">
+        <div onDoubleClick={startEditing} className="mm-node-label">
           {data.label}
         </div>
       )}
