@@ -11,11 +11,11 @@ export function useNodeActions(id, data, position) {
   const { setNodes, getNodes } = useMindMapNodes();
 
   const handleLabelChange = useCallback(
-    (e) => {
+    (newLabel) => {
       setNodes((nodes) =>
         nodes.map((node) =>
           node.id === id
-            ? { ...node, data: { ...node.data, label: e.target.value } }
+            ? { ...node, data: { ...node.data, label: newLabel } }
             : node
         )
       );
@@ -24,11 +24,21 @@ export function useNodeActions(id, data, position) {
   );
 
   const handleAddNode = useCallback(() => {
+    const siblings = getNodes().filter((node) => node.data.parentId === id);
+    const siblingIndex = siblings.length;
+
+    const SPACING = 160; // 형제간 간격
+
+    const offsetX =
+      (siblingIndex - Math.floor(siblingIndex / 2)) *
+      SPACING *
+      (siblingIndex % 2 === 0 ? 1 : -1);
+
     const newNode = {
       id: crypto.randomUUID(),
       position: {
-        x: position.x + 100,
-        y: position.y + 200,
+        x: position.x + offsetX,
+        y: position.y + 150,
       },
       data: {
         label: '더블 클릭 후 내용을 입력하세요',
