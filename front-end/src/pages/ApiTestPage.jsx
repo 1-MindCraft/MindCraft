@@ -86,14 +86,22 @@ function ApiTestPage() {
 
   const testSaveMindMap = async () => {
     try {
-      const rdata = await saveMindMap(6, '테스트 제목', [
+      const rdata = await saveMindMap(9, '테스트 제목', [
         {
           id: '1-root',
           data: { depth: 0, label: '테스트' },
           position: { x: 400, y: 0 },
         },
+        {
+          id: 'n2',
+          data: { depth: 0, label: '테스트', parentId: '1-root' },
+          position: { x: 400, y: 100 },
+        },
       ]); // saveMindMap이 인자를 받으니 테스트용 값 전달
-      console.log('save MindMap 성공: ', rdata);
+
+      const parseNodes = JSON.parse(rdata.nodes);
+      const mindMap = { ...rdata, nodes: parseNodes };
+      console.log('save MindMap 성공: ', mindMap);
     } catch (error) {
       console.log('save MindMap 실패: ', error.response?.data || error);
     }
