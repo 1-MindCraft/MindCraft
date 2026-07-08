@@ -103,6 +103,16 @@ public class CoverLetterSectionServiceImpl implements CoverLetterSectionService 
         return true;
     }
 
+    @Override
+    @Transactional
+    public boolean delete(Long coverLetterId, Long sectionId) {
+        CoverLetterSection section = coverLetterSectionRepository.findByIdAndCoverLetterId(sectionId, coverLetterId)
+                .orElseThrow(() -> new CoverLetterSectionNotFoundException("section not found"));
+
+        coverLetterSectionRepository.delete(section);
+        return true;
+    }
+
     private void validateCreateRequest(CoverLetterSectionDto dto) {
         if (dto.getQuestion() == null || dto.getQuestion().isBlank()) {
             throw new InvalidCoverLetterSectionException("question is required");

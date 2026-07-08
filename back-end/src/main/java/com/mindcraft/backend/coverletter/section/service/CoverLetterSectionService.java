@@ -20,4 +20,6 @@ public interface CoverLetterSectionService {
     CoverLetterSectionDto create(Long coverLetterId, CoverLetterSectionDto dto);
 
     boolean update(Long coverLetterId, CoverLetterSectionDto dto);
+
+    boolean delete(Long coverLetterId, Long sectionId);
 }
