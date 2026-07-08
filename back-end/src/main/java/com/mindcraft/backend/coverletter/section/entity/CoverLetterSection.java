@@ -43,14 +43,17 @@ public class CoverLetterSection {
     @JoinColumn(name = "coverletter_id", nullable = false)
     private CoverLetter coverLetter;
 
+    @Column(columnDefinition = "text")
     private String question;
+
+    @Column(columnDefinition = "text")
     private String answer;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "source_node", columnDefinition = "jsonb")
     private List<ReactNode> sourceNode;
 
-    @Column(name = "writing_style")
+    @Column(name = "writing_style", columnDefinition = "text")
     private String writingStyle;
 
     @Column(name = "max_chars")

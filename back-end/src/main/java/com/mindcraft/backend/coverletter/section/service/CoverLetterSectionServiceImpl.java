@@ -45,9 +45,15 @@ public class CoverLetterSectionServiceImpl implements CoverLetterSectionService 
         int maxChars = dto.getMaxChars() != null ? dto.getMaxChars() : DEFAULT_MAX_CHARS;
         boolean allowCreativity = Boolean.TRUE.equals(dto.getAllowCreativity());
 
+        // v1 임시: 회사명 없으면 기본값 치환 (v2에서 NOT NULL + 프론트 필수입력으로 전환 예정)
+        String companyName = coverLetter.getCompanyName();
+        if (companyName == null || companyName.isBlank()) {
+            companyName = "지원 회사";
+        }
+
         String answer = aiCoverLetterService.generateAnswer(
                 coverLetterId,
-                coverLetter.getCompanyName(),
+                companyName,
                 coverLetter.getCompanyIdeal(),
                 coverLetter.getJobDescription(),
                 dto.getQuestion(),
@@ -100,6 +106,16 @@ public class CoverLetterSectionServiceImpl implements CoverLetterSectionService 
             section.setAllowCreativity(dto.getAllowCreativity());
         }
 
+        return true;
+    }
+
+    @Override
+    @Transactional
+    public boolean delete(Long coverLetterId, Long sectionId) {
+        CoverLetterSection section = coverLetterSectionRepository.findByIdAndCoverLetterId(sectionId, coverLetterId)
+                .orElseThrow(() -> new CoverLetterSectionNotFoundException("section not found"));
+
+        coverLetterSectionRepository.delete(section);
         return true;
     }
 

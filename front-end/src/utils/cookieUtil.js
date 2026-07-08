@@ -19,4 +19,5 @@ export const getCookie = (name) => {
 
 export const removeCookie = (name, path = '/') => {
   cookies.remove(name, { path });
+  console.log('삭제되었는지 쿠키 확인 : ', getCookie('user'));
 };

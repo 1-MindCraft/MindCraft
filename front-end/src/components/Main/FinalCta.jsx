@@ -1,6 +1,6 @@
 import React from 'react';
 
-function FinalCta({ onClick }) {
+function FinalCta({ onClick, ctaLabel = '마인드맵 시작하기 →' }) {
   return (
     <section className="cta-section">
       <div className="cta-box">
@@ -15,7 +15,7 @@ function FinalCta({ onClick }) {
           AI가 더 정확한 이력서를 완성해드립니다.
         </p>
         <button className="btn-white" onClick={onClick}>
-          마인드맵 시작하기 →
+          {ctaLabel}
         </button>
       </div>
     </section>

@@ -2,11 +2,13 @@
 
 // hooks/useNodeActions.js
 import { useCallback } from 'react';
-import { useReactFlow } from '@xyflow/react';
+import { useMindMapNodes } from '../context/MindMapNodesContext';
 import { getDescendantIds } from '../utils/mindmapTree';
 
 export function useNodeActions(id, data, position) {
-  const { setNodes, setEdges, getNodes } = useReactFlow();
+  // useReactFlow() 대신, 캔버스가 실제로 들고 있는 외부 nodes state를 직접 갱신
+  // (사이드바와 항상 같은 데이터를 보게 하기 위함)
+  const { setNodes, getNodes } = useMindMapNodes();
 
   const handleLabelChange = useCallback(
     (e) => {
@@ -36,15 +38,9 @@ export function useNodeActions(id, data, position) {
       type: 'mapNode',
     };
 
+    // 엣지는 nodes(parentId)에서 자동으로 파생되므로 별도로 추가하지 않음
     setNodes((nds) => [...nds, newNode]);
-
-    const newEdge = {
-      id: `${id}-${newNode.id}`,
-      source: `${id}`,
-      target: `${newNode.id}`,
-    };
-    setEdges((edges) => [...edges, newEdge]);
-  }, [id, data.depth, position.x, position.y, setNodes, setEdges]);
+  }, [id, data.depth, position.x, position.y, setNodes]);
 
   const handleDeleteNode = useCallback(() => {
     const nodes = getNodes();
@@ -59,16 +55,7 @@ export function useNodeActions(id, data, position) {
     }
 
     setNodes((nodes) => nodes.filter((node) => !idsToDelete.includes(node.id)));
-    setEdges((edges) =>
-      edges.filter(
-        (edge) =>
-          !(
-            idsToDelete.includes(edge.source) ||
-            idsToDelete.includes(edge.target)
-          )
-      )
-    );
-  }, [id, setNodes, setEdges, getNodes]);
+  }, [id, setNodes, getNodes]);
 
   return { handleLabelChange, handleAddNode, handleDeleteNode };
 }
