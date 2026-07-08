@@ -12,7 +12,7 @@ import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "mindmap")
+@Table(name = "mindmap", uniqueConstraints = @UniqueConstraint(columnNames = "user_id"))
 @Setter
 @Getter
 @NoArgsConstructor

@@ -61,9 +61,8 @@ const failResponse = async (error) => {
     errorData?.error === 'ERROR_ACCESS_TOKEN' ||
     errorData?.error === 'Expired'
   ) {
-
     const userCookieValue = getCookie('user');
-    
+
     if (!userCookieValue) {
       return Promise.reject(error);
     }
@@ -85,7 +84,7 @@ const failResponse = async (error) => {
     } catch (refreshError) {
       // refresh도 만료 → 로그인 페이지로
       removeCookie('user');
-      window.location.href = '/login';
+      window.location.href = '/';
       return Promise.reject(refreshError);
     }
   }

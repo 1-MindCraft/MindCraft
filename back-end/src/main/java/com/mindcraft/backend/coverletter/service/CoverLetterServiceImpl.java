@@ -2,8 +2,8 @@ package com.mindcraft.backend.coverletter.service;
 
 import com.mindcraft.backend.coverletter.dto.CoverLetterDto;
 import com.mindcraft.backend.coverletter.entity.CoverLetter;
-import com.mindcraft.backend.coverletter.section.entity.CoverLetterSection;
 import com.mindcraft.backend.coverletter.repository.CoverLetterRepository;
+import com.mindcraft.backend.coverletter.section.entity.CoverLetterSection;
 import com.mindcraft.backend.coverletter.section.repository.CoverLetterSectionRepository;
 import com.mindcraft.backend.mindmap.entity.MindMap;
 import com.mindcraft.backend.mindmap.repository.MindMapRepository;
@@ -11,6 +11,7 @@ import com.mindcraft.backend.user.entity.User;
 import com.mindcraft.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -71,13 +72,23 @@ public class CoverLetterServiceImpl implements CoverLetterService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 사용자입니다. userId = " + userId));
 
-        CoverLetter coverLetter = new CoverLetter();
-        coverLetter.setUser(user);
-        coverLetter.setMindmapId(mindmapId);
-        coverLetterRepository.save(coverLetter);
-        log.info("자소서 생성 완료 coverLetter = " + coverLetter);
-
-        return entityToDto(coverLetter, List.of());
+        try {
+            CoverLetter coverLetter = new CoverLetter();
+            coverLetter.setUser(user);
+            coverLetter.setMindmapId(mindmapId);
+            coverLetterRepository.save(coverLetter);
+            log.info("자소서 생성 완료 coverLetter = " + coverLetter);
+            return entityToDto(coverLetter, List.of());
+        } catch (DataIntegrityViolationException e) {
+            // 거의 동시에 다른 요청이 먼저 생성한 경우 (유니크 제약 위반)
+            // → 새로 만들지 않고, 이미 생성된 걸 다시 조회해서 반환
+            log.warn("자소서 생성 경합 발생, 기존 자소서 재조회: mindmapId = {}", mindmapId);
+            CoverLetter existing = coverLetterRepository.findByMindmapId(mindmapId)
+                    .orElseThrow(() -> e);
+            List<CoverLetterSection> sections =
+                    coverLetterSectionRepository.findByCoverLetterIdOrderByIdAsc(existing.getId());
+            return entityToDto(existing, sections);
+        }
     }
 
     // 상세조회 ( API 문서 : GET /coverletters/{id})
