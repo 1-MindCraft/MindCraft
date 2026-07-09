@@ -4,6 +4,7 @@ import com.mindcraft.backend.global.security.filter.JWTCheckFilter;
 import com.mindcraft.backend.global.security.handler.CustomAccessDeniedHandler;
 import com.mindcraft.backend.global.security.handler.LoginFailHandler;
 import com.mindcraft.backend.global.security.handler.LoginSuccessHandler;
+import com.mindcraft.backend.global.security.handler.OAuth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -74,6 +75,11 @@ public class CustomSecurityConfig {
         http.addFilterBefore(
                 new JWTCheckFilter(),
                 UsernamePasswordAuthenticationFilter.class
+        );
+
+        http.oauth2Login(oauth2 -> oauth2
+                .successHandler(new LoginSuccessHandler())
+                .failureHandler(new LoginFailHandler())
         );
 
         // 만들어놓은 필터체인 리턴

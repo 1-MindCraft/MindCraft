@@ -1,0 +1,9 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 발급받은값
+            client-secret: 발급받은값
+            scope: email,profile

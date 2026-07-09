@@ -39,6 +39,7 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.7'
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
     annotationProcessor 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
