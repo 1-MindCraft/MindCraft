@@ -4,6 +4,7 @@
 import { useCallback } from 'react';
 import { useMindMapNodes } from '../context/MindMapNodesContext';
 import { getDescendantIds } from '../utils/mindmapTree';
+import { v4 as uuidv4 } from 'uuid';
 
 export function useNodeActions(id, data, position) {
   // useReactFlow() 대신, 캔버스가 실제로 들고 있는 외부 nodes state를 직접 갱신
@@ -35,7 +36,7 @@ export function useNodeActions(id, data, position) {
       (siblingIndex % 2 === 0 ? 1 : -1);
 
     const newNode = {
-      id: crypto.randomUUID(),
+      id: uuidv4(),
       position: {
         x: position.x + offsetX,
         y: position.y + 150,

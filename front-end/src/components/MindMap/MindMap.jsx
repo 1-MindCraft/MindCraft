@@ -4,6 +4,7 @@ import MindMapNode from './MindMapNode';
 import { getDescendantIds, buildEdgesFromNodes } from '../../utils/mindmapTree';
 import { MindMapNodesProvider } from '../../context/MindMapNodesContext';
 import useMindMapStore from '../../zustand/mindMapStore';
+import { v4 as uuidv4 } from 'uuid';
 
 const nodeTypes = {
   mapNode: MindMapNode,
@@ -33,7 +34,7 @@ export default function MindMap({ tool = 'drag' }) {
       if (e.key === 'Enter') {
         // 노드 추가
         const newNode = {
-          id: crypto.randomUUID(),
+          id: uuidv4(),
           position: {
             x: selectedNode.position.x + 100,
             y: selectedNode.position.y + 200,
