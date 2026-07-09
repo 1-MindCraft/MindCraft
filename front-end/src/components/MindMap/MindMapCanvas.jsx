@@ -11,10 +11,9 @@ function MindMapCanvas({ isSaving, onSave, tool }) {
         <p className="mm-canvas-hint">실제 마인드맵 라이브러리 연동 예정</p> */}
       </div>
 
-      {/* 미니맵 */}
-      <div className="mm-minimap">
-        <div className="mm-minimap-inner" />
-      </div>
+      {/* 수정된 부분: 미니맵 div를 여기서 삭제함
+          이유: 실제 React Flow MiniMap이 아니라 아무 기능도 없는 장식용 빈 박스였고,
+          불필요하니 제거해달라는 요청이 있어서 삭제 (아래 저장 버튼은 그대로 유지) */}
 
       {/* 우하단 저장 버튼 */}
       <button

@@ -24,6 +24,7 @@
   font-size: 0.95rem;
   font-weight: 700;
   color: #1a1a2e;
+  cursor: pointer;
 }
 .mm-save-status {
   display: flex;
@@ -276,23 +277,8 @@
   flex-shrink: 0;
 }
 
-.mm-sidebar-add {
-  margin: 0.6rem 0.8rem 0.8rem;
-  padding: 0.55rem;
-  border: 1.5px dashed #d4d0f0;
-  border-radius: 8px;
-  background: none;
-  color: #6c63ff;
-  font-size: 0.78rem;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  text-align: center;
-  transition: background 0.15s;
-}
-.mm-sidebar-add:hover {
-  background: #f0eeff;
-}
+/* 수정된 부분: .mm-sidebar-add(“+ 노드 추가” 죽은 버튼) 관련 스타일을 여기서 삭제함
+   이유: JSX에서 그 버튼 자체를 지웠기 때문에 이 CSS도 죽은 코드가 되어 같이 정리 */
 
 /* 사이드바 토글 버튼: 사이드바 끝에 세로 중앙 */
 .mm-sidebar-toggle {
@@ -393,14 +379,9 @@
   min-width: 36px;
   text-align: center;
 }
-.mm-btn-theme {
-  font-size: 0.78rem;
-  font-weight: 600;
-  padding: 0.3rem 0.75rem;
-  border: 1.5px solid #e8e4f8 !important;
-  border-radius: 7px;
-  color: #555;
-}
+
+/* 수정된 부분: .mm-btn-theme("테마 ▾" 버튼) 관련 스타일을 여기서 삭제함
+   이유: JSX에서 그 버튼 자체를 지웠기 때문에 이 CSS도 죽은 코드가 되어 같이 정리 */
 
 /* 색상 팔레트 */
 .mm-color-dot {
@@ -449,29 +430,9 @@
   font-weight: 400;
 }
 
-/* 미니맵 */
-.mm-minimap {
-  position: absolute;
-  bottom: 1rem;
-  left: 1rem;
-  width: 140px;
-  height: 100px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid #e8e4f8;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-}
-.mm-minimap-inner {
-  position: absolute;
-  inset: 8px;
-  background: linear-gradient(
-    135deg,
-    rgba(108, 99, 255, 0.1),
-    rgba(72, 202, 228, 0.1)
-  );
-  border-radius: 4px;
-}
+/* 수정된 부분: 미니맵(.mm-minimap/.mm-minimap-inner) 관련 스타일을 여기서 삭제함
+   이유: JSX(MindMapCanvas.jsx)에서 장식용 미니맵 div 자체를 지웠기 때문에 같이 정리
+   (CoverLetter 페이지의 .mm-minimap-inner는 별도 파일에 따로 있어서 안 건드림) */
 
 /* ─── 검색 하이라이트 / 결과 없음 ─── */
 .mm-highlight {
@@ -690,10 +651,6 @@
 [data-theme='dark'] .mm-zoom-label {
   color: #b8b6cc;
 }
-[data-theme='dark'] .mm-btn-theme {
-  border-color: #3a3a55 !important;
-  color: #b8b6cc;
-}
 [data-theme='dark'] .mm-btn-keyword,
 [data-theme='dark'] .mm-btn-export {
   background: #1c1c2b;
@@ -713,13 +670,6 @@
 [data-theme='dark'] .mm-sidebar-search input:focus {
   border-color: #8b7fff;
 }
-[data-theme='dark'] .mm-sidebar-add {
-  border-color: #3a3a55;
-  color: #a99cff;
-}
-[data-theme='dark'] .mm-sidebar-add:hover {
-  background: #2c2a4d;
-}
 [data-theme='dark'] .mm-sidebar-toggle {
   background: #1c1c2b;
   border-color: #3a3a55;
@@ -736,10 +686,6 @@
 [data-theme='dark'] .mm-canvas-placeholder,
 [data-theme='dark'] .mm-canvas-hint {
   color: #6c6a86;
-}
-[data-theme='dark'] .mm-minimap {
-  background: rgba(28, 28, 43, 0.85);
-  border-color: #3a3a55;
 }
 [data-theme='dark'] .mm-highlight {
   background: #3a3560;
