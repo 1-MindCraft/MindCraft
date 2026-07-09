@@ -10,6 +10,7 @@ import CLSettings from '../../components/CoverLetter/CLSettings';
 import { getOrCreateCoverLetter, getCoverLetterDetail } from '../../axios/coverLetterApi';
 import { createSection } from '../../axios/sectionApi';
 import { getMindMap } from '../../axios/mindMapApi';
+import { useModal } from '../../components/common/ModalProvider';
 
 // 백엔드 문항(section) → 화면 형태로 변환
 const mapSection = (s) => ({
@@ -20,6 +21,7 @@ const mapSection = (s) => ({
 });
 
 function CoverLetterPage({ onBackToMindMap }) {
+  const { alert } = useModal(); // 수정된 부분: 브라우저 기본 alert() 대신 커스텀 모달 사용
   const [sections, setSections] = useState([]);
   const [coverLetterId, setCoverLetterId] = useState(null);
   const [userName, setUserName] = useState('자기소개서');
@@ -95,15 +97,18 @@ function CoverLetterPage({ onBackToMindMap }) {
   const handleGenerate = async (settings) => {
     const current = sections.find((s) => s.id === selectedId);
     if (!current) {
-      alert('생성할 문항을 선택해주세요.');
+      // 수정된 부분: alert() → await alert() (커스텀 모달로 교체)
+      await alert('생성할 문항을 선택해주세요.');
       return;
     }
     if (!current.title || !current.title.trim()) {
-      alert('문항(질문)을 먼저 입력해주세요.');
+      // 수정된 부분: alert() → await alert() (커스텀 모달로 교체)
+      await alert('문항(질문)을 먼저 입력해주세요.');
       return;
     }
     if (mindMapNodes.length === 0) {
-      alert('마인드맵 노드가 없습니다. 마인드맵을 먼저 작성해주세요.');
+      // 수정된 부분: alert() → await alert() (커스텀 모달로 교체)
+      await alert('마인드맵 노드가 없습니다. 마인드맵을 먼저 작성해주세요.');
       return;
     }
 
@@ -122,7 +127,8 @@ function CoverLetterPage({ onBackToMindMap }) {
       setSelectedId(mapped.id);
     } catch (error) {
       console.error('생성 실패:', error.response?.data || error);
-      alert('생성 중 오류가 발생했습니다.');
+      // 수정된 부분: alert() → await alert() (커스텀 모달로 교체)
+      await alert('생성 중 오류가 발생했습니다.');
     } finally {
       setGenerating(false);
     }

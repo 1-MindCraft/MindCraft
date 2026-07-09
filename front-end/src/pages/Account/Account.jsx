@@ -9,6 +9,7 @@ import { deleteMe } from '../../axios/userApi';
 import useLoginStore from '../../zustand/loginState';
 import { useLoginActions } from '../../hooks/useLoginActions';
 import { removeCookie } from '../../utils/cookieUtil';
+import { useModal } from '../../components/common/ModalProvider';
 
 // 목업 데이터 — 실제 API 연동 전까지 화면 구조 확인용
 const MOCK_MINDMAPS = [
@@ -38,6 +39,7 @@ const NAV_ITEMS = [
 ];
 
 function AccountPage() {
+  const { alert, confirm } = useModal(); // 수정된 부분: 브라우저 기본 alert()/confirm() 대신 커스텀 모달 사용
   const [activeTab, setActiveTab] = useState('profile');
   const navigate = useNavigate();
   const resetState = useLoginStore((state) => state.resetState);
@@ -60,7 +62,8 @@ function AccountPage() {
         });
       } catch (error) {
         console.log(error.response?.data || error);
-        alert('회원정보를 가져오는데 실패했습니다.');
+        // 수정된 부분: alert() → await alert() (커스텀 모달로 교체)
+        await alert('회원정보를 가져오는데 실패했습니다.');
       }
     };
 
@@ -94,7 +97,8 @@ function AccountPage() {
       setMyInfo((prev) => ({ ...prev, name: rdata.name }));
     } catch (error) {
       console.log('updateMyInfo 실패:', error.response?.data || error);
-      alert(error.response?.data || '이름 변경 중 오류가 발생했습니다.');
+      // 수정된 부분: alert() → await alert() (커스텀 모달로 교체)
+      await alert(error.response?.data || '이름 변경 중 오류가 발생했습니다.');
       setNameDraft(myInfo.name);
     } finally {
       setIsEditingName(false);
@@ -127,13 +131,15 @@ function AccountPage() {
     try {
       // TODO: 현재 비밀번호 확인 모달 완성되면 함께 전달하도록 변경
       await updateMyInfo({ password: trimmed });
-      alert('비밀번호가 변경되었습니다.');
+      // 수정된 부분: alert() → await alert() (커스텀 모달로 교체)
+      await alert('비밀번호가 변경되었습니다.');
     } catch (error) {
       console.log(
         'updateMyInfo(password) 실패:',
         error.response?.data || error
       );
-      alert(
+      // 수정된 부분: alert() → await alert() (커스텀 모달로 교체)
+      await alert(
         error.response?.data?.error || '비밀번호 변경 중 오류가 발생했습니다.'
       );
     } finally {
@@ -155,11 +161,13 @@ function AccountPage() {
 
   const handleDeleteAccount = async () => {
     if (!deletePassword.trim()) {
-      alert('비밀번호를 입력해주세요.');
+      // 수정된 부분: alert() → await alert() (커스텀 모달로 교체)
+      await alert('비밀번호를 입력해주세요.');
       return;
     }
 
-    const confirmed = window.confirm(
+    // 수정된 부분: window.confirm() → await confirm() (커스텀 모달로 교체)
+    const confirmed = await confirm(
       '계정을 삭제하면 진행한 작업이 모두 삭제되며, 복구할 수 없습니다. 정말 탈퇴하시겠습니까?'
     );
     if (!confirmed) return;
@@ -168,11 +176,13 @@ function AccountPage() {
       await deleteMe(deletePassword);
       removeCookie('user');
       resetState();
-      alert('탈퇴가 완료되었습니다.');
+      // 수정된 부분: alert() → await alert() (커스텀 모달로 교체)
+      await alert('탈퇴가 완료되었습니다.');
       navigate('/');
     } catch (error) {
       console.log('deleteMe 실패:', error.response?.data || error);
-      alert(error.response?.data?.error || '비밀번호가 일치하지 않습니다.');
+      // 수정된 부분: alert() → await alert() (커스텀 모달로 교체)
+      await alert(error.response?.data?.error || '비밀번호가 일치하지 않습니다.');
     }
   };
 

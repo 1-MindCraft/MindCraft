@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import SocialButtons from './SocialButtons';
 import { useLoginActions } from '../../hooks/useLoginActions';
 import { useNavigation } from '../../hooks/useNavigation';
+import { useModal } from '../common/ModalProvider';
 
 function LoginForm({ onSignupClick }) {
   const [showPassword, setShowPassword] = useState(false);
   const { moveToPath } = useNavigation();
   const { doLogin, doLogout } = useLoginActions();
+  const { alert } = useModal(); // 수정된 부분: 브라우저 기본 alert() 대신 커스텀 모달 사용
   const [formData, setFormData] = useState(() => {
     const savedEmail = localStorage.getItem('rememberedEmail');
     return {
@@ -40,11 +42,13 @@ function LoginForm({ onSignupClick }) {
     try {
       const rdata = await doLogin(formData);
       console.log('login 성공:', rdata);
-      alert('로그인 성공!');
+      // 수정된 부분: alert() → await alert() (브라우저 기본 alert창 대신 커스텀 모달로 교체)
+      await alert('로그인 성공!');
       moveToPath('/mindmap');
     } catch (error) {
       console.log('login 실패:', error.response?.data || error);
-      alert('입력 정보를 다시 확인하세요.');
+      // 수정된 부분: alert() → await alert() (브라우저 기본 alert창 대신 커스텀 모달로 교체)
+      await alert('입력 정보를 다시 확인하세요.');
     }
   };
 

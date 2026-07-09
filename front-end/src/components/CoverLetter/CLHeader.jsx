@@ -11,6 +11,7 @@ import AppHeader from '../common/AppHeader';
 // 프론트는 그 결과 파일을 받아서 다운로드만 시켜주면 됨
 import { exportCoverLetterAsPdf, exportCoverLetterAsDocx } from '../../axios/coverLetterApi';
 import { downloadFromResponse } from '../../utils/downloadFromResponse';
+import { useModal } from '../common/ModalProvider';
 
 // title/onTitleChange가 내려오면(자소서 생성 요청과 제목을 공유해야 하는 경우) 그걸 그대로 사용하고,
 // 안 내려오면(단독으로 쓰는 경우) 기존처럼 내부 상태로 동작
@@ -26,6 +27,7 @@ function CLHeader({ userName = '프로젝트 매니저 지원', onBackToMindMap,
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef(null);
   const navigate = useNavigate();
+  const { alert } = useModal(); // 수정된 부분: 브라우저 기본 alert() 대신 커스텀 모달 사용
 
   // PDF/DOCX 생성 중 상태 — 응답 오는 동안 중복 클릭 방지 + "내보내는 중" 표시용
   const [isExportingPdf, setIsExportingPdf] = useState(false);
@@ -69,7 +71,8 @@ function CLHeader({ userName = '프로젝트 매니저 지원', onBackToMindMap,
       downloadFromResponse(res, `${currentTitle || '자기소개서'}.pdf`);
     } catch (error) {
       console.error('PDF 내보내기 실패:', error);
-      alert('PDF를 만드는 중 문제가 발생했어요. 다시 시도해주세요.');
+      // 수정된 부분: alert() → await alert() (커스텀 모달로 교체)
+      await alert('PDF를 만드는 중 문제가 발생했어요. 다시 시도해주세요.');
     } finally {
       setIsExportingPdf(false);
     }
@@ -84,7 +87,8 @@ function CLHeader({ userName = '프로젝트 매니저 지원', onBackToMindMap,
       downloadFromResponse(res, `${currentTitle || '자기소개서'}.docx`);
     } catch (error) {
       console.error('DOCX 내보내기 실패:', error);
-      alert('DOCX를 만드는 중 문제가 발생했어요. 다시 시도해주세요.');
+      // 수정된 부분: alert() → await alert() (커스텀 모달로 교체)
+      await alert('DOCX를 만드는 중 문제가 발생했어요. 다시 시도해주세요.');
     } finally {
       setIsExportingDocx(false);
     }

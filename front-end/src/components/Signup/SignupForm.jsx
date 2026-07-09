@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import SocialButtons from '../Login/SocialButtons';
 import { register } from '../../axios/userApi';
+import { useModal } from '../common/ModalProvider';
 
 const validate = {
   name: (v) => {
@@ -33,6 +34,7 @@ const validate = {
 };
 
 function SignupForm({ theme = 'blue', onLoginClick }) {
+  const { alert } = useModal(); // 수정된 부분: 브라우저 기본 alert() 대신 커스텀 모달 사용
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -109,7 +111,8 @@ function SignupForm({ theme = 'blue', onLoginClick }) {
     }
 
     if (!form.agreed) {
-      alert('이용약관 및 개인정보처리방침에 동의해주세요');
+      // 수정된 부분: alert() → await alert() (커스텀 모달로 교체)
+      await alert('이용약관 및 개인정보처리방침에 동의해주세요');
       return;
     }
 
@@ -122,12 +125,13 @@ function SignupForm({ theme = 'blue', onLoginClick }) {
     try {
       const rdata = await register(joinData);
       console.log('register 성공:', rdata);
-      // TODO : 안내 모달
-      alert('회원가입 성공!');
+      // 수정된 부분: alert() → await alert() (커스텀 모달로 교체)
+      await alert('회원가입 성공!');
       onLoginClick();
     } catch (error) {
       console.log('register 실패:', error.response?.data || error);
-      alert(error.response?.data?.error || '회원가입 중 오류가 발생했습니다.');
+      // 수정된 부분: alert() → await alert() (커스텀 모달로 교체)
+      await alert(error.response?.data?.error || '회원가입 중 오류가 발생했습니다.');
     }
   };
 
