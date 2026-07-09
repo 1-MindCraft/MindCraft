@@ -83,10 +83,29 @@ def _collect_ancestors(node: MindMapNode, id_map: Dict[str, MindMapNode]) -> Lis
         cur = id_map.get(cur.parentId) if cur.parentId else None
     return ancestors
 
+def _build_query_text(
+    question: str,
+    company_name: str,
+    company_ideal: str | None,
+    job_description: str | None,
+) -> str:
+    """유사도 쿼리 텍스트: 문항 + 회사 컨텍스트."""
+    parts = [question]
+    if company_name:
+        parts.append(f"회사: {company_name}")
+    if company_ideal:
+        parts.append(f"인재상: {company_ideal}")
+    if job_description:
+        parts.append(f"직무: {job_description}")
+    return "\n".join(parts)
 
 def select_relevant_nodes(
     question: str,
     nodes: List[MindMapNode],
+    company_name: str = "",
+    company_ideal: str | None = None,
+    job_description: str | None = None,
+    
 ) -> Tuple[List[MindMapNode], List[str], List[str]]:
     """
     문항과 관련 높은 노드 선별.
@@ -108,14 +127,18 @@ def select_relevant_nodes(
         return nodes, all_ids, all_ids
 
     # 임베딩: 문항 + 후보 노드들
+    query_text = _build_query_text(question, company_name, company_ideal, job_description)
+
     node_texts = [_build_node_embedding_text(n, id_map) for n in candidates]
-    all_vecs = _embed([question] + node_texts)
+    all_vecs = _embed([query_text] + node_texts)   # question 대신 query_text
     q_vec, node_vecs = all_vecs[0], all_vecs[1:]
 
     sims = _cosine_sim(q_vec, node_vecs)
 
     # 유사도 내림차순 정렬
     ranked = sorted(zip(candidates, sims), key=lambda x: x[1], reverse=True)
+
+    
 
     # 임계값 넘는 것 중 상위 TOP_K
     selected = [n for n, s in ranked if s >= SIMILARITY_THRESHOLD][:TOP_K]
@@ -134,4 +157,5 @@ def select_relevant_nodes(
     context_nodes = [n for n in nodes if n.id in context_id_set]
     context_ids = [n.id for n in context_nodes]
 
-    return context_nodes, selected_ids, context_idsh
+    return context_nodes, selected_ids, context_ids
+

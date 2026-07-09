@@ -25,7 +25,7 @@ def generate_coverletter(req: CoverLetterGenerateRequest) -> CoverLetterGenerate
 
     # 선별된 노드로 프롬프트 구성
     #     req를 직접 수정하지 않고 source_node만 교체한 복사본 사용
-    rag_req = req.model_copy(update={"ssource_node" : context_nodes})
+    rag_req = req.model_copy(update={"source_node" : context_nodes})
     system_prompt, user_prompt = build_prompts(rag_req)
 
     # OpenAI 호출 (실패 시 LLMGenerationError 전파)
