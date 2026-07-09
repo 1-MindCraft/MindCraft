@@ -48,8 +48,11 @@ function LoginForm({ onSignupClick }) {
     }
   };
 
+  // 추가된 부분: <div>를 <form onSubmit={handleSubmit}>로 교체
+  // 이유: 비밀번호 입력 후 Enter를 누르면 폼이 제출되어 로그인되게 하려면
+  // 실제 <form> 태그가 있어야 브라우저가 Enter를 자동으로 제출로 처리해줌
   return (
-    <div className="login-form">
+    <form className="login-form" onSubmit={handleSubmit}>
       <h2>로그인</h2>
       <p className="login-sub">이메일과 비밀번호로 로그인하세요</p>
 
@@ -100,7 +103,9 @@ function LoginForm({ onSignupClick }) {
         로그인 상태 유지
       </label>
 
-      <button className="login-submit" onClick={handleSubmit}>
+      {/* 수정된 부분: onClick={handleSubmit} 제거하고 type="submit"으로 변경
+          이유: <form onSubmit>이 이제 제출을 처리하므로, onClick까지 남겨두면 중복 호출될 수 있어 제거 */}
+      <button className="login-submit" type="submit">
         로그인
       </button>
 
@@ -128,7 +133,7 @@ function LoginForm({ onSignupClick }) {
           회원가입 ›
         </a>
       </p>
-    </div>
+    </form>
   );
 }
 

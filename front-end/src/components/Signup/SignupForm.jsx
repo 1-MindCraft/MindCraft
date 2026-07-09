@@ -79,7 +79,10 @@ function SignupForm({ theme = 'blue', onLoginClick }) {
     setErrors((prev) => ({ ...prev, [field]: err }));
   };
 
-  const handleSubmit = async () => {
+  // 수정된 부분: handleSubmit이 이벤트(e)를 받아서 e.preventDefault()를 호출하도록 변경
+  // 이유: <form onSubmit>으로 감싸면 기본적으로 페이지가 새로고침되는데, 그걸 막아야 함
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setTouched({
       name: true,
       email: true,
@@ -136,8 +139,11 @@ function SignupForm({ theme = 'blue', onLoginClick }) {
 
   const showMsg = (field) => errors[field] && touched[field];
 
+  // 추가된 부분: <div>를 <form onSubmit={handleSubmit}>로 교체
+  // 이유: 회원가입 폼 마지막 입력창에서 Enter를 누르면 바로 제출되게 하려면
+  // 실제 <form> 태그가 필요함
   return (
-    <div className={`login-form signup-form--${theme}`}>
+    <form className={`login-form signup-form--${theme}`} onSubmit={handleSubmit}>
       <h2>회원가입</h2>
       <p className="login-sub">이메일로 간편하게 계정을 만들어보세요</p>
 
@@ -259,9 +265,11 @@ function SignupForm({ theme = 'blue', onLoginClick }) {
         </span>
       </label>
 
+      {/* 수정된 부분: onClick={handleSubmit} 제거하고 type="submit"으로 변경
+          이유: <form onSubmit>이 이제 제출을 처리하므로 중복 호출 방지 */}
       <button
         className={`login-submit signup-submit--${theme}`}
-        onClick={handleSubmit}
+        type="submit"
       >
         회원가입
       </button>
@@ -283,7 +291,7 @@ function SignupForm({ theme = 'blue', onLoginClick }) {
         <span>소셜 계정으로 간편 가입</span>
       </div>
       <SocialButtons />
-    </div>
+    </form>
   );
 }
 
