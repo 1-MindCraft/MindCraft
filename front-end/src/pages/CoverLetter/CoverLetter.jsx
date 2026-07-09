@@ -134,7 +134,10 @@ function CoverLetterPage({ onBackToMindMap }) {
 
   return (
     <div className="cl-page">
-      <CLHeader userName={userName} onBackToMindMap={onBackToMindMap} />
+      {/* 수정된 부분: sections 대신 coverLetterId를 내려줌
+          이유: PDF/DOCX 생성이 백엔드로 옮겨가면서, CLHeader는 문항 데이터가 아니라
+          어떤 자소서를 내보낼지 식별할 id만 있으면 되기 때문 */}
+      <CLHeader userName={userName} onBackToMindMap={onBackToMindMap} coverLetterId={coverLetterId} />
 
       <div className="cl-body">
         <CLToolbar

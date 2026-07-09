@@ -51,9 +51,27 @@ const successResponse = (res) => res;
   8. 그 외의 오류는 그대로 반환합니다.
 */
 
+// 추가된 부분: blob 응답(error.response.data가 Blob)일 때 그 안의 JSON을 꺼내는 헬퍼
+// 이유: PDF/DOCX 내보내기처럼 responseType: 'blob'인 요청은, 401이 나도 에러 바디가
+// Blob으로 오기 때문에 errorData?.error 검사가 항상 실패해서 자동 토큰 재발급이 안 됐음.
+// Blob을 텍스트로 읽어서 JSON.parse 해주면 기존 로직을 그대로 재사용할 수 있음
+const extractErrorData = async (error) => {
+  const rawData = error.response?.data;
+  if (rawData instanceof Blob) {
+    try {
+      const text = await rawData.text();
+      return JSON.parse(text);
+    } catch {
+      return null; // JSON이 아니거나 파싱 실패 시 그냥 null (기존 동작대로 재발급 없이 실패 처리)
+    }
+  }
+  return rawData;
+};
+
 // 응답 실패: access 만료면 재발급 후 재요청
 const failResponse = async (error) => {
-  const errorData = error.response?.data;
+  // 수정된 부분: error.response?.data를 바로 안 쓰고, blob이면 text로 변환해서 읽도록 교체
+  const errorData = await extractErrorData(error);
   const originalRequest = error.config;
 
   // 백엔드: access 만료 시 401 + { error: "ERROR_ACCESS_TOKEN" }
