@@ -16,13 +16,14 @@ import {
 } from '../../axios/coverLetterApi';
 import { createSection } from '../../axios/sectionApi';
 import { getMindMap } from '../../axios/mindMapApi';
+import useMindMapStore from '../../zustand/mindMapStore';
 import { useModal } from '../../components/common/ModalProvider';
 
 // 백엔드 문항(section) → 화면 형태로 변환
 const mapSection = (s) => ({
   id: s.id,
-  title: s.question,        // question → title
-  content: s.answer,        // answer → content
+  title: s.question,
+  content: s.answer,
   sourceNodes: (s.sourceNode || []).map((node) => node?.data?.label).filter(Boolean),
 });
 
@@ -46,6 +47,13 @@ let tempIdCounter = -1;
 function CoverLetterPage({ onBackToMindMap }) {
   const { alert } = useModal(); // 수정된 부분: 브라우저 기본 alert() 대신 커스텀 모달 사용
 
+  // 추가된 부분: Zustand store에서 mindMapId와 fetchMindMap을 가져옴
+  // 이유: 생성/수정 요청 dto에 mindMapId를 포함시켜야 백엔드 @NotNull 유효성 검사를 통과하는데,
+  // 이 페이지는 mindMapId를 읽기만 하고 fetch를 안 해서 null이 유지되던 문제가 있었음.
+  // fetchMindMap을 페이지 진입 시 호출해서 store에 mindMapId를 채워줘야 함
+  const mindMapId = useMindMapStore((state) => state.mindMapId);
+  const fetchMindMap = useMindMapStore((state) => state.fetchMindMap);
+
   // 추가된 부분: view state ('list' = 자소서 마스터 목록/폼, 'edit' = 문항 편집)
   // 이유: 두 화면을 같은 컴포넌트 안에서 전환하기 위해 필요
   const [view, setView] = useState('list');
@@ -60,25 +68,28 @@ function CoverLetterPage({ onBackToMindMap }) {
   const [editingId, setEditingId] = useState(null); // 추가된 부분: 지금 편집 중인 자소서의 id (URL 파라미터 대신 state로 관리)
   const [sections, setSections] = useState([]);
   const [userName, setUserName] = useState('자기소개서');
-  const [mindMapNodes, setMindMapNodes] = useState([]);   // 마인드맵 전체 노드 (sourceNode로 넘길 것)
+  const [mindMapNodes, setMindMapNodes] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [nextId, setNextId] = useState(100);
   const [settingsOpen, setSettingsOpen] = useState(true);
   const [loadingEdit, setLoadingEdit] = useState(false);
-  const [generating, setGenerating] = useState(false);   // AI 생성 중 여부
+  const [generating, setGenerating] = useState(false);
 
-  // 추가된 부분: 페이지 진입 시 자소서 마스터 전체 조회 (Allfind/Allget)
-  // 이유: /coverletter에 들어오면 가장 먼저 이 사람이 만들어둔 자소서 마스터 목록을 봐야 함
+  // 추가된 부분: 페이지 진입 시 자소서 마스터 전체 조회 + fetchMindMap으로 mindMapId 채우기
+  // 이유: /coverletter에 들어오면 가장 먼저 자소서 마스터 목록을 봐야 하고,
+  // mindMapId도 이 시점에 store에 채워져 있어야 이후 생성/수정 요청에 쓸 수 있음
   useEffect(() => {
     const load = async () => {
       try {
         setLoadingList(true);
+        // 추가된 부분: mindMapId 채우기 (이유: store가 비어있으면 dto에 null이 들어가서 400 에러)
+        await fetchMindMap();
         const list = await getCoverLetterList();
         const mapped = list.map(mapMaster);
         setMasters(mapped);
         if (mapped.length > 0) setSelectedMasterId(mapped[0].id);
       } catch (error) {
-        console.error('자소서 마스터 목록 로드 실패:', error.response?.data || error);
+        console.error('목록 로드 실패:', error.response?.data || error);
       } finally {
         setLoadingList(false);
       }
@@ -112,17 +123,20 @@ function CoverLetterPage({ onBackToMindMap }) {
     const current = masters.find((m) => m.id === selectedMasterId);
     if (!current || savingMaster) return;
 
+    // 수정된 부분: dto에 mindMapId 추가
+    // 이유: 백엔드 CoverLetterRequestDto의 @NotNull mindMapId가 null이면 400 에러가 나서,
+    // fetchMindMap()으로 채워진 store의 mindMapId를 같이 보냄
     const dto = {
       title: current.title,
-      company_name: current.companyName,
-      company_ideal: current.companyIdeal,
-      job_description: current.jobDescription,
+      companyName: current.companyName,
+      companyIdeal: current.companyIdeal,
+      jobDescription: current.jobDescription,
+      mindMapId: mindMapId,
     };
 
     setSavingMaster(true);
     try {
       if (current.saved) {
-        // 이미 저장된 마스터 → 수정
         await updateCoverLetter(current.id, dto);
         setMasters((prev) =>
           prev.map((m) => (m.id === current.id ? { ...m, ...current } : m))
@@ -130,7 +144,6 @@ function CoverLetterPage({ onBackToMindMap }) {
         // 추가된 부분: 수정 성공 알림
         await alert('자소서 마스터가 수정되었습니다.');
       } else {
-        // 아직 저장 전인 임시 항목 → 실제 생성 요청
         const created = await createCoverLetter(dto);
         const mapped = mapMaster(created);
         setMasters((prev) => prev.map((m) => (m.id === current.id ? mapped : m)));
@@ -163,8 +176,8 @@ function CoverLetterPage({ onBackToMindMap }) {
   };
 
   // 수정된 부분: 페이지 진입 시 무조건 로드하던 것을, editingId가 정해지고 view가 'edit'일 때만 로드하도록 변경
-  // 이유: 이제 coverLetterId를 처음부터 알 수 없고(목록에서 선택해야 알게 됨), 여러 자소서 중
-  // 편집하려는 특정 하나가 정해졌을 때만 그 상세 내용을 불러오면 되기 때문
+  // 이유: coverLetterId를 처음부터 알 수 없고(목록에서 선택해야 알게 됨), 특정 하나가
+  // 정해졌을 때만 그 상세 내용을 불러오면 되기 때문
   useEffect(() => {
     if (view !== 'edit' || !editingId) return;
 
@@ -178,11 +191,10 @@ function CoverLetterPage({ onBackToMindMap }) {
         setSections(mapped);
         setSelectedId(mapped.length > 0 ? mapped[0].id : null);
 
-        // 마인드맵 노드 로드 (생성 시 sourceNode로 넘김)
         const mindmap = await getMindMap();
         const nodes = typeof mindmap.nodes === 'string'
-          ? JSON.parse(mindmap.nodes)   // 문자열이면 파싱
-          : mindmap.nodes;              // 이미 배열이면 그대로
+          ? JSON.parse(mindmap.nodes)
+          : mindmap.nodes;
         setMindMapNodes(nodes || []);
       } catch (error) {
         console.error('자소서 로드 실패:', error.response?.data || error);
@@ -213,7 +225,6 @@ function CoverLetterPage({ onBackToMindMap }) {
     setSections((prev) => prev.map((s) => (s.id === id ? { ...s, title } : s)));
   };
 
-  // "생성하기" → 현재 선택 문항을 마인드맵 노드 참고해 AI 생성
   const handleGenerate = async (settings) => {
     const current = sections.find((s) => s.id === selectedId);
     if (!current) {
@@ -236,9 +247,8 @@ function CoverLetterPage({ onBackToMindMap }) {
         writingStyle: settings.writingStyle,
         maxChars: settings.maxChars,
         allowCreativity: settings.allowCreativity,
-        sourceNode: mindMapNodes,   // 마인드맵 전체 노드 참고
+        sourceNode: mindMapNodes,
       });
-      // 임시 문항 → 실제 저장된 문항으로 교체 (answer 채워짐)
       const mapped = mapSection(created);
       setSections((prev) => prev.map((s) => (s.id === selectedId ? mapped : s)));
       setSelectedId(mapped.id);
