@@ -86,7 +86,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AiGenerationException.class)
     public ResponseEntity<Map<String, String>> handleAiGeneration(AiGenerationException e) {
-        log.error("AI Generation Exception : {}", e.getMessage(), e);
+        log.error("AI Generation Exception : {}", e.getMessage());
 
         return ResponseEntity
                 .status(HttpStatus.UNPROCESSABLE_ENTITY)
