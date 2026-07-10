@@ -82,4 +82,11 @@ public class MindMapServiceImpl implements MindMapService{
 
         return mindMapRepository.save(mindMap);
     }
+
+    @Override
+    public MindMap getMindMap (long userId, long mindMapId) {
+        Optional<MindMap> optionalMindMap = mindMapRepository.findByUserIdAndMindMapId(userId, mindMapId);
+        MindMap mindMap = optionalMindMap.orElseThrow(() -> new InvalidMindMapException("유효하지 않은 마인드맵입니다."));
+        return mindMap;
+    }
 }
