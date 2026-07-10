@@ -1,16 +1,12 @@
 // 추가된 부분: 이 파일 전체가 새로 추가된 파일입니다
 // 이유: CoverLetterExportService의 실제 구현체(PDF는 OpenPDF, DOCX는 Apache POI 사용)가 필요해서 추가
-package com.mindcraft.backend.coverletter.export.service;
+package com.mindcraft.backend.coverletter.service;
 
-import com.mindcraft.backend.coverletter.dto.CoverLetterDto;
-import com.mindcraft.backend.coverletter.section.dto.CoverLetterSectionDto;
-import com.lowagie.text.Chunk;
-import com.lowagie.text.Document;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.Font;
-import com.lowagie.text.Paragraph;
+import com.lowagie.text.*;
 import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.PdfWriter;
+import com.mindcraft.backend.coverletter.dto.CoverLetterDetailDto;
+import com.mindcraft.backend.coverletter.section.dto.CoverLetterSectionDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
@@ -34,7 +30,7 @@ public class CoverLetterExportServiceImpl implements CoverLetterExportService {
     private static final String FONT_PATH = "fonts/NotoSansKR-Regular.ttf";
 
     @Override
-    public byte[] toPdf(CoverLetterDto dto) {
+    public byte[] toPdf(CoverLetterDetailDto dto) {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Document document = new Document();
             PdfWriter.getInstance(document, out);
@@ -68,7 +64,7 @@ public class CoverLetterExportServiceImpl implements CoverLetterExportService {
     }
 
     @Override
-    public byte[] toDocx(CoverLetterDto dto) {
+    public byte[] toDocx(CoverLetterDetailDto dto) {
         try (XWPFDocument document = new XWPFDocument();
              ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 

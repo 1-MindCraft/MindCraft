@@ -24,7 +24,9 @@ const mapSection = (s) => ({
   id: s.id,
   title: s.question,
   content: s.answer,
-  sourceNodes: (s.sourceNode || []).map((node) => node?.data?.label).filter(Boolean),
+  sourceNodes: (s.sourceNode || [])
+    .map((node) => node?.data?.label)
+    .filter(Boolean),
 });
 
 // 추가된 부분: 백엔드 자소서 마스터(snake_case) → 화면 형태(camelCase)로 변환
@@ -114,7 +116,9 @@ function CoverLetterPage({ onBackToMindMap }) {
   // 추가된 부분: 폼 입력값 변경 — 선택된 마스터의 해당 필드만 갱신 (목록의 이름도 실시간 반영됨)
   const handleMasterFieldChange = (field, value) => {
     setMasters((prev) =>
-      prev.map((m) => (m.id === selectedMasterId ? { ...m, [field]: value } : m))
+      prev.map((m) =>
+        m.id === selectedMasterId ? { ...m, [field]: value } : m
+      )
     );
   };
 
@@ -128,10 +132,10 @@ function CoverLetterPage({ onBackToMindMap }) {
     // fetchMindMap()으로 채워진 store의 mindMapId를 같이 보냄
     const dto = {
       title: current.title,
-      companyName: current.companyName,
-      companyIdeal: current.companyIdeal,
-      jobDescription: current.jobDescription,
-      mindMapId: mindMapId,
+      company_name: current.companyName,
+      company_ideal: current.companyIdeal,
+      job_description: current.jobDescription,
+      mindmap_id: mindMapId,
     };
 
     setSavingMaster(true);
@@ -146,7 +150,9 @@ function CoverLetterPage({ onBackToMindMap }) {
       } else {
         const created = await createCoverLetter(dto);
         const mapped = mapMaster(created);
-        setMasters((prev) => prev.map((m) => (m.id === current.id ? mapped : m)));
+        setMasters((prev) =>
+          prev.map((m) => (m.id === current.id ? mapped : m))
+        );
         setSelectedMasterId(mapped.id);
         // 추가된 부분: 생성 성공 알림
         await alert('자소서 마스터가 저장되었습니다.');
@@ -192,9 +198,10 @@ function CoverLetterPage({ onBackToMindMap }) {
         setSelectedId(mapped.length > 0 ? mapped[0].id : null);
 
         const mindmap = await getMindMap();
-        const nodes = typeof mindmap.nodes === 'string'
-          ? JSON.parse(mindmap.nodes)
-          : mindmap.nodes;
+        const nodes =
+          typeof mindmap.nodes === 'string'
+            ? JSON.parse(mindmap.nodes)
+            : mindmap.nodes;
         setMindMapNodes(nodes || []);
       } catch (error) {
         console.error('자소서 로드 실패:', error.response?.data || error);
@@ -250,7 +257,9 @@ function CoverLetterPage({ onBackToMindMap }) {
         sourceNode: mindMapNodes,
       });
       const mapped = mapSection(created);
-      setSections((prev) => prev.map((s) => (s.id === selectedId ? mapped : s)));
+      setSections((prev) =>
+        prev.map((s) => (s.id === selectedId ? mapped : s))
+      );
       setSelectedId(mapped.id);
     } catch (error) {
       console.error('생성 실패:', error.response?.data || error);
@@ -303,7 +312,11 @@ function CoverLetterPage({ onBackToMindMap }) {
 
   return (
     <div className="cl-page">
-      <CLHeader userName={userName} onBackToMindMap={onBackToMindMap} coverLetterId={editingId} />
+      <CLHeader
+        userName={userName}
+        onBackToMindMap={onBackToMindMap}
+        coverLetterId={editingId}
+      />
 
       <div className="cl-body">
         <CLToolbar
