@@ -86,11 +86,6 @@ function CLMindMap() {
           </div>
         )}
       </div>
-
-      {/* 기존 그대로: 미니맵 장식 (실제 React Flow MiniMap 아님, 자리표시자) */}
-      <div className="cl-minimap">
-        <div className="mm-minimap-inner" />
-      </div>
     </div>
   );
 }
