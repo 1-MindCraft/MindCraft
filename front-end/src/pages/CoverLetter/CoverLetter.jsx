@@ -313,6 +313,7 @@ function CoverLetterPage({ onBackToMindMap }) {
           onSettingsToggle={toggleSettings}
           navLabel="← 자소서 마스터로 돌아가기"
           onNav={handleBackToMasterList}
+          className="cl-toolbar--master"
         />
 
         <div className="cl-content">
