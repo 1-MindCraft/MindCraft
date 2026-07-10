@@ -57,6 +57,12 @@ class LLMOutput(BaseModel):
 # ---------- Response (FastAPI -> Spring) ----------
 
 class CoverLetterGenerateResponse(BaseModel):
-
-
     answer: str = Field(..., description="AI가 생성한 자소서 본문")
+    selected_node_ids: List[str] = Field(
+        default_factory=list,
+        description="RAG로 직접 선별된 노드 id",
+    )
+    context_node_ids: List[str] = Field(
+        default_factory=list,
+        description="조상 포함, 프롬프트에 실제 들어간 전체 노드 id",
+    )
