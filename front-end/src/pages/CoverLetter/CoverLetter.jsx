@@ -6,10 +6,17 @@ import CLToolbar from '../../components/CoverLetter/CLToolbar';
 import CLMindMap from '../../components/CoverLetter/CLMindMap';
 import CLDraft from '../../components/CoverLetter/CLDraft';
 import CLSettings from '../../components/CoverLetter/CLSettings';
+import CLMasterDraft from '../../components/CoverLetter/CLMasterDraft';
 
-import { getOrCreateCoverLetter, getCoverLetterDetail } from '../../axios/coverLetterApi';
+import {
+  getCoverLetterList,
+  createCoverLetter,
+  updateCoverLetter,
+  getCoverLetterDetail,
+} from '../../axios/coverLetterApi';
 import { createSection } from '../../axios/sectionApi';
 import { getMindMap } from '../../axios/mindMapApi';
+import { useModal } from '../../components/common/ModalProvider';
 
 // 백엔드 문항(section) → 화면 형태로 변환
 const mapSection = (s) => ({
@@ -19,42 +26,157 @@ const mapSection = (s) => ({
   sourceNodes: (s.sourceNode || []).map((node) => node?.data?.label).filter(Boolean),
 });
 
-function CoverLetterPage({ onBackToMindMap }) {
-  const [sections, setSections] = useState([]);
-  const [coverLetterId, setCoverLetterId] = useState(null);
-  const [userName, setUserName] = useState('자기소개서');
-  const [companyInfo, setCompanyInfo] = useState({
-    companyName: '',
-    companyIdeal: '',
-    jobDescription: '',
-  });
-  const [mindMapNodes, setMindMapNodes] = useState([]);   // 마인드맵 전체 노드 (sourceNode로 넘길 것)
+// 추가된 부분: 백엔드 자소서 마스터(snake_case) → 화면 형태(camelCase)로 변환
+// 이유: 자소서 마스터 목록/폼 화면에서 쓸 데이터 형태가 필요해서 추가
+const mapMaster = (m) => ({
+  id: m.id,
+  title: m.title || '',
+  companyName: m.company_name || '',
+  companyIdeal: m.company_ideal || '',
+  jobDescription: m.job_description || '',
+  saved: true,
+});
 
+// 추가된 부분: 저장 전 임시 항목용 id 카운터 (실제 id와 안 겹치게 음수로 부여)
+let tempIdCounter = -1;
+
+// 수정된 부분: 이 파일 하나가 "자소서 마스터 목록/폼 화면"과 "문항 편집 화면"을 모두 담당함
+// 이유: 별도 페이지 파일/라우트를 만들지 않고, /coverletter 라우트 하나 안에서
+// view state로 두 화면을 전환하기로 결정했기 때문
+function CoverLetterPage({ onBackToMindMap }) {
+  const { alert } = useModal(); // 수정된 부분: 브라우저 기본 alert() 대신 커스텀 모달 사용
+
+  // 추가된 부분: view state ('list' = 자소서 마스터 목록/폼, 'edit' = 문항 편집)
+  // 이유: 두 화면을 같은 컴포넌트 안에서 전환하기 위해 필요
+  const [view, setView] = useState('list');
+
+  // 추가된 부분: 자소서 마스터 목록 화면 전용 상태
+  const [masters, setMasters] = useState([]);
+  const [selectedMasterId, setSelectedMasterId] = useState(null);
+  const [loadingList, setLoadingList] = useState(true);
+  const [savingMaster, setSavingMaster] = useState(false);
+
+  // 문항 편집 화면 상태
+  const [editingId, setEditingId] = useState(null); // 추가된 부분: 지금 편집 중인 자소서의 id (URL 파라미터 대신 state로 관리)
+  const [sections, setSections] = useState([]);
+  const [userName, setUserName] = useState('자기소개서');
+  const [mindMapNodes, setMindMapNodes] = useState([]);   // 마인드맵 전체 노드 (sourceNode로 넘길 것)
   const [selectedId, setSelectedId] = useState(null);
   const [nextId, setNextId] = useState(100);
   const [settingsOpen, setSettingsOpen] = useState(true);
-  const [loading, setLoading] = useState(true);
+  const [loadingEdit, setLoadingEdit] = useState(false);
   const [generating, setGenerating] = useState(false);   // AI 생성 중 여부
 
-  // 페이지 진입 시: 자소서 조회 + 문항 로드 + 마인드맵 노드 로드
+  // 추가된 부분: 페이지 진입 시 자소서 마스터 전체 조회 (Allfind/Allget)
+  // 이유: /coverletter에 들어오면 가장 먼저 이 사람이 만들어둔 자소서 마스터 목록을 봐야 함
   useEffect(() => {
     const load = async () => {
       try {
-        setLoading(true);
-        const cover = await getOrCreateCoverLetter();
-        setCoverLetterId(cover.id);
+        setLoadingList(true);
+        const list = await getCoverLetterList();
+        const mapped = list.map(mapMaster);
+        setMasters(mapped);
+        if (mapped.length > 0) setSelectedMasterId(mapped[0].id);
+      } catch (error) {
+        console.error('자소서 마스터 목록 로드 실패:', error.response?.data || error);
+      } finally {
+        setLoadingList(false);
+      }
+    };
+    load();
+  }, []);
 
-        const detail = await getCoverLetterDetail(cover.id);
+  // 추가된 부분: "+ 자소서 마스터 생성하기" — 임시 항목을 목록에 추가하고 선택함 (아직 저장 안 됨)
+  const handleAddMaster = () => {
+    const newMaster = {
+      id: tempIdCounter--,
+      title: '',
+      companyName: '',
+      companyIdeal: '',
+      jobDescription: '',
+      saved: false,
+    };
+    setMasters((prev) => [...prev, newMaster]);
+    setSelectedMasterId(newMaster.id);
+  };
+
+  // 추가된 부분: 폼 입력값 변경 — 선택된 마스터의 해당 필드만 갱신 (목록의 이름도 실시간 반영됨)
+  const handleMasterFieldChange = (field, value) => {
+    setMasters((prev) =>
+      prev.map((m) => (m.id === selectedMasterId ? { ...m, [field]: value } : m))
+    );
+  };
+
+  // 추가된 부분: 생성하기(저장 전) / 수정하기(이미 저장됨) 버튼
+  const handleMasterSubmit = async () => {
+    const current = masters.find((m) => m.id === selectedMasterId);
+    if (!current || savingMaster) return;
+
+    const dto = {
+      title: current.title,
+      company_name: current.companyName,
+      company_ideal: current.companyIdeal,
+      job_description: current.jobDescription,
+    };
+
+    setSavingMaster(true);
+    try {
+      if (current.saved) {
+        // 이미 저장된 마스터 → 수정
+        await updateCoverLetter(current.id, dto);
+        setMasters((prev) =>
+          prev.map((m) => (m.id === current.id ? { ...m, ...current } : m))
+        );
+        // 추가된 부분: 수정 성공 알림
+        await alert('자소서 마스터가 수정되었습니다.');
+      } else {
+        // 아직 저장 전인 임시 항목 → 실제 생성 요청
+        const created = await createCoverLetter(dto);
+        const mapped = mapMaster(created);
+        setMasters((prev) => prev.map((m) => (m.id === current.id ? mapped : m)));
+        setSelectedMasterId(mapped.id);
+        // 추가된 부분: 생성 성공 알림
+        await alert('자소서 마스터가 저장되었습니다.');
+      }
+    } catch (error) {
+      console.error('자소서 마스터 저장 실패:', error.response?.data || error);
+      await alert('저장 중 오류가 발생했습니다.');
+    } finally {
+      setSavingMaster(false);
+    }
+  };
+
+  // 추가된 부분: 툴바의 "→ 자소서 편집으로 이동" — 저장된 마스터만 편집 화면으로 전환 가능
+  const selectedMaster = masters.find((m) => m.id === selectedMasterId);
+  const handleGoToEdit = async () => {
+    if (!selectedMaster?.saved) {
+      await alert('먼저 자소서 마스터를 저장해주세요.');
+      return;
+    }
+    setEditingId(selectedMaster.id);
+    setView('edit');
+  };
+
+  // 추가된 부분: 툴바의 "← 자소서 마스터로 돌아가기"
+  const handleBackToMasterList = () => {
+    setView('list');
+  };
+
+  // 수정된 부분: 페이지 진입 시 무조건 로드하던 것을, editingId가 정해지고 view가 'edit'일 때만 로드하도록 변경
+  // 이유: 이제 coverLetterId를 처음부터 알 수 없고(목록에서 선택해야 알게 됨), 여러 자소서 중
+  // 편집하려는 특정 하나가 정해졌을 때만 그 상세 내용을 불러오면 되기 때문
+  useEffect(() => {
+    if (view !== 'edit' || !editingId) return;
+
+    const load = async () => {
+      try {
+        setLoadingEdit(true);
+        const detail = await getCoverLetterDetail(editingId);
         setUserName(detail.title || '자기소개서');
-        setCompanyInfo({
-          companyName: detail.company_name || '',
-          companyIdeal: detail.company_ideal || '',
-          jobDescription: detail.job_description || '',
-        });
 
         const mapped = (detail.sections || []).map(mapSection);
         setSections(mapped);
-        if (mapped.length > 0) setSelectedId(mapped[0].id);
+        setSelectedId(mapped.length > 0 ? mapped[0].id : null);
 
         // 마인드맵 노드 로드 (생성 시 sourceNode로 넘김)
         const mindmap = await getMindMap();
@@ -65,11 +187,11 @@ function CoverLetterPage({ onBackToMindMap }) {
       } catch (error) {
         console.error('자소서 로드 실패:', error.response?.data || error);
       } finally {
-        setLoading(false);
+        setLoadingEdit(false);
       }
     };
     load();
-  }, []);
+  }, [view, editingId]);
 
   const toggleSettings = () => setSettingsOpen((p) => !p);
 
@@ -95,21 +217,21 @@ function CoverLetterPage({ onBackToMindMap }) {
   const handleGenerate = async (settings) => {
     const current = sections.find((s) => s.id === selectedId);
     if (!current) {
-      alert('생성할 문항을 선택해주세요.');
+      await alert('생성할 문항을 선택해주세요.');
       return;
     }
     if (!current.title || !current.title.trim()) {
-      alert('문항(질문)을 먼저 입력해주세요.');
+      await alert('문항(질문)을 먼저 입력해주세요.');
       return;
     }
     if (mindMapNodes.length === 0) {
-      alert('마인드맵 노드가 없습니다. 마인드맵을 먼저 작성해주세요.');
+      await alert('마인드맵 노드가 없습니다. 마인드맵을 먼저 작성해주세요.');
       return;
     }
 
     try {
       setGenerating(true);
-      const created = await createSection(coverLetterId, {
+      const created = await createSection(editingId, {
         question: current.title,
         writingStyle: settings.writingStyle,
         maxChars: settings.maxChars,
@@ -122,27 +244,63 @@ function CoverLetterPage({ onBackToMindMap }) {
       setSelectedId(mapped.id);
     } catch (error) {
       console.error('생성 실패:', error.response?.data || error);
-      alert('생성 중 오류가 발생했습니다.');
+      await alert('생성 중 오류가 발생했습니다.');
     } finally {
       setGenerating(false);
     }
   };
 
-  if (loading) {
+  // 추가된 부분: view === 'list'일 때 자소서 마스터 목록/폼 화면을 반환
+  if (view === 'list') {
+    if (loadingList) {
+      return <div className="cl-page">자소서 목록을 불러오는 중...</div>;
+    }
+    return (
+      <div className="cl-page">
+        <CLHeader userName="자소서 마스터" />
+
+        <div className="cl-body">
+          <CLToolbar
+            navLabel="자소서 편집으로 이동 →"
+            onNav={handleGoToEdit}
+            showSettingsToggle={false}
+            className="cl-toolbar--master"
+          />
+
+          <div className="cl-content cl-content--master">
+            <CLMindMap />
+            <div className="cl-content-divider" />
+
+            <CLMasterDraft
+              masters={masters}
+              selectedId={selectedMasterId}
+              onSelect={setSelectedMasterId}
+              onAdd={handleAddMaster}
+              onFieldChange={handleMasterFieldChange}
+              onSubmit={handleMasterSubmit}
+              saving={savingMaster}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // view === 'edit' — 문항 편집 화면 (기존 그대로)
+  if (loadingEdit) {
     return <div className="cl-page">자소서를 불러오는 중...</div>;
   }
 
   return (
     <div className="cl-page">
-      {/* 수정된 부분: sections 대신 coverLetterId를 내려줌
-          이유: PDF/DOCX 생성이 백엔드로 옮겨가면서, CLHeader는 문항 데이터가 아니라
-          어떤 자소서를 내보낼지 식별할 id만 있으면 되기 때문 */}
-      <CLHeader userName={userName} onBackToMindMap={onBackToMindMap} coverLetterId={coverLetterId} />
+      <CLHeader userName={userName} onBackToMindMap={onBackToMindMap} coverLetterId={editingId} />
 
       <div className="cl-body">
         <CLToolbar
           settingsOpen={settingsOpen}
           onSettingsToggle={toggleSettings}
+          navLabel="← 자소서 마스터로 돌아가기"
+          onNav={handleBackToMasterList}
         />
 
         <div className="cl-content">

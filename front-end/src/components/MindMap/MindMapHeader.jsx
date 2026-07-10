@@ -7,7 +7,7 @@ import AppHeader from '../common/AppHeader';
 import useMindMapStore from '../../zustand/mindMapStore';
 
 function MindMapHeader({ userName = '사용자' }) {
-  const navigate = useNavigate(); // 새로 추가된 부분 // React Router의 navigate 함수 가져오기
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef(null);
   const title = useMindMapStore((state) => state.title);
@@ -49,7 +49,16 @@ function MindMapHeader({ userName = '사용자' }) {
               maxLength={30}
             />
           ) : (
-            <span className="mm-user-name">{title}</span>
+            // 추가된 부분: onDoubleClick 추가
+            // 이유: 기존엔 펜 아이콘 클릭으로만 편집모드에 들어갈 수 있었는데,
+            // 제목을 더블클릭해도 똑같이 편집모드로 들어가게 해달라는 요청이 있어서 추가
+            <span
+              className="mm-user-name"
+              onDoubleClick={() => setIsEditing(true)}
+              title="더블클릭해서 제목 수정"
+            >
+              {title}
+            </span>
           )}
           <button
             className="mm-icon-btn mm-icon-img-btn"
@@ -65,7 +74,7 @@ function MindMapHeader({ userName = '사용자' }) {
           <button className="mm-btn-keyword">
             <span>✦</span> 키워드 추출
           </button>
-          <button className="mm-btn-export" onClick={() => navigate('/coverletter')}> {/* // 새로 추가된 부분 // navigate 함수를 사용하여 '/coverletter' 경로로 이동 */}
+          <button className="mm-btn-export" onClick={() => navigate('/coverletter')}>
             <img src={EXPORT_SRC} alt="생성하기" className="mm-header-btn-icon" />{' '}
             생성하기
           </button>

@@ -1,0 +1,117 @@
+/* ═══════════════════════════════════
+   Modal — 어디서든 쓸 수 있는 공용 모달 껍데기
+═══════════════════════════════════ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 26, 46, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: modal-fade-in 0.15s ease;
+}
+
+.modal-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 380px;
+  margin: 1rem;
+  animation: modal-pop-in 0.18s ease;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.3rem 0.6rem;
+}
+.modal-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #1a1a2e;
+  margin: 0;
+}
+.modal-close-btn {
+  border: none;
+  background: none;
+  font-size: 0.9rem;
+  color: #999;
+  cursor: pointer;
+  padding: 0.2rem;
+  line-height: 1;
+}
+.modal-close-btn:hover {
+  color: #6c63ff;
+}
+
+.modal-body {
+  padding: 1.3rem 1.3rem 1.2rem; /* 기본값: 헤더(title) 없이 쓰는 경우(alert/confirm) 기준 */
+  font-size: 0.88rem;
+  color: #444;
+  line-height: 1.7;
+  white-space: pre-wrap; /* 여러 줄 메시지(\n)도 그대로 줄바꿈되게 */
+}
+/* 수정된 부분: 헤더(title)가 있는 경우엔 헤더가 이미 위쪽 여백을 만들어주므로 body 위쪽은 좁게 */
+.modal-header + .modal-body {
+  padding-top: 0.4rem;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0 1.3rem 1.3rem;
+}
+
+.modal-btn {
+  padding: 0.5rem 1.1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  font-family: inherit;
+}
+.modal-btn--primary {
+  background: #6c63ff;
+  color: #fff;
+}
+.modal-btn--primary:hover {
+  background: #5a51e6;
+}
+.modal-btn--secondary {
+  background: #fff;
+  border-color: #e2e0f0;
+  color: #555;
+}
+.modal-btn--secondary:hover {
+  border-color: #6c63ff;
+  color: #6c63ff;
+}
+
+@keyframes modal-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes modal-pop-in {
+  from { opacity: 0; transform: scale(0.96) translateY(6px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+[data-theme='dark'] .modal-card {
+  background: #1c1c2b;
+}
+[data-theme='dark'] .modal-title {
+  color: #e8e6f5;
+}
+[data-theme='dark'] .modal-body {
+  color: #cfcfe0;
+}
+[data-theme='dark'] .modal-btn--secondary {
+  background: #1c1c2b;
+  border-color: #3a3a55;
+  color: #cfcfe0;
+}

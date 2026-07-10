@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import SocialButtons from '../Login/SocialButtons';
 import { register } from '../../axios/userApi';
+import { useModal } from '../common/ModalProvider';
 
 const validate = {
   name: (v) => {
@@ -33,6 +34,7 @@ const validate = {
 };
 
 function SignupForm({ theme = 'blue', onLoginClick }) {
+  const { alert } = useModal(); // 수정된 부분: 브라우저 기본 alert() 대신 커스텀 모달 사용
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -79,7 +81,10 @@ function SignupForm({ theme = 'blue', onLoginClick }) {
     setErrors((prev) => ({ ...prev, [field]: err }));
   };
 
-  const handleSubmit = async () => {
+  // 수정된 부분: handleSubmit이 이벤트(e)를 받아서 e.preventDefault()를 호출하도록 변경
+  // 이유: <form onSubmit>으로 감싸면 기본적으로 페이지가 새로고침되는데, 그걸 막아야 함
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setTouched({
       name: true,
       email: true,
@@ -106,7 +111,8 @@ function SignupForm({ theme = 'blue', onLoginClick }) {
     }
 
     if (!form.agreed) {
-      alert('이용약관 및 개인정보처리방침에 동의해주세요');
+      // 수정된 부분: alert() → await alert() (커스텀 모달로 교체)
+      await alert('이용약관 및 개인정보처리방침에 동의해주세요');
       return;
     }
 
@@ -119,12 +125,13 @@ function SignupForm({ theme = 'blue', onLoginClick }) {
     try {
       const rdata = await register(joinData);
       console.log('register 성공:', rdata);
-      // TODO : 안내 모달
-      alert('회원가입 성공!');
+      // 수정된 부분: alert() → await alert() (커스텀 모달로 교체)
+      await alert('회원가입 성공!');
       onLoginClick();
     } catch (error) {
       console.log('register 실패:', error.response?.data || error);
-      alert(error.response?.data?.error || '회원가입 중 오류가 발생했습니다.');
+      // 수정된 부분: alert() → await alert() (커스텀 모달로 교체)
+      await alert(error.response?.data?.error || '회원가입 중 오류가 발생했습니다.');
     }
   };
 
@@ -136,8 +143,11 @@ function SignupForm({ theme = 'blue', onLoginClick }) {
 
   const showMsg = (field) => errors[field] && touched[field];
 
+  // 추가된 부분: <div>를 <form onSubmit={handleSubmit}>로 교체
+  // 이유: 회원가입 폼 마지막 입력창에서 Enter를 누르면 바로 제출되게 하려면
+  // 실제 <form> 태그가 필요함
   return (
-    <div className={`login-form signup-form--${theme}`}>
+    <form className={`login-form signup-form--${theme}`} onSubmit={handleSubmit}>
       <h2>회원가입</h2>
       <p className="login-sub">이메일로 간편하게 계정을 만들어보세요</p>
 
@@ -259,9 +269,11 @@ function SignupForm({ theme = 'blue', onLoginClick }) {
         </span>
       </label>
 
+      {/* 수정된 부분: onClick={handleSubmit} 제거하고 type="submit"으로 변경
+          이유: <form onSubmit>이 이제 제출을 처리하므로 중복 호출 방지 */}
       <button
         className={`login-submit signup-submit--${theme}`}
-        onClick={handleSubmit}
+        type="submit"
       >
         회원가입
       </button>
@@ -283,7 +295,7 @@ function SignupForm({ theme = 'blue', onLoginClick }) {
         <span>소셜 계정으로 간편 가입</span>
       </div>
       <SocialButtons />
-    </div>
+    </form>
   );
 }
 
