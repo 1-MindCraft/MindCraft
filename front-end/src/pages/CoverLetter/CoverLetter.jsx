@@ -157,8 +157,10 @@ function CoverLetterPage({ onBackToMindMap }) {
         const mapped = mapMaster(created);
         setMasters((prev) => prev.map((m) => (m.id === current.id ? mapped : m)));
         setSelectedMasterId(mapped.id);
-        // 추가된 부분: 생성 성공 알림
+        // 추가된 부분: 생성 성공 알림 — 확인 누르면 편집 화면으로 이동
         await alert('자소서 마스터가 저장되었습니다.');
+        setEditingId(mapped.id);
+        setView('edit');
       }
     } catch (error) {
       console.error('자소서 마스터 저장 실패:', error.response?.data || error);
@@ -320,6 +322,7 @@ function CoverLetterPage({ onBackToMindMap }) {
           onSettingsToggle={toggleSettings}
           navLabel="← 자소서 마스터로 돌아가기"
           onNav={handleBackToMasterList}
+          className="cl-toolbar--master"
         />
 
         <div className="cl-content">
