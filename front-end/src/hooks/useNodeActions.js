@@ -13,11 +13,11 @@ export function useNodeActions(id, data, position) {
   const { confirm } = useModal(); // 수정된 부분: 브라우저 기본 confirm() 대신 커스텀 모달 사용
 
   const handleLabelChange = useCallback(
-    (e) => {
+    (label) => {
       setNodes((nodes) =>
         nodes.map((node) =>
           node.id === id
-            ? { ...node, data: { ...node.data, label: e.target.value } }
+            ? { ...node, data: { ...node.data, label } }
             : node
         )
       );

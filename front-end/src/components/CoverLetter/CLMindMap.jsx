@@ -31,9 +31,7 @@ function CLMindMap() {
   // 여기서 한 번 조회해서 채워줌. (반대로 /mindmap을 이미 거쳐서 mindMapId가
   // 있는 상태라면 여기서 또 fetch하지 않음 — 편집 중이던 내용을 덮어쓰지 않기 위함)
   useEffect(() => {
-    if (!mindMapId) {
-      fetchMindMap().catch((err) => console.error('마인드맵 조회 실패:', err));
-    }
+    fetchMindMap().catch((err) => console.error('마인드맵 조회 실패:', err));
     // 마운트 시 한 번만 확인하면 되므로 의도적으로 deps를 비워둠
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -85,11 +83,6 @@ function CLMindMap() {
             </p>
           </div>
         )}
-      </div>
-
-      {/* 기존 그대로: 미니맵 장식 (실제 React Flow MiniMap 아님, 자리표시자) */}
-      <div className="cl-minimap">
-        <div className="mm-minimap-inner" />
       </div>
     </div>
   );
