@@ -1,9 +1,18 @@
 import jwtAxios  from "../utils/JwtUtil";
 import ApiURL from "./ApiURL";
 
-// 자소서 마스터 조회/생성 (JWT 사용자 기준, 없으면 생성)
-export const getOrCreateCoverLetter = async () =>{
+// 추가된 부분: 자소서 마스터 목록 조회 (V2, 1:N)
+// 이유: 백엔드 GET /coverletters가 이제 "조회 또는 생성" 단건이 아니라 배열을 반환하도록 바뀌어서,
+// 이름도 그 의미에 맞게 getCoverLetterList로 바꿈 (기존 getOrCreateCoverLetter는 삭제)
+export const getCoverLetterList = async () => {
     const res = await jwtAxios.get(`${ApiURL}/coverletters`);
+    return res.data;
+};
+
+// 추가된 부분: 자소서 마스터 신규 생성 (V2, 1:N)
+// 이유: V1엔 없던 POST 엔드포인트가 새로 생겨서, 그걸 호출하는 함수도 새로 추가
+export const createCoverLetter = async (dto) => {
+    const res = await jwtAxios.post(`${ApiURL}/coverletters`, dto);
     return res.data;
 };
 

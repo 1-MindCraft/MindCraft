@@ -13,7 +13,8 @@ import TopButton from '../../components/Main/TopButton';
 import FloatingCta from '../../components/Main/FloatingCta';
 import LoginPage from '../Login/Login';
 import SignupPage from '../Signup/Signup';
-import { getCookie, removeCookie } from '../../utils/cookieUtil';
+// 수정된 부분: removeCookie import 삭제 (이유: handleLogout 함수를 없애면서 더 이상 여기서 안 씀)
+import { getCookie } from '../../utils/cookieUtil';
 
 import useScrollButtons from '../../hooks/useScrollButtons';
 
@@ -75,10 +76,11 @@ function MainPage() {
   };
   const ctaLabel = isMember ? '마인드맵 바로가기' : undefined; // undefined면 각 컴포넌트 기본 문구 사용
 
-  // 헤더 맨 오른쪽 버튼(Nav)의 로그아웃 처리: 쿠키 지우고 새로고침해서 비회원 화면으로 되돌림
-  const handleLogout = () => {
-    removeCookie('user');
-    window.location.reload();
+  // 수정된 부분: handleLogout을 handleGoToMyPage로 교체
+  // 이유: 로그아웃은 MindMap/CoverLetter 헤더 드롭다운에 이미 있어서, 메인 화면 버튼은
+  // 이제 로그아웃 대신 /account로 이동시키는 역할로 바뀜
+  const handleGoToMyPage = () => {
+    navigate('/account');
   };
 
   const scrollToTop = () => {
@@ -87,7 +89,7 @@ function MainPage() {
 
   return (
     <div className="mindcraft-page">
-      <Nav isMember={isMember} onLoginClick={openLogin} onLogout={handleLogout} />
+      <Nav isMember={isMember} onLoginClick={openLogin} onGoToMyPage={handleGoToMyPage} />
       <Hero onStartClick={handleCtaClick} ctaLabel={ctaLabel} />
       <HowItWorks />
 

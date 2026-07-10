@@ -4,23 +4,21 @@ import com.mindcraft.backend.coverletter.dto.CoverLetterDetailDto;
 import com.mindcraft.backend.coverletter.dto.CoverLetterRequestDto;
 import com.mindcraft.backend.coverletter.dto.CoverLetterSummaryDto;
 import com.mindcraft.backend.coverletter.entity.CoverLetter;
-import com.mindcraft.backend.coverletter.mapper.CoverLetterMapper;
 import com.mindcraft.backend.coverletter.export.service.CoverLetterExportService; // 추가된 부분: export 서비스 사용을 위해 추가
+import com.mindcraft.backend.coverletter.mapper.CoverLetterMapper;
 import com.mindcraft.backend.coverletter.service.CoverLetterService;
 import com.mindcraft.backend.user.dto.UserSecurityDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders; // 추가된 부분: Content-Disposition 헤더 설정에 필요
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType; // 추가된 부분: PDF/DOCX Content-Type 지정에 필요
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.net.URLEncoder; // 추가된 부분: 한글 파일명을 다운로드 헤더에 안전하게 넣기 위해 필요
 import java.nio.charset.StandardCharsets; // 추가된 부분: 위와 동일한 이유
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -102,39 +100,39 @@ public class CoverLetterController {
                 "message", "자소서 기본 정보가 수정되었습니다."
         ), HttpStatus.OK);
     }
-
-    // 추가된 부분: PDF 내보내기 엔드포인트 (GET /coverletters/{id}/export/pdf)
-    // 이유: 프론트에서 브라우저 자체적으로(jsPDF+html2canvas 이미지 캡처 방식) 만들던 PDF를
-    // 서버에서 실제 텍스트 PDF로 만들어주기 위해 추가. 한글이 이미지가 아니라 진짜 텍스트로
-    // 들어가서 복사/검색이 가능해짐.
-    @GetMapping(value = "/{id}/export/pdf")
-    public ResponseEntity<byte[]> exportPdf(@PathVariable("id") Long id) {
-        return coverLetterService.findById(id)
-                .map(dto -> {
-                    byte[] pdfBytes = coverLetterExportService.toPdf(dto);
-                    return ResponseEntity.ok()
-                            .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition(dto.getTitle(), "pdf"))
-                            .contentType(MediaType.APPLICATION_PDF)
-                            .body(pdfBytes);
-                })
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-    }
-
-    // 추가된 부분: DOCX 내보내기 엔드포인트 (GET /coverletters/{id}/export/docx)
-    // 이유: 위 PDF와 같은 이유 + 프론트에서 쓰던 docx 라이브러리를 서버로 옮기기 위해 추가
-    @GetMapping(value = "/{id}/export/docx")
-    public ResponseEntity<byte[]> exportDocx(@PathVariable("id") Long id) {
-        return coverLetterService.findById(id)
-                .map(dto -> {
-                    byte[] docxBytes = coverLetterExportService.toDocx(dto);
-                    return ResponseEntity.ok()
-                            .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition(dto.getTitle(), "docx"))
-                            .contentType(MediaType.parseMediaType(
-                                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
-                            .body(docxBytes);
-                })
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-    }
+//
+//    // 추가된 부분: PDF 내보내기 엔드포인트 (GET /coverletters/{id}/export/pdf)
+//    // 이유: 프론트에서 브라우저 자체적으로(jsPDF+html2canvas 이미지 캡처 방식) 만들던 PDF를
+//    // 서버에서 실제 텍스트 PDF로 만들어주기 위해 추가. 한글이 이미지가 아니라 진짜 텍스트로
+//    // 들어가서 복사/검색이 가능해짐.
+//    @GetMapping(value = "/{id}/export/pdf")
+//    public ResponseEntity<byte[]> exportPdf(@PathVariable("id") Long id) {
+//        return coverLetterService.findById(id)
+//                .map(dto -> {
+//                    byte[] pdfBytes = coverLetterExportService.toPdf(dto);
+//                    return ResponseEntity.ok()
+//                            .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition(dto.getTitle(), "pdf"))
+//                            .contentType(MediaType.APPLICATION_PDF)
+//                            .body(pdfBytes);
+//                })
+//                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+//    }
+//
+//    // 추가된 부분: DOCX 내보내기 엔드포인트 (GET /coverletters/{id}/export/docx)
+//    // 이유: 위 PDF와 같은 이유 + 프론트에서 쓰던 docx 라이브러리를 서버로 옮기기 위해 추가
+//    @GetMapping(value = "/{id}/export/docx")
+//    public ResponseEntity<byte[]> exportDocx(@PathVariable("id") Long id) {
+//        return coverLetterService.findById(id)
+//                .map(dto -> {
+//                    byte[] docxBytes = coverLetterExportService.toDocx(dto);
+//                    return ResponseEntity.ok()
+//                            .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition(dto.getTitle(), "docx"))
+//                            .contentType(MediaType.parseMediaType(
+//                                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
+//                            .body(docxBytes);
+//                })
+//                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+//    }
 
     // 추가된 부분: 다운로드 파일명을 만드는 헬퍼
     // 이유: 두 엔드포인트가 똑같은 파일명 규칙(제목 + 확장자)을 쓰므로 중복을 없애기 위해 추가

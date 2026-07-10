@@ -3,11 +3,13 @@ import { login } from '../axios/userApi';
 import { getCookie, setCookie, removeCookie } from '../utils/cookieUtil';
 import { useNavigation } from './useNavigation';
 import useLoginStore from '../zustand/loginState';
+import { useModal } from '../components/common/ModalProvider';
 
 export const useLoginActions = () => {
   const { moveToMain } = useNavigation();
   const setLoginState = useLoginStore((state) => state.setLoginState);
   const resetState = useLoginStore((state) => state.resetState);
+  const { alert } = useModal(); // 수정된 부분: 브라우저 기본 alert() 대신 커스텀 모달 사용
 
   const saveAsCookie = useCallback(
     (data) => {
@@ -39,12 +41,13 @@ export const useLoginActions = () => {
     [saveAsCookie]
   );
 
-  const doLogout = useCallback(() => {
+  const doLogout = useCallback(async () => {
     removeCookie('user');
     resetState();
-    alert('로그아웃 되었습니다!');
+    // 수정된 부분: alert() → await alert() (커스텀 모달로 교체)
+    await alert('로그아웃 되었습니다!');
     moveToMain();
-  }, [resetState, moveToMain]);
+  }, [resetState, moveToMain, alert]);
 
   const updateLoginName = useCallback(
     (newName) => {

@@ -8,10 +8,15 @@ import MindMapToolbar from '../../components/MindMap/MindMapToolbar';
 import MindMapSidebar from '../../components/MindMap/MindMapSidebar';
 import MindMapCanvas from '../../components/MindMap/MindMapCanvas';
 import { getDescendantIds } from '../../utils/mindmapTree';
+import { useModal } from '../../components/common/ModalProvider';
 
 const HISTORY_DEBOUNCE_MS = 400; // 드래그 등 연속 변경을 하나의 undo 단위로 묶기 위한 대기 시간
 
-function MindMapPage({ userName = '사용자' }) {
+// [수정됨 | 2026-07-10]
+// 프로필 표시용 userName prop을 제거했습니다.
+// 수정 이유: 로그인 사용자 이름은 ProfileDropdown에서 Zustand를 통해 직접 조회합니다.
+function MindMapPage() {
+  const { alert, confirm } = useModal(); // 수정된 부분: 브라우저 기본 alert()/confirm() 대신 커스텀 모달 사용
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [lastSaved, setLastSaved] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -24,10 +29,11 @@ function MindMapPage({ userName = '사용자' }) {
   const fetchMindMap = useMindMapStore((state) => state.fetchMindMap);
 
   useEffect(() => {
-    fetchMindMap().catch(() => {
-      alert('마인드맵을 불러오지 못했습니다.');
+    fetchMindMap().catch(async () => {
+      // 수정된 부분: alert() → await alert() (커스텀 모달로 교체)
+      await alert('마인드맵을 불러오지 못했습니다.');
     });
-  }, [fetchMindMap]);
+  }, [fetchMindMap, alert]);
 
   // ── 실행 취소(undo) / 다시 실행(redo) ──
   // history는 nodes의 스냅샷 배열. 드래그처럼 짧은 시간에 여러 번 바뀌는 경우를 하나로 묶기 위해 디바운스함
@@ -77,14 +83,14 @@ function MindMapPage({ userName = '사용자' }) {
   // 사이드바에서 노드 삭제 버튼을 눌렀을 때: 해당 노드 + 모든 자손을 함께 제거
   // (캔버스의 Delete 키 삭제와 동일한 getDescendantIds 로직을 그대로 재사용)
   const handleDeleteNode = useCallback(
-    (nodeId) => {
+    async (nodeId) => {
       const idsToDelete = [nodeId, ...getDescendantIds(nodeId, nodes)];
 
-      if (
-        !confirm(
-          `이 노드를 삭제하시겠습니까?\n(총 ${idsToDelete.length} 개의 노드가 삭제됩니다.)`
-        )
-      ) {
+      // 수정된 부분: confirm() → await confirm() (커스텀 모달로 교체)
+      const ok = await confirm(
+        `이 노드를 삭제하시겠습니까?\n(총 ${idsToDelete.length} 개의 노드가 삭제됩니다.)`
+      );
+      if (!ok) {
         return;
       }
 
@@ -92,7 +98,7 @@ function MindMapPage({ userName = '사용자' }) {
         prevNodes.filter((n) => !idsToDelete.includes(n.id))
       );
     },
-    [nodes, setNodes]
+    [nodes, setNodes, confirm]
   );
 
   const handleSave = useCallback(async () => {
@@ -103,15 +109,16 @@ function MindMapPage({ userName = '사용자' }) {
       setLastSaved(new Date());
     } catch (error) {
       console.log('저장 실패: ', error.response?.data || error);
-      alert(error.response?.data?.error || '저장 중 오류가 발생했습니다.');
+      // 수정된 부분: alert() → await alert() (커스텀 모달로 교체)
+      await alert(error.response?.data?.error || '저장 중 오류가 발생했습니다.');
     } finally {
       setIsSaving(false);
     }
-  }, [isSaving, saveMindMap]);
+  }, [isSaving, saveMindMap, alert]);
 
   return (
     <div className="mm-page">
-      <MindMapHeader userName={userName} />
+      <MindMapHeader />
 
       <div className="mm-body">
         <MindMapSidebar

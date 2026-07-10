@@ -6,8 +6,12 @@ import ProfileDropdown from '../common/ProfileDropdown';
 import AppHeader from '../common/AppHeader';
 import useMindMapStore from '../../zustand/mindMapStore';
 
-function MindMapHeader({ userName = '사용자' }) {
-  const navigate = useNavigate(); // 새로 추가된 부분 // React Router의 navigate 함수 가져오기
+// [수정됨 | 2026-07-10]
+// userName prop을 제거했습니다.
+// 수정 이유: 프로필 이름은 ProfileDropdown이 Zustand loginState에서 직접 조회하므로
+// Header에서 사용자 이름을 전달할 필요가 없습니다.
+function MindMapHeader() {
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef(null);
   const title = useMindMapStore((state) => state.title);
@@ -49,7 +53,16 @@ function MindMapHeader({ userName = '사용자' }) {
               maxLength={30}
             />
           ) : (
-            <span className="mm-user-name">{title}</span>
+            // 추가된 부분: onDoubleClick 추가
+            // 이유: 기존엔 펜 아이콘 클릭으로만 편집모드에 들어갈 수 있었는데,
+            // 제목을 더블클릭해도 똑같이 편집모드로 들어가게 해달라는 요청이 있어서 추가
+            <span
+              className="mm-user-name"
+              onDoubleClick={() => setIsEditing(true)}
+              title="더블클릭해서 제목 수정"
+            >
+              {title}
+            </span>
           )}
           <button
             className="mm-icon-btn mm-icon-img-btn"
@@ -65,11 +78,11 @@ function MindMapHeader({ userName = '사용자' }) {
           <button className="mm-btn-keyword">
             <span>✦</span> 키워드 추출
           </button>
-          <button className="mm-btn-export" onClick={() => navigate('/coverletter')}> {/* // 새로 추가된 부분 // navigate 함수를 사용하여 '/coverletter' 경로로 이동 */}
+          <button className="mm-btn-export" onClick={() => navigate('/coverletter')}>
             <img src={EXPORT_SRC} alt="생성하기" className="mm-header-btn-icon" />{' '}
             생성하기
           </button>
-          <ProfileDropdown userName={userName} />
+          <ProfileDropdown />
         </div>
       }
     />

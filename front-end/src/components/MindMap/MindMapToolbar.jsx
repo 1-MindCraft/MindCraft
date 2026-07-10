@@ -123,12 +123,8 @@ function MindMapToolbar({
             ⛶
           </button>
         </div>
-
-        <div className="mm-toolbar-divider" />
-
-        <div className="mm-toolbar-group">
-          <button className="mm-tool-btn mm-btn-theme">테마 ▾</button>
-        </div>
+        {/* 수정된 부분: "테마 ▾" 버튼과 그 앞 구분선을 여기서 삭제함
+            이유: 아직 미완성 기능이라 보류 중이었는데, 나중에 추가하는 방식으로 논의를 결정해서 삭제 */}
       </div>
     </div>
   );
