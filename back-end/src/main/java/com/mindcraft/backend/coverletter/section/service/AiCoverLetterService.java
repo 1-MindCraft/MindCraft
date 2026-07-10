@@ -36,7 +36,7 @@ public class AiCoverLetterService {
         this.aiServerBaseUrl = aiServerBaseUrl;
     }
 
-    public String generateAnswer(
+    public AiGenerateResponse generateAnswer(
             Long coverLetterId,
             String companyName,
             String companyIdeal,
@@ -62,6 +62,8 @@ public class AiCoverLetterService {
         String requestJson = gson.toJson(requestPayload);
         log.info("AI request payload coverLetterId={} request={}", coverLetterId, requestJson);
 
+
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(aiServerBaseUrl + "/coverletters/" + coverLetterId + "/sections"))
                 .timeout(Duration.ofSeconds(60))
@@ -86,7 +88,10 @@ public class AiCoverLetterService {
                 throw new AiGenerationException("AI server returned an empty response.");
             }
 
-            return parsedResponse.answer();
+            log.info("AI parsed selected={} context={}",
+                    parsedResponse.selectedNodeIds(), parsedResponse.contextNodeIds());
+
+            return parsedResponse;
         } catch (IOException | InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new AiGenerationException("AI 자소서 생성 중 통신 오류가 발생했습니다.", e);
