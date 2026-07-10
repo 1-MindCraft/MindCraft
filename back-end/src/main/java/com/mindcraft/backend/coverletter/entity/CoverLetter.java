@@ -1,5 +1,6 @@
 package com.mindcraft.backend.coverletter.entity;
 
+import com.mindcraft.backend.mindmap.entity.MindMap;
 import com.mindcraft.backend.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,7 +28,11 @@ public class CoverLetter {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    private Long mindmapId; // 나중에 mindmap과 연관 관계 설정 필요 ( DBeaver )
+//    private Long mindmapId; // 나중에 mindmap과 연관 관계 설정 필요 ( DBeaver )
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mindmap_id", nullable = false)
+    private MindMap mindMap;
 
     private String title;
     private String companyName;
