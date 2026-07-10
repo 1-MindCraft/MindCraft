@@ -26,8 +26,8 @@ _http_client = httpx.Client(verify=False)
 _client = OpenAI(api_key=settings.OPENAI_API_KEY, http_client=_http_client)
 
 EMBEDDING_MODEL = "text-embedding-3-small"
-TOP_K = 5                    # 선별 최대 개수
-SIMILARITY_THRESHOLD = 0.3   # 이 미만은 관련 없음으로 제외
+TOP_K = 4                    # 선별 최대 개수
+SIMILARITY_THRESHOLD = 0.25   # 이 미만은 관련 없음으로 제외
 
 
 class EmbeddingError(Exception):
@@ -141,7 +141,7 @@ def select_relevant_nodes(
     # 유사도 내림차순 정렬
     ranked = sorted(zip(candidates, sims), key=lambda x: x[1], reverse=True)
 
-    # [임시] 점수 확인용 로그
+    # TODK: 배포 전 제거 점수 확인용 로그
     print("\n=== 노드별 유사도 ===")
     for n, s in ranked:
         print(f"{s:.3f}  {n.topic}")

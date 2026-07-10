@@ -20,13 +20,22 @@ import useMindMapStore from '../../zustand/mindMapStore';
 import { useModal } from '../../components/common/ModalProvider';
 
 // 백엔드 문항(section) → 화면 형태로 변환
-const mapSection = (s) => ({
-  id: s.id,
-  title: s.question,
-  content: s.answer,
-  sourceNodes: (s.sourceNode || []).map((node) => node?.data?.label).filter(Boolean),
-});
+const mapSection = (s) => {
+  const selectedIds = s.selectedNodeIds || [];
+  const allNodes = s.sourceNode || [];
 
+  return {
+    id: s.id,
+    title: s.question,
+    content: s.answer,
+    sourceNodes: allNodes
+      .filter((node) => selectedIds.includes(node.id))
+      .map((node) => node?.data?.label)
+      .filter(Boolean),
+    selectedNodeIds: selectedIds,
+    contextNodeIds: s.contextNodeIds || [],
+  };
+};
 // 추가된 부분: 백엔드 자소서 마스터(snake_case) → 화면 형태(camelCase)로 변환
 // 이유: 자소서 마스터 목록/폼 화면에서 쓸 데이터 형태가 필요해서 추가
 const mapMaster = (m) => ({
