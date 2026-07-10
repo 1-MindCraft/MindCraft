@@ -6,7 +6,11 @@ import ProfileDropdown from '../common/ProfileDropdown';
 import AppHeader from '../common/AppHeader';
 import useMindMapStore from '../../zustand/mindMapStore';
 
-function MindMapHeader({ userName = '사용자' }) {
+// [수정됨 | 2026-07-10]
+// userName prop을 제거했습니다.
+// 수정 이유: 프로필 이름은 ProfileDropdown이 Zustand loginState에서 직접 조회하므로
+// Header에서 사용자 이름을 전달할 필요가 없습니다.
+function MindMapHeader() {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef(null);
@@ -78,7 +82,7 @@ function MindMapHeader({ userName = '사용자' }) {
             <img src={EXPORT_SRC} alt="생성하기" className="mm-header-btn-icon" />{' '}
             생성하기
           </button>
-          <ProfileDropdown userName={userName} />
+          <ProfileDropdown />
         </div>
       }
     />

@@ -144,7 +144,10 @@ function CLHeader({ userName = '프로젝트 매니저 지원', onBackToMindMap,
             <img src={DOCX_SRC} alt="DOCX" className="cl-file-icon" />{' '}
             {isExportingDocx ? '내보내는 중...' : 'DOCX'}
           </button>
-          <ProfileDropdown userName="마인드크래프트 회원" />
+          {/* [수정됨 | 2026-07-10]
+              고정 사용자 이름 prop을 제거했습니다.
+              수정 이유: ProfileDropdown이 Zustand loginState.name을 직접 사용합니다. */}
+          <ProfileDropdown />
         </div>
       }
     />

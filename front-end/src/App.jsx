@@ -15,7 +15,10 @@ function App() {
     <>
       <Routes>
         <Route path="/" element={<MainPage />} />
-        <Route path="/mindmap" element={<MindMapPage userName="홍길동" />} />
+        {/* [수정됨 | 2026-07-10]
+            마인드맵 화면에 전달하던 고정 사용자 이름 prop을 제거했습니다.
+            수정 이유: 로그인 사용자 이름은 Zustand loginState.name을 기준으로 표시됩니다. */}
+        <Route path="/mindmap" element={<MindMapPage />} />
         <Route
           path="/coverletter"
           element={<CoverLetterPage userName="프로젝트 매니저 지원" />}

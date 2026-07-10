@@ -12,7 +12,10 @@ import { useModal } from '../../components/common/ModalProvider';
 
 const HISTORY_DEBOUNCE_MS = 400; // 드래그 등 연속 변경을 하나의 undo 단위로 묶기 위한 대기 시간
 
-function MindMapPage({ userName = '사용자' }) {
+// [수정됨 | 2026-07-10]
+// 프로필 표시용 userName prop을 제거했습니다.
+// 수정 이유: 로그인 사용자 이름은 ProfileDropdown에서 Zustand를 통해 직접 조회합니다.
+function MindMapPage() {
   const { alert, confirm } = useModal(); // 수정된 부분: 브라우저 기본 alert()/confirm() 대신 커스텀 모달 사용
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [lastSaved, setLastSaved] = useState(null);
@@ -115,7 +118,7 @@ function MindMapPage({ userName = '사용자' }) {
 
   return (
     <div className="mm-page">
-      <MindMapHeader userName={userName} />
+      <MindMapHeader />
 
       <div className="mm-body">
         <MindMapSidebar
