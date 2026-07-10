@@ -6,4 +6,6 @@ public interface MindMapService {
     MindMap getOrCreateMindMap(long userId);
 
     MindMap saveMindMap(MindMap mindMap, long userId);
+
+    MindMap getMindMap(long userId, long mindMapId);
 }
