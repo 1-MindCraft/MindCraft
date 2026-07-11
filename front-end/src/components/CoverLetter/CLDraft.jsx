@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import PENCIL_SRC from '../../assets/pencil.png';
 
-function CLDraft({ sections, selectedId, onSelect, onAddSection, onUpdateTitle }) {
+// 수정된 부분: draftTitle prop 추가 (이유: 자소서 마스터의 title을 CLDraft 헤더에 표시하기 위해 외부에서 받아야 함)
+function CLDraft({ sections, selectedId, onSelect, onAddSection, onUpdateTitle, draftTitle = '자기소개서 초안' }) {
   const selectedIndex = sections.findIndex((s) => s.id === selectedId);
   const selected = sections[selectedIndex];
   const totalChars = sections.reduce((sum, s) => sum + (s.content?.length || 0), 0);
@@ -47,7 +48,8 @@ function CLDraft({ sections, selectedId, onSelect, onAddSection, onUpdateTitle }
       {/* 헤더 */}
       <div className="cl-draft-header">
         <div>
-          <div className="cl-draft-title">자기소개서 초안</div>
+          {/* 수정된 부분: 하드코딩된 "자기소개서 초안" → draftTitle prop으로 교체 (이유: 자소서 마스터의 title과 동기화하기 위해) */}
+          <div className="cl-draft-title">{draftTitle}</div>
           <div className="cl-draft-hint">문항을 클릭하면 해당 내용의 참고 노드를 마인드맵에서 확인할 수 있습니다.</div>
         </div>
         <div className="cl-draft-total">총 글자 수 : {totalChars.toLocaleString()}자</div>

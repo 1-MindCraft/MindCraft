@@ -326,6 +326,7 @@ function CoverLetterPage({ onBackToMindMap }) {
             onSelect={setSelectedId}
             onAddSection={addSection}
             onUpdateTitle={updateSectionTitle}
+            draftTitle={userName}
           />
 
           <CLSettings
