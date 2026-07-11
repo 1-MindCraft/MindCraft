@@ -262,79 +262,76 @@ function CoverLetterPage({ onBackToMindMap }) {
     }
   };
 
-  // 추가된 부분: view === 'list'일 때 자소서 마스터 목록/폼 화면을 반환
-  if (view === 'list') {
-    if (loadingList) {
-      return <div className="cl-page">자소서 목록을 불러오는 중...</div>;
-    }
-    return (
-      <div className="cl-page">
-        <CLHeader userName="자소서 마스터" />
+  // 수정된 부분: CLMindMap을 두 화면 바깥으로 꺼내서 하나만 공유
+  // 이유: 두 개의 CLMindMap이 각각 마운트/언마운트되면서 React Flow 리렌더링이 일어나 깜빡임이 생겼음
+  return (
+    <div className="cl-page" style={{ display: 'flex', flexDirection: 'column' }}>
+      {/* 헤더 — 화면에 따라 다른 헤더 */}
+      {view === 'list'
+        ? <CLHeader userName="자소서 마스터" />
+        : <CLHeader userName={userName} onBackToMindMap={onBackToMindMap} coverLetterId={editingId} />
+      }
 
-        <div className="cl-body">
+      <div className="cl-body">
+        {/* 툴바 — 화면에 따라 다른 툴바 */}
+        {view === 'list' ? (
           <CLToolbar
             navLabel="자소서 편집으로 이동 →"
             onNav={handleGoToEdit}
             showSettingsToggle={false}
             className="cl-toolbar--master"
           />
+        ) : (
+          <CLToolbar
+            settingsOpen={settingsOpen}
+            onSettingsToggle={toggleSettings}
+            navLabel="← 자소서 마스터로 돌아가기"
+            onNav={handleBackToMasterList}
+            className="cl-toolbar--master"
+          />
+        )}
 
-          <div className="cl-content cl-content--master">
-            <CLMindMap />
-            <div className="cl-content-divider" />
-
-            <CLMasterDraft
-              masters={masters}
-              selectedId={selectedMasterId}
-              onSelect={setSelectedMasterId}
-              onAdd={handleAddMaster}
-              onFieldChange={handleMasterFieldChange}
-              onSubmit={handleMasterSubmit}
-              saving={savingMaster}
-            />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // view === 'edit' — 문항 편집 화면 (기존 그대로)
-  if (loadingEdit) {
-    return <div className="cl-page">자소서를 불러오는 중...</div>;
-  }
-
-  return (
-    <div className="cl-page">
-      <CLHeader userName={userName} onBackToMindMap={onBackToMindMap} coverLetterId={editingId} />
-
-      <div className="cl-body">
-        <CLToolbar
-          settingsOpen={settingsOpen}
-          onSettingsToggle={toggleSettings}
-          navLabel="← 자소서 마스터로 돌아가기"
-          onNav={handleBackToMasterList}
-          className="cl-toolbar--master"
-        />
-
-        <div className="cl-content">
+        <div className={`cl-content ${view === 'list' ? 'cl-content--master' : ''}`}>
+          {/* 추가된 부분: CLMindMap 하나를 두 화면이 공유 — DOM 유지로 깜빡임 제거 */}
           <CLMindMap />
           <div className="cl-content-divider" />
 
-          <CLDraft
-            sections={sections}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-            onAddSection={addSection}
-            onUpdateTitle={updateSectionTitle}
-            draftTitle={userName}
-          />
+          {/* 마스터 목록/폼 — display:none으로 숨김/표시 */}
+          <div style={{ display: view === 'list' ? 'contents' : 'none' }}>
+            {!loadingList && (
+              <CLMasterDraft
+                masters={masters}
+                selectedId={selectedMasterId}
+                onSelect={setSelectedMasterId}
+                onAdd={handleAddMaster}
+                onFieldChange={handleMasterFieldChange}
+                onSubmit={handleMasterSubmit}
+                saving={savingMaster}
+              />
+            )}
+          </div>
 
-          <CLSettings
-            open={settingsOpen}
-            onToggle={toggleSettings}
-            onGenerate={handleGenerate}
-            generating={generating}
-          />
+          {/* 문항 편집 — display:none으로 숨김/표시 */}
+          <div style={{ display: view === 'edit' ? 'contents' : 'none' }}>
+            {!loadingEdit && (
+              <>
+                <CLDraft
+                  sections={sections}
+                  selectedId={selectedId}
+                  onSelect={setSelectedId}
+                  onAddSection={addSection}
+                  onUpdateTitle={updateSectionTitle}
+                  draftTitle={userName}
+                />
+                <CLSettings
+                  open={settingsOpen}
+                  onToggle={toggleSettings}
+                  onGenerate={handleGenerate}
+                  generating={generating}
+                />
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
