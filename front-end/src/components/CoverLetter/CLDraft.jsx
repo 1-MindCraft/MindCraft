@@ -97,7 +97,14 @@ function CLDraft({ sections, selectedId, onSelect, onAddSection, onUpdateTitle }
                 </div>
               ) : (
                 <div className="cl-detail-title-row">
-                  <div className="cl-detail-title">{selectedIndex + 1}. {selected.title}</div>
+                  {/* 추가된 부분: onDoubleClick 추가 (이유: 제목을 더블클릭해도 편집 모드로 들어가게 해달라는 요청) */}
+                  <div
+                    className="cl-detail-title"
+                    onDoubleClick={startEditTitle}
+                    title="더블클릭해서 제목 수정"
+                  >
+                    {selectedIndex + 1}. {selected.title}
+                  </div>
                   <button
                     className="mm-icon-btn mm-icon-img-btn"
                     onClick={startEditTitle}
