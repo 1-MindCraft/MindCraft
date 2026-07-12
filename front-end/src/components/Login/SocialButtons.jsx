@@ -5,6 +5,12 @@ function SocialButtons() {
   const handleGoogleLogin = () => {
     window.location.href = `${ApiURL}/oauth2/authorization/google`;
   };
+  const handleKaKaoLogin = () => {
+    window.location.href = `${ApiURL}/oauth2/authorization/kakao`;
+  };
+  const handleNaverLogin = () => {
+    window.location.href = `${ApiURL}/oauth2/authorization/naver`;
+  };
   return (
     <div className="login-social">
       {/* Google */}
@@ -46,7 +52,11 @@ function SocialButtons() {
       </button>
 
       {/* 카카오 */}
-      <button type="button" className="login-image-btn login-image-btn-kakao">
+      <button
+        type="button"
+        className="login-image-btn login-image-btn-kakao"
+        onClick={handleKaKaoLogin}
+      >
         <span className="login-social-icon">
           <svg viewBox="0 0 24 24" width="16" height="16">
             <path
@@ -59,7 +69,11 @@ function SocialButtons() {
       </button>
 
       {/* 네이버 */}
-      <button type="button" className="login-image-btn login-image-btn-naver">
+      <button
+        type="button"
+        className="login-image-btn login-image-btn-naver"
+        onClick={handleNaverLogin}
+      >
         <span className="login-social-icon login-social-icon-naver">N</span>
         네이버 로그인
       </button>

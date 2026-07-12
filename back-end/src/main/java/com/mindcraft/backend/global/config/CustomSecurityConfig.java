@@ -2,6 +2,7 @@ package com.mindcraft.backend.global.config;
 
 import com.mindcraft.backend.global.security.filter.JWTCheckFilter;
 import com.mindcraft.backend.global.security.handler.*;
+import com.mindcraft.backend.global.security.repository.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.mindcraft.backend.global.security.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -78,6 +79,8 @@ public class CustomSecurityConfig {
         );
 
         http.oauth2Login(oauth2 -> oauth2
+//                .authorizationEndpoint(endpoint -> endpoint
+//                        .authorizationRequestRepository(new HttpCookieOAuth2AuthorizationRequestRepository()))
                 .userInfoEndpoint(endpoint -> endpoint.userService(customOAuth2UserService))
                 .successHandler(new OAuth2SuccessHandler())
                 .failureHandler(new OAuth2FailHandler())
