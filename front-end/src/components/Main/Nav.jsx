@@ -1,9 +1,11 @@
 import React from 'react';
 import LOGO_SRC from '../../assets/MindCraft-Logo1.png';
+import ProfileDropdown from '../common/ProfileDropdown';
 
-// 수정된 부분: onLogout prop을 onGoToMyPage로 이름 변경
-// 이유: 이제 로그아웃이 아니라 마이페이지 이동 기능으로 바뀌어서 prop 이름도 그에 맞게 변경
-function Nav({ isMember, onLoginClick, onGoToMyPage }) {
+// 수정된 부분: onGoToMyPage prop 제거, ProfileDropdown 추가
+// 이유: 회원 전용 메인화면 우측 상단의 "마이페이지로 이동" 버튼을
+// Dropdown 형식의 Profile 컴포넌트로 교체하기로 결정
+function Nav({ isMember, onLoginClick }) {
   return (
     <nav className="nav">
       <a href="#" className="logo">
@@ -20,13 +22,10 @@ function Nav({ isMember, onLoginClick, onGoToMyPage }) {
         <a href="#how">서비스 소개</a>
         <a href="#features">사용 방법</a>
         <a href="#faq">FAQ</a>
-        {/* 수정된 부분: 회원일 때 "로그아웃" 대신 "마이페이지로 이동"으로 변경
-            이유: 로그아웃 기능은 MindMap/CoverLetter 헤더 드롭다운에 이미 있어서,
-            메인 화면 헤더 버튼은 마이페이지로 이동하는 용도로 바꾸기로 결정함 */}
+        {/* 수정된 부분: "마이페이지로 이동" 버튼 → ProfileDropdown으로 교체
+            이유: 회원일 때 우측 상단에 드롭다운 형식의 프로필을 넣어달라는 요청 */}
         {isMember ? (
-          <button className="nav-btn" onClick={onGoToMyPage}>
-            마이페이지로 이동
-          </button>
+          <ProfileDropdown showTheme={false} showHelp={false} />
         ) : (
           <button className="nav-btn" onClick={onLoginClick}>
             로그인 / 회원가입
