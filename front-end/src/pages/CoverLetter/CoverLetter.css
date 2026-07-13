@@ -128,11 +128,11 @@
   align-items: center;
   flex-shrink: 0;
 }
-/* 추가된 부분: cl-toolbar--master 전용 규칙
-   이유: 자소서 마스터 화면의 이동 버튼을 "자소서 마스터" 문구(왼쪽 마인드맵 42% + 헤더 좌측
-   padding 1.5rem 지점) 바로 위에 오도록 왼쪽 여백을 맞춤 */
-.cl-toolbar--master .cl-toolbar-left {
-  margin-left: calc(40.35% + 1.5rem);
+/* 수정된 부분: 두 화면(마스터/편집) 모두 버튼 위치를 같은 기준으로 맞추기 위해
+   cl-toolbar-left margin을 cl-toolbar--master 전용에서 공통으로 확장하고,
+   편집 화면 마인드맵도 42% 고정 폭으로 통일함 */
+.cl-toolbar-left {
+  margin-left: calc(42% + 1.5rem);
 }
 .cl-toolbar-left .mm-toolbar-divider {
   align-self: center;
@@ -200,7 +200,7 @@
 
 /* ─── 마인드맵 영역 ─── */
 .cl-mindmap {
-  flex: 1;
+  flex: 0 0 42%;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -420,10 +420,10 @@
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  max-width: 100%;
+  max-width: 420px;
 }
 .cl-master-label {
-  font-size: 1rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: #1a1a2e;
   margin-top: 0.6rem;
@@ -447,7 +447,6 @@
 }
 .cl-master-submit {
   margin-top: 1rem;
-  width: 100%;
   padding: 0.65rem;
   border: none;
   border-radius: 8px;
@@ -482,12 +481,14 @@
   width: 100%;
 }
 
+/* 추가된 부분: cursor:pointer 추가 (이유: 더블클릭으로 편집 가능하다는 걸 커서로도 알 수 있게) */
 .cl-detail-title {
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: 800;
   color: #1a1a2e;
   flex: 1;
   min-width: 0;
+  cursor: pointer;
 }
 
 .cl-detail-edit-btn {

@@ -76,20 +76,13 @@ function MainPage() {
   };
   const ctaLabel = isMember ? '마인드맵 바로가기' : undefined; // undefined면 각 컴포넌트 기본 문구 사용
 
-  // 수정된 부분: handleLogout을 handleGoToMyPage로 교체
-  // 이유: 로그아웃은 MindMap/CoverLetter 헤더 드롭다운에 이미 있어서, 메인 화면 버튼은
-  // 이제 로그아웃 대신 /account로 이동시키는 역할로 바뀜
-  const handleGoToMyPage = () => {
-    navigate('/account');
-  };
-
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <div className="mindcraft-page">
-      <Nav isMember={isMember} onLoginClick={openLogin} onGoToMyPage={handleGoToMyPage} />
+      <Nav isMember={isMember} onLoginClick={openLogin} />
       <Hero onStartClick={handleCtaClick} ctaLabel={ctaLabel} />
       <HowItWorks />
 
