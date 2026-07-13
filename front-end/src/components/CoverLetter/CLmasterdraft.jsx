@@ -17,6 +17,7 @@ function CLMasterDraft({
   onFieldChange,
   onSubmit,
   saving,
+  onGoToEdit,
 }) {
   const selectedIndex = masters.findIndex((m) => m.id === selectedId);
   const selected = masters[selectedIndex];
@@ -53,7 +54,9 @@ function CLMasterDraft({
             >
               <div className="cl-section-num">{idx + 1}</div>
               <div>
-                <div className="cl-section-name">{m.title || `자소서 마스터 ${idx + 1}`}</div>
+                <div className="cl-section-name">
+                  {m.title || `자소서 마스터 ${idx + 1}`}
+                </div>
                 {!m.saved && <div className="cl-section-chars">저장 전</div>}
               </div>
             </button>
@@ -108,19 +111,38 @@ function CLMasterDraft({
               <textarea
                 className="cl-master-textarea"
                 value={selected.jobDescription}
-                onChange={(e) => onFieldChange('jobDescription', e.target.value)}
+                onChange={(e) =>
+                  onFieldChange('jobDescription', e.target.value)
+                }
                 placeholder="지원하는 직무에 대한 설명을 입력하세요"
                 rows={4}
               />
 
-              <button className="cl-master-submit" onClick={onSubmit} disabled={saving}>
-                {saving ? '저장 중...' : selected.saved ? '수정하기' : '생성하기'}
-              </button>
+              {/* 이미 생성된 자소서 마스터만 이동 버튼 노출 */}
+              <div className="cl-master-actions">
+                <button
+                  className="cl-master-submit"
+                  onClick={onSubmit}
+                  disabled={saving}
+                >
+                  {saving
+                    ? '저장 중...'
+                    : selected.saved
+                      ? '수정하기'
+                      : '생성하기'}
+                </button>
+                {selected.saved && (
+                  <button className="cl-master-goedit" onClick={onGoToEdit}>
+                    문항 편집하기 →
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         ) : (
           <div className="cl-section-detail cl-master-empty-detail">
-            아직 생성된 자소서가 없어요. 왼쪽의 "+ 자소서 마스터 생성하기"를 눌러 시작해보세요.
+            아직 생성된 자소서가 없어요. 왼쪽의 "+ 자소서 마스터 생성하기"를
+            눌러 시작해보세요.
           </div>
         )}
       </div>

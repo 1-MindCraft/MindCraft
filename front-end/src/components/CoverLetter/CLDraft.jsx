@@ -2,10 +2,21 @@ import React, { useState, useRef, useEffect } from 'react';
 import PENCIL_SRC from '../../assets/pencil.png';
 
 // 수정된 부분: draftTitle prop 추가 (이유: 자소서 마스터의 title을 CLDraft 헤더에 표시하기 위해 외부에서 받아야 함)
-function CLDraft({ sections, selectedId, onSelect, onAddSection, onUpdateTitle, draftTitle = '자기소개서 초안' }) {
+function CLDraft({
+  sections,
+  selectedId,
+  onSelect,
+  onAddSection,
+  onUpdateTitle,
+  draftTitle = '자기소개서 초안',
+  onBackToMasterList,
+}) {
   const selectedIndex = sections.findIndex((s) => s.id === selectedId);
   const selected = sections[selectedIndex];
-  const totalChars = sections.reduce((sum, s) => sum + (s.content?.length || 0), 0);
+  const totalChars = sections.reduce(
+    (sum, s) => sum + (s.content?.length || 0),
+    0
+  );
 
   // ── 제목 편집 상태 ──
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -49,10 +60,33 @@ function CLDraft({ sections, selectedId, onSelect, onAddSection, onUpdateTitle, 
       <div className="cl-draft-header">
         <div>
           {/* 수정된 부분: 하드코딩된 "자기소개서 초안" → draftTitle prop으로 교체 (이유: 자소서 마스터의 title과 동기화하기 위해) */}
-          <div className="cl-draft-title">{draftTitle}</div>
-          <div className="cl-draft-hint">문항을 클릭하면 해당 내용의 참고 노드를 마인드맵에서 확인할 수 있습니다.</div>
+          <div className="cl-draft-title-row">
+            {onBackToMasterList && (
+              <button
+                className="mm-icon-btn cl-title-back-btn"
+                onClick={onBackToMasterList}
+                data-tooltip="자소서 마스터 목록으로 돌아가기"
+              >
+                <svg
+                  viewBox="0 0 640 640"
+                  width="14"
+                  height="14"
+                  fill="currentColor"
+                >
+                  <path d="M73.4 297.4C60.9 309.9 60.9 330.2 73.4 342.7L233.4 502.7C245.9 515.2 266.2 515.2 278.7 502.7C291.2 490.2 291.2 469.9 278.7 457.4L173.3 352L544 352C561.7 352 576 337.7 576 320C576 302.3 561.7 288 544 288L173.3 288L278.7 182.6C291.2 170.1 291.2 149.8 278.7 137.3C266.2 124.8 245.9 124.8 233.4 137.3L73.4 297.3z" />
+                </svg>
+              </button>
+            )}
+            <div className="cl-draft-title">{draftTitle}</div>
+          </div>
+          <div className="cl-draft-hint">
+            문항을 클릭하면 해당 내용의 참고 노드를 마인드맵에서 확인할 수
+            있습니다.
+          </div>
         </div>
-        <div className="cl-draft-total">총 글자 수 : {totalChars.toLocaleString()}자</div>
+        <div className="cl-draft-total">
+          총 글자 수 : {totalChars.toLocaleString()}자
+        </div>
       </div>
 
       <div className="cl-draft-body">
@@ -68,7 +102,9 @@ function CLDraft({ sections, selectedId, onSelect, onAddSection, onUpdateTitle, 
               <div className="cl-section-num">{idx + 1}</div>
               <div>
                 <div className="cl-section-name">{s.title}</div>
-                {s.content?.length > 0 && <div className="cl-section-chars">{s.content.length}자</div>}
+                {s.content?.length > 0 && (
+                  <div className="cl-section-chars">{s.content.length}자</div>
+                )}
               </div>
             </button>
           ))}
@@ -85,7 +121,9 @@ function CLDraft({ sections, selectedId, onSelect, onAddSection, onUpdateTitle, 
             <div className="cl-detail-header">
               {isEditingTitle ? (
                 <div className="cl-detail-title-row">
-                  <span className="cl-detail-title-num">{selectedIndex + 1}.</span>
+                  <span className="cl-detail-title-num">
+                    {selectedIndex + 1}.
+                  </span>
                   <input
                     ref={titleInputRef}
                     className="cl-detail-title-input"
@@ -112,7 +150,11 @@ function CLDraft({ sections, selectedId, onSelect, onAddSection, onUpdateTitle, 
                     onClick={startEditTitle}
                     title="제목 수정"
                   >
-                    <img src={PENCIL_SRC} alt="편집" className="cl-detail-pencil" />
+                    <img
+                      src={PENCIL_SRC}
+                      alt="편집"
+                      className="cl-detail-pencil"
+                    />
                   </button>
                 </div>
               )}
@@ -121,7 +163,8 @@ function CLDraft({ sections, selectedId, onSelect, onAddSection, onUpdateTitle, 
             <div className="cl-detail-content">
               {selected.content || (
                 <span className="cl-detail-empty">
-                  오른쪽 '생성 설정'에서 문항, 문체, 글자 수를 선택한 뒤 [생성하기] 버튼을 눌러 AI로 이 문항의 초안을 만들어보세요.
+                  오른쪽 '생성 설정'에서 문항, 문체, 글자 수를 선택한 뒤
+                  [생성하기] 버튼을 눌러 AI로 이 문항의 초안을 만들어보세요.
                 </span>
               )}
             </div>
@@ -131,7 +174,9 @@ function CLDraft({ sections, selectedId, onSelect, onAddSection, onUpdateTitle, 
                 <div className="cl-source-label">참고한 마인드맵 노드</div>
                 <div className="cl-source-tags">
                   {selected.sourceNodes.map((n) => (
-                    <span key={n} className="cl-source-tag">{n}</span>
+                    <span key={n} className="cl-source-tag">
+                      {n}
+                    </span>
                   ))}
                 </div>
               </div>
@@ -145,10 +190,18 @@ function CLDraft({ sections, selectedId, onSelect, onAddSection, onUpdateTitle, 
         <span className="cl-ai-icon">✦</span>
         <div>
           <div className="cl-ai-notice-title">AI가 생성한 초안입니다</div>
-          <div className="cl-ai-notice-sub">마인드맵의 구조와 내용을 기반으로 AI가 자기소개서 초안을 생성합니다. 내용은 자유롭게 수정하고 보완하여 완성도를 높여보세요.</div>
+          <div className="cl-ai-notice-sub">
+            마인드맵의 구조와 내용을 기반으로 AI가 자기소개서 초안을 생성합니다.
+            내용은 자유롭게 수정하고 보완하여 완성도를 높여보세요.
+          </div>
         </div>
         <div className="cl-ai-notice-time">
-          생성 일시 {new Date().toLocaleDateString('ko-KR')} {new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} 📅
+          생성 일시 {new Date().toLocaleDateString('ko-KR')}{' '}
+          {new Date().toLocaleTimeString('ko-KR', {
+            hour: '2-digit',
+            minute: '2-digit',
+          })}{' '}
+          📅
         </div>
       </div>
     </div>

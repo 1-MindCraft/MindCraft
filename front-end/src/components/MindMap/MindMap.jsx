@@ -126,7 +126,7 @@ export default function MindMap({ tool = 'drag' }) {
             style: { strokeWidth: 2 },
           }}
         >
-          <Background />
+          {/* <Background /> */}
         </ReactFlow>
       </MindMapNodesProvider>
     </div>

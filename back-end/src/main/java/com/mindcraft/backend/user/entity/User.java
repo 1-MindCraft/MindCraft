@@ -30,6 +30,7 @@ public class User {
     private String password;
 
     // 이메일 회원이면 null
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(length = 50, nullable = false)
     private Provider provider = Provider.LOCAL;
