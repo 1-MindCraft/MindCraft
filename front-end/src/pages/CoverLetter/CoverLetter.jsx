@@ -20,14 +20,24 @@ import useMindMapStore from '../../zustand/mindMapStore';
 import { useModal } from '../../components/common/ModalProvider';
 
 // 백엔드 문항(section) → 화면 형태로 변환
-const mapSection = (s) => ({
-  id: s.id,
-  title: s.question,
-  content: s.answer,
-  sourceNodes: (s.sourceNode || [])
-    .map((node) => node?.data?.label)
-    .filter(Boolean),
-});
+// 수정된 부분: RAG가 선별한 노드만 "참고한 노드"로 표시 (기존: 마인드맵 전체 노드)
+const mapSection = (s) => {
+  const selectedIds = s.selectedNodeIds || [];
+  const allNodes = s.sourceNode || [];
+
+  return {
+    id: s.id,
+    title: s.question,
+    content: s.answer,
+    sourceNodes: allNodes
+      .filter((node) => selectedIds.includes(node.id))
+      .map((node) => node?.data?.label)
+      .filter(Boolean),
+    // 추가: 마인드맵 하이라이트용 (selected = 네온, context = 조상)
+    selectedNodeIds: selectedIds,
+    contextNodeIds: s.contextNodeIds || [],
+  };
+};
 
 // 추가된 부분: 백엔드 자소서 마스터(snake_case) → 화면 형태(camelCase)로 변환
 // 이유: 자소서 마스터 목록/폼 화면에서 쓸 데이터 형태가 필요해서 추가
@@ -271,6 +281,9 @@ function CoverLetterPage({ onBackToMindMap }) {
     }
   };
 
+    // 현재 선택된 문항 (마인드맵 RAG 하이라이트용)
+  const currentSection = sections.find((s) => s.id === selectedId);
+
   // 수정된 부분: CLMindMap을 두 화면 바깥으로 꺼내서 하나만 공유
   // 이유: 두 개의 CLMindMap이 각각 마운트/언마운트되면서 React Flow 리렌더링이 일어나 깜빡임이 생겼음
   return (
@@ -302,7 +315,12 @@ function CoverLetterPage({ onBackToMindMap }) {
 
         <div className={`cl-content ${view === 'list' ? 'cl-content--master' : ''}`}>
           {/* 추가된 부분: CLMindMap 하나를 두 화면이 공유 — DOM 유지로 깜빡임 제거 */}
-          <CLMindMap />
+          {/* 추가: 선택된 문항의 RAG 결과를 넘겨 마인드맵 하이라이트
+              (목록 화면에선 currentSection이 undefined라 하이라이트 자동으로 꺼짐) */}
+          <CLMindMap
+            selectedNodeIds={currentSection?.selectedNodeIds}
+            contextNodeIds={currentSection?.contextNodeIds}
+          />
           <div className="cl-content-divider" />
 
           {/* 마스터 목록/폼 — display:none으로 숨김/표시 */}
