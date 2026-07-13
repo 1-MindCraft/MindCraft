@@ -53,6 +53,14 @@ public class CoverLetterSection {
     @Column(name = "source_node", columnDefinition = "jsonb")
     private List<ReactNode> sourceNode;
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "selected_node_ids", columnDefinition = "jsonb")
+    private List<String> selectedNodeIds;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "context_node_ids", columnDefinition = "jsonb")
+    private List<String> contextNodeIds;
+
     @Column(name = "writing_style", columnDefinition = "text")
     private String writingStyle;
 

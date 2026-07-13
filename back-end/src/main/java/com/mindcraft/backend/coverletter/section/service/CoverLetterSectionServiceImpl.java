@@ -2,6 +2,7 @@ package com.mindcraft.backend.coverletter.section.service;
 
 import com.mindcraft.backend.coverletter.entity.CoverLetter;
 import com.mindcraft.backend.coverletter.repository.CoverLetterRepository;
+import com.mindcraft.backend.coverletter.section.dto.AiGenerateResponse;
 import com.mindcraft.backend.coverletter.section.dto.CoverLetterSectionDto;
 import com.mindcraft.backend.coverletter.section.entity.CoverLetterSection;
 import com.mindcraft.backend.coverletter.section.repository.CoverLetterSectionRepository;
@@ -51,7 +52,7 @@ public class CoverLetterSectionServiceImpl implements CoverLetterSectionService 
             companyName = "지원 회사";
         }
 
-        String answer = aiCoverLetterService.generateAnswer(
+        AiGenerateResponse aiResponse = aiCoverLetterService.generateAnswer(
                 coverLetterId,
                 companyName,
                 coverLetter.getCompanyIdeal(),
@@ -66,7 +67,9 @@ public class CoverLetterSectionServiceImpl implements CoverLetterSectionService 
         CoverLetterSection section = new CoverLetterSection();
         section.setCoverLetter(coverLetter);
         section.setQuestion(dto.getQuestion());
-        section.setAnswer(answer);
+        section.setAnswer(aiResponse.answer());
+        section.setSelectedNodeIds(aiResponse.selectedNodeIds());
+        section.setContextNodeIds(aiResponse.contextNodeIds());
         section.setSourceNode(dto.getSourceNode());
         section.setWritingStyle(dto.getWritingStyle());
         section.setMaxChars(maxChars);

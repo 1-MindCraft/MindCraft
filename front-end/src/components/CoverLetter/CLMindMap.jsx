@@ -19,7 +19,7 @@ import CLMindMapNode from './CLMindMapNode';
 // 반드시 똑같아야 함 — DB에서 내려오는 노드 데이터의 type 값이 'mapNode'로 고정되어 있기 때문
 const nodeTypes = { mapNode: CLMindMapNode };
 
-function CLMindMap() {
+function CLMindMap({ selectedNodeIds, contextNodeIds }) {
   // 추가된 부분: 마인드맵 편집 화면(MindMapPage)이 쓰는 것과 완전히 같은
   // zustand store를 그대로 구독함. 별도 API 호출/상태를 새로 안 만듦.
   const nodes = useMindMapStore((state) => state.nodes);
@@ -41,6 +41,28 @@ function CLMindMap() {
   // "엣지를 그리는 규칙"이 두 화면에서 절대 어긋나지 않도록 함
   const edges = useMemo(() => buildEdgesFromNodes(nodes), [nodes]);
 
+  // 추가: RAG 선별 결과를 노드 data에 주입
+  // selected = 직접 선별(네온) / context = 조상(보통) / 나머지 = dim
+  const highlightedNodes = useMemo(() => {
+    const selectedSet = new Set(selectedNodeIds ?? []);
+    const contextSet = new Set(contextNodeIds ?? []);
+    const hasResult = selectedSet.size > 0 || contextSet.size > 0;
+
+    return nodes.map((node) => ({
+      ...node,
+      data: {
+        ...node.data,
+        highlight: !hasResult
+          ? undefined              // RAG 결과 없으면 전체 정상 표시
+          : selectedSet.has(node.id)
+          ? 'selected'
+          : contextSet.has(node.id)
+          ? 'context'
+          : 'dimmed',
+      },
+    }));
+  }, [nodes, selectedNodeIds, contextNodeIds]);
+
   return (
     <div className="cl-mindmap">
       <div className="cl-mindmap-label">마인드맵</div>
@@ -54,7 +76,7 @@ function CLMindMap() {
           // width/height를 100%로 명시해서 .cl-mindmap-canvas(flex:1) 영역을 꽉 채움
           <div style={{ width: '100%', height: '100%' }}>
             <ReactFlow
-              nodes={nodes}
+              nodes={highlightedNodes}
               edges={edges}
               nodeTypes={nodeTypes}
               // 읽기 전용이라 실제로 상태를 바꿀 필요는 없지만, React Flow가
