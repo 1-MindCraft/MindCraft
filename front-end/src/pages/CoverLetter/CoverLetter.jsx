@@ -24,6 +24,7 @@ const mapSection = (s) => {
   const selectedIds = s.selectedNodeIds || [];
   const allNodes = s.sourceNode || [];
 
+  
   return {
     id: s.id,
     title: s.question,
@@ -271,6 +272,9 @@ function CoverLetterPage({ onBackToMindMap }) {
     }
   };
 
+  // 추가: 현재 선택된 문항 (마인드맵 RAG 하이라이트용)
+  const currentSection = sections.find((s) => s.id === selectedId);
+  
   // 추가된 부분: view === 'list'일 때 자소서 마스터 목록/폼 화면을 반환
   if (view === 'list') {
     if (loadingList) {
@@ -325,8 +329,11 @@ function CoverLetterPage({ onBackToMindMap }) {
           className="cl-toolbar--master"
         />
 
-        <div className="cl-content">
-          <CLMindMap />
+          <div className="cl-content">
+          <CLMindMap
+            selectedNodeIds={currentSection?.selectedNodeIds}
+            contextNodeIds={currentSection?.contextNodeIds}
+          />
           <div className="cl-content-divider" />
 
           <CLDraft

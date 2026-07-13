@@ -27,10 +27,13 @@ function CLMindMapNode({ data }) {
   // (MindMapNode.css에 정의된 것과 동일한 규칙 — 편집 화면과 색이 똑같이 보이게 하기 위함)
   const depthClass = data.depth <= 2 ? `depth-${data.depth}` : 'depth-default';
 
+    // 추가: RAG 하이라이트 (selected → 네온, context → 보통, dimmed → 흐리게)
+  const highlightClass = data.highlight ? `hl-${data.highlight}` : '';
+
   return (
     // className 조합은 편집 화면의 MindMapNode.jsx와 동일하게 맞춰서,
     // 같은 MindMapNode.css를 그대로 재사용해도 스타일이 어긋나지 않게 함
-    <div className={`mm-map-node ${depthClass} ${isRoot ? 'is-root' : ''}`}>
+    <div className={`mm-map-node ${depthClass} ${isRoot ? 'is-root' : ''} ${highlightClass}`}>
       {/* Handle: React Flow가 엣지(부모-자식 연결선)를 그리기 위한 연결점.
           opacity: 0으로 화면엔 안 보이게 하되, 엣지 계산 자체는 정상 동작하게 둠 */}
       <Handle type="target" position={Position.Top} style={{ opacity: 0 }} />

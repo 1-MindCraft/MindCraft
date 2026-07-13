@@ -141,11 +141,7 @@ def select_relevant_nodes(
     # 유사도 내림차순 정렬
     ranked = sorted(zip(candidates, sims), key=lambda x: x[1], reverse=True)
 
-    # TODK: 배포 전 제거 점수 확인용 로그
-    print("\n=== 노드별 유사도 ===")
-    for n, s in ranked:
-        print(f"{s:.3f}  {n.topic}")
-    print("====================\n")
+
 
     # 임계값 넘는 것 중 상위 TOP_K
     selected = [n for n, s in ranked if s >= SIMILARITY_THRESHOLD][:TOP_K]
