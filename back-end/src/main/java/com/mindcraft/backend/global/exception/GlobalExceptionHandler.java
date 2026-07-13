@@ -107,7 +107,7 @@ public class GlobalExceptionHandler {
         log.error("Access Denied : {}", e.getMessage());
 
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .status(HttpStatus.FORBIDDEN)
                 .body(Map.of("error", e.getMessage()));
     }
 }
