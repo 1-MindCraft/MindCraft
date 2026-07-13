@@ -39,3 +39,4 @@ out/
 .vscode/
 
 application-local.properties
+application-oauth.yml

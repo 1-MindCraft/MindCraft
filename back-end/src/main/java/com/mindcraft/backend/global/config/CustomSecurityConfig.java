@@ -1,9 +1,9 @@
 package com.mindcraft.backend.global.config;
 
 import com.mindcraft.backend.global.security.filter.JWTCheckFilter;
-import com.mindcraft.backend.global.security.handler.CustomAccessDeniedHandler;
-import com.mindcraft.backend.global.security.handler.LoginFailHandler;
-import com.mindcraft.backend.global.security.handler.LoginSuccessHandler;
+import com.mindcraft.backend.global.security.handler.*;
+import com.mindcraft.backend.global.security.repository.HttpCookieOAuth2AuthorizationRequestRepository;
+import com.mindcraft.backend.global.security.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -31,6 +31,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 @EnableMethodSecurity
 public class CustomSecurityConfig {
+
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     // security filter chain - 인증/인가 설정
     @Bean
@@ -74,6 +76,14 @@ public class CustomSecurityConfig {
         http.addFilterBefore(
                 new JWTCheckFilter(),
                 UsernamePasswordAuthenticationFilter.class
+        );
+
+        http.oauth2Login(oauth2 -> oauth2
+//                .authorizationEndpoint(endpoint -> endpoint
+//                        .authorizationRequestRepository(new HttpCookieOAuth2AuthorizationRequestRepository()))
+                .userInfoEndpoint(endpoint -> endpoint.userService(customOAuth2UserService))
+                .successHandler(new OAuth2SuccessHandler())
+                .failureHandler(new OAuth2FailHandler())
         );
 
         // 만들어놓은 필터체인 리턴

@@ -39,6 +39,7 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.7'
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
     // 추가된 부분: 자소서 PDF 내보내기용
     // 이유: PDF 생성 라이브러리가 필요해서 추가. iText7(AGPL)은 상업적 이용 시 라이선스 문제가
