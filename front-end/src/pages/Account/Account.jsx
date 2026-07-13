@@ -157,15 +157,20 @@ function AccountPage() {
     }
   };
 
-  const handleDeleteAccount = async () => {
+  // 추가된 부분: [ 탈퇴하기 ] 버튼 — 비밀번호 입력 프롬프트 모달, 탈퇴 요청, 성공하면 알림 모달
+   const handleDeleteAccount = async () => {
     const password = await promptPassword('현재 비밀번호를 입력해주세요.');
-    if (!password) return; // 취소 또는 빈 값 → 아무 요청도 안 보냄
+    if (password === null) return; // 취소 → 아무 반응 없이 조용히 종료
+    if (!password.trim()) {
+      await alert('비밀번호를 입력해주세요.');
+      return;
+    }
 
     try {
       await deleteMe(password);
       removeCookie('user');
       resetState();
-      await alert('탈퇴가 완료되었습니다.');
+      await alert('탈퇴가 처리가 완료되었습니다.');
       navigate('/');
     } catch (error) {
       console.log('deleteMe 실패:', error.response?.data || error);
@@ -268,7 +273,7 @@ function AccountPage() {
                     className="account-field-btn account-field-btn--danger"
                     onClick={handleDeleteAccount}
                   >
-                    서비스 탈퇴
+                    탈퇴하기
                   </button>
                 </div>
               </div>
