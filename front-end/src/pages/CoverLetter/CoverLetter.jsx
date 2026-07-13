@@ -20,23 +20,15 @@ import useMindMapStore from '../../zustand/mindMapStore';
 import { useModal } from '../../components/common/ModalProvider';
 
 // 백엔드 문항(section) → 화면 형태로 변환
-const mapSection = (s) => {
-  const selectedIds = s.selectedNodeIds || [];
-  const allNodes = s.sourceNode || [];
+const mapSection = (s) => ({
+  id: s.id,
+  title: s.question,
+  content: s.answer,
+  sourceNodes: (s.sourceNode || [])
+    .map((node) => node?.data?.label)
+    .filter(Boolean),
+});
 
-  
-  return {
-    id: s.id,
-    title: s.question,
-    content: s.answer,
-    sourceNodes: allNodes
-      .filter((node) => selectedIds.includes(node.id))
-      .map((node) => node?.data?.label)
-      .filter(Boolean),
-    selectedNodeIds: selectedIds,
-    contextNodeIds: s.contextNodeIds || [],
-  };
-};
 // 추가된 부분: 백엔드 자소서 마스터(snake_case) → 화면 형태(camelCase)로 변환
 // 이유: 자소서 마스터 목록/폼 화면에서 쓸 데이터 형태가 필요해서 추가
 const mapMaster = (m) => ({
@@ -124,7 +116,9 @@ function CoverLetterPage({ onBackToMindMap }) {
   // 추가된 부분: 폼 입력값 변경 — 선택된 마스터의 해당 필드만 갱신 (목록의 이름도 실시간 반영됨)
   const handleMasterFieldChange = (field, value) => {
     setMasters((prev) =>
-      prev.map((m) => (m.id === selectedMasterId ? { ...m, [field]: value } : m))
+      prev.map((m) =>
+        m.id === selectedMasterId ? { ...m, [field]: value } : m
+      )
     );
   };
 
@@ -138,10 +132,10 @@ function CoverLetterPage({ onBackToMindMap }) {
     // fetchMindMap()으로 채워진 store의 mindMapId를 같이 보냄
     const dto = {
       title: current.title,
-      companyName: current.companyName,
-      companyIdeal: current.companyIdeal,
-      jobDescription: current.jobDescription,
-      mindMapId: mindMapId,
+      company_name: current.companyName,
+      company_ideal: current.companyIdeal,
+      job_description: current.jobDescription,
+      mindmap_id: mindMapId,
     };
 
     setSavingMaster(true);
@@ -156,7 +150,9 @@ function CoverLetterPage({ onBackToMindMap }) {
       } else {
         const created = await createCoverLetter(dto);
         const mapped = mapMaster(created);
-        setMasters((prev) => prev.map((m) => (m.id === current.id ? mapped : m)));
+        setMasters((prev) =>
+          prev.map((m) => (m.id === current.id ? mapped : m))
+        );
         setSelectedMasterId(mapped.id);
         // 추가된 부분: 생성 성공 알림 — 확인 누르면 편집 화면으로 이동
         await alert('자소서 마스터가 저장되었습니다.');
@@ -204,9 +200,10 @@ function CoverLetterPage({ onBackToMindMap }) {
         setSelectedId(mapped.length > 0 ? mapped[0].id : null);
 
         const mindmap = await getMindMap();
-        const nodes = typeof mindmap.nodes === 'string'
-          ? JSON.parse(mindmap.nodes)
-          : mindmap.nodes;
+        const nodes =
+          typeof mindmap.nodes === 'string'
+            ? JSON.parse(mindmap.nodes)
+            : mindmap.nodes;
         setMindMapNodes(nodes || []);
       } catch (error) {
         console.error('자소서 로드 실패:', error.response?.data || error);
@@ -262,7 +259,9 @@ function CoverLetterPage({ onBackToMindMap }) {
         sourceNode: mindMapNodes,
       });
       const mapped = mapSection(created);
-      setSections((prev) => prev.map((s) => (s.id === selectedId ? mapped : s)));
+      setSections((prev) =>
+        prev.map((s) => (s.id === selectedId ? mapped : s))
+      );
       setSelectedId(mapped.id);
     } catch (error) {
       console.error('생성 실패:', error.response?.data || error);
@@ -272,84 +271,76 @@ function CoverLetterPage({ onBackToMindMap }) {
     }
   };
 
-  // 추가: 현재 선택된 문항 (마인드맵 RAG 하이라이트용)
-  const currentSection = sections.find((s) => s.id === selectedId);
-  
-  // 추가된 부분: view === 'list'일 때 자소서 마스터 목록/폼 화면을 반환
-  if (view === 'list') {
-    if (loadingList) {
-      return <div className="cl-page">자소서 목록을 불러오는 중...</div>;
-    }
-    return (
-      <div className="cl-page">
-        <CLHeader userName="자소서 마스터" />
+  // 수정된 부분: CLMindMap을 두 화면 바깥으로 꺼내서 하나만 공유
+  // 이유: 두 개의 CLMindMap이 각각 마운트/언마운트되면서 React Flow 리렌더링이 일어나 깜빡임이 생겼음
+  return (
+    <div className="cl-page" style={{ display: 'flex', flexDirection: 'column' }}>
+      {/* 헤더 — 화면에 따라 다른 헤더 */}
+      {view === 'list'
+        ? <CLHeader userName="자소서 마스터" />
+        : <CLHeader userName={userName} onBackToMindMap={onBackToMindMap} coverLetterId={editingId} />
+      }
 
-        <div className="cl-body">
+      <div className="cl-body">
+        {/* 툴바 — 화면에 따라 다른 툴바 */}
+        {view === 'list' ? (
           <CLToolbar
             navLabel="자소서 편집으로 이동 →"
             onNav={handleGoToEdit}
             showSettingsToggle={false}
             className="cl-toolbar--master"
           />
-
-          <div className="cl-content cl-content--master">
-            <CLMindMap />
-            <div className="cl-content-divider" />
-
-            <CLMasterDraft
-              masters={masters}
-              selectedId={selectedMasterId}
-              onSelect={setSelectedMasterId}
-              onAdd={handleAddMaster}
-              onFieldChange={handleMasterFieldChange}
-              onSubmit={handleMasterSubmit}
-              saving={savingMaster}
-            />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // view === 'edit' — 문항 편집 화면 (기존 그대로)
-  if (loadingEdit) {
-    return <div className="cl-page">자소서를 불러오는 중...</div>;
-  }
-
-  return (
-    <div className="cl-page">
-      <CLHeader userName={userName} onBackToMindMap={onBackToMindMap} coverLetterId={editingId} />
-
-      <div className="cl-body">
-        <CLToolbar
-          settingsOpen={settingsOpen}
-          onSettingsToggle={toggleSettings}
-          navLabel="← 자소서 마스터로 돌아가기"
-          onNav={handleBackToMasterList}
-          className="cl-toolbar--master"
-        />
-
-          <div className="cl-content">
-          <CLMindMap
-            selectedNodeIds={currentSection?.selectedNodeIds}
-            contextNodeIds={currentSection?.contextNodeIds}
+        ) : (
+          <CLToolbar
+            settingsOpen={settingsOpen}
+            onSettingsToggle={toggleSettings}
+            navLabel="← 자소서 마스터로 돌아가기"
+            onNav={handleBackToMasterList}
+            className="cl-toolbar--master"
           />
+        )}
+
+        <div className={`cl-content ${view === 'list' ? 'cl-content--master' : ''}`}>
+          {/* 추가된 부분: CLMindMap 하나를 두 화면이 공유 — DOM 유지로 깜빡임 제거 */}
+          <CLMindMap />
           <div className="cl-content-divider" />
 
-          <CLDraft
-            sections={sections}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-            onAddSection={addSection}
-            onUpdateTitle={updateSectionTitle}
-          />
+          {/* 마스터 목록/폼 — display:none으로 숨김/표시 */}
+          <div style={{ display: view === 'list' ? 'contents' : 'none' }}>
+            {!loadingList && (
+              <CLMasterDraft
+                masters={masters}
+                selectedId={selectedMasterId}
+                onSelect={setSelectedMasterId}
+                onAdd={handleAddMaster}
+                onFieldChange={handleMasterFieldChange}
+                onSubmit={handleMasterSubmit}
+                saving={savingMaster}
+              />
+            )}
+          </div>
 
-          <CLSettings
-            open={settingsOpen}
-            onToggle={toggleSettings}
-            onGenerate={handleGenerate}
-            generating={generating}
-          />
+          {/* 문항 편집 — display:none으로 숨김/표시 */}
+          <div style={{ display: view === 'edit' ? 'contents' : 'none' }}>
+            {!loadingEdit && (
+              <>
+                <CLDraft
+                  sections={sections}
+                  selectedId={selectedId}
+                  onSelect={setSelectedId}
+                  onAddSection={addSection}
+                  onUpdateTitle={updateSectionTitle}
+                  draftTitle={userName}
+                />
+                <CLSettings
+                  open={settingsOpen}
+                  onToggle={toggleSettings}
+                  onGenerate={handleGenerate}
+                  generating={generating}
+                />
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

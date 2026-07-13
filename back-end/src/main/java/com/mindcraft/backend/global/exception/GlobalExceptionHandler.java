@@ -86,7 +86,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AiGenerationException.class)
     public ResponseEntity<Map<String, String>> handleAiGeneration(AiGenerationException e) {
-        log.error("AI Generation Exception : {}", e.getMessage(), e);
+        log.error("AI Generation Exception : {}", e.getMessage());
 
         return ResponseEntity
                 .status(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -107,7 +107,7 @@ public class GlobalExceptionHandler {
         log.error("Access Denied : {}", e.getMessage());
 
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .status(HttpStatus.FORBIDDEN)
                 .body(Map.of("error", e.getMessage()));
     }
 }

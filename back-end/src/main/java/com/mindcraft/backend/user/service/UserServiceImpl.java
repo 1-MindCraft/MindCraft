@@ -31,8 +31,6 @@ public class UserServiceImpl implements UserService{
 
         // createdAt 설정, updatedAt 설정, password 암호화
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
 
         User createdUser = userRepository.save(user);
         return createdUser;
@@ -54,7 +52,6 @@ public class UserServiceImpl implements UserService{
                 .ifPresent(password -> findUser.setPassword(
                         passwordEncoder.encode(password)
                 ));
-        findUser.setUpdatedAt(LocalDateTime.now());
 
         User updatedUser = userRepository.save(findUser);
         return updatedUser;
@@ -63,9 +60,12 @@ public class UserServiceImpl implements UserService{
     @Override
     public void deleteUser(long userId, String password) {
         User user = findUserById(userId);
-        boolean isPasswordCorrect = passwordEncoder.matches(password, user.getPassword());
-        if(!isPasswordCorrect) {
-            throw new InvalidPasswordException("비밀번호가 일치하지 않습니다.");
+
+        if (user.getProvider() == Provider.LOCAL) {
+            boolean isPasswordCorrect = passwordEncoder.matches(password, user.getPassword());
+            if(!isPasswordCorrect) {
+                throw new InvalidPasswordException("비밀번호가 일치하지 않습니다.");
+            }
         }
 
         userRepository.delete(user);
