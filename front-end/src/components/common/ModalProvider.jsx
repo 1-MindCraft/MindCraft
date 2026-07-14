@@ -18,6 +18,9 @@ const ModalContext = createContext(null);
 export function ModalProvider({ children }) {
   const [modalState, setModalState] = useState(null); // null이면 모달 안 뜸
   const resolveRef = useRef(null); // 사용자가 버튼을 누르면 이 함수를 호출해서 Promise를 resolve함
+  // 추가된 부분: promptPassword용 입력값 state
+  // 이유: 비밀번호를 입력받는 프롬프트 모달은 내부에 controlled input이 필요함
+  const [promptValue, setPromptValue] = useState('');
 
   // alert(message) — 확인 버튼 하나만 있는 모달. 확인 누르면 resolve(true)
   const alert = useCallback((message, options = {}) => {
@@ -46,20 +49,59 @@ export function ModalProvider({ children }) {
     });
   }, []);
 
+  // 추가된 부분: promptPassword(message) — 비밀번호 입력창 + 확인/취소 버튼이 있는 모달
+  // 확인 누르면 입력한 비밀번호 문자열로 resolve, 취소/바깥클릭/ESC는 null로 resolve
+  // 이유: 회원 탈퇴 시 "현재 비밀번호를 입력해주세요" 모달에 입력창이 필요해서 추가
+  const promptPassword = useCallback((message, options = {}) => {
+    return new Promise((resolve) => {
+      resolveRef.current = resolve;
+      setPromptValue('');
+      setModalState({
+        type: 'prompt',
+        message,
+        title: options.title,
+        confirmText: options.confirmText || '확인',
+        cancelText: options.cancelText || '취소',
+      });
+    });
+  }, []);
+
+  // before:
+  // const handleConfirm = () => {
+  //   resolveRef.current?.(true);
+  //   setModalState(null);
+  // };
+  // after:
   const handleConfirm = () => {
-    resolveRef.current?.(true);
+    if (modalState?.type === 'prompt') {
+      resolveRef.current?.(promptValue);
+    } else {
+      resolveRef.current?.(true);
+    }
     setModalState(null);
   };
 
+  // before:
+  // const handleCancel = () => {
+  //   resolveRef.current?.(modalState?.type === 'alert' ? true : false);
+  //   setModalState(null);
+  // };
+  // after:
   const handleCancel = () => {
-    // alert 타입인데 바깥을 클릭/ESC로 닫는 경우도 여기로 들어옴 → true로 resolve
-    // (alert는 "확인"밖에 없는 개념이라, 어떻게 닫히든 같은 의미로 처리)
-    resolveRef.current?.(modalState?.type === 'alert' ? true : false);
+    if (modalState?.type === 'prompt') {
+      resolveRef.current?.(null);
+    } else {
+      // alert 타입인데 바깥을 클릭/ESC로 닫는 경우도 여기로 들어옴 → true로 resolve
+      // (alert는 "확인"밖에 없는 개념이라, 어떻게 닫히든 같은 의미로 처리)
+      resolveRef.current?.(modalState?.type === 'alert' ? true : false);
+    }
     setModalState(null);
   };
 
   return (
-    <ModalContext.Provider value={{ alert, confirm }}>
+    // before: <ModalContext.Provider value={{ alert, confirm }}>
+    // after:
+    <ModalContext.Provider value={{ alert, confirm, promptPassword }}>
       {children}
 
       <Modal open={Boolean(modalState)} onClose={handleCancel}>
@@ -68,8 +110,22 @@ export function ModalProvider({ children }) {
             <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
               {modalState.message}
             </p>
+            {/* 추가된 부분: prompt 타입일 때 비밀번호 입력창 렌더링
+                이유: promptPassword 모달은 사용자가 비밀번호를 입력할 곳이 있어야 함 */}
+            {modalState.type === 'prompt' && (
+              <input
+                type="password"
+                className="modal-input"
+                value={promptValue}
+                onChange={(e) => setPromptValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleConfirm();
+                }}
+                autoFocus
+              />
+            )}
             <div className="modal-footer" style={{ padding: '1rem 0 0' }}>
-              {modalState.type === 'confirm' && (
+              {(modalState.type === 'confirm' || modalState.type === 'prompt') && (
                 <button
                   className="modal-btn modal-btn--secondary"
                   onClick={handleCancel}

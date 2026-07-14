@@ -408,8 +408,8 @@
   flex: 1;
   position: relative;
   overflow: hidden;
-  background: radial-gradient(circle, #ddd 1px, transparent 1px);
-  background-size: 24px 24px;
+  /* background: radial-gradient(circle, #ddd 1px, transparent 1px); */
+  /* background-size: 24px 24px; */
   background-color: #f4f6fb;
 }
 .mm-canvas-placeholder {

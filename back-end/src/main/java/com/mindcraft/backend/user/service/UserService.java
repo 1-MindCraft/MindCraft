@@ -11,7 +11,7 @@ public interface UserService {
     public User getMyInfo(long userId);
 
     // 정보 수정
-    public User updateMyInfo(User User);
+    public User updateMyInfo(User User, String currentPassword);
 
     // 회원 탈퇴
     public void deleteUser(long userId, String password);

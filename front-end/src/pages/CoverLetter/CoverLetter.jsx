@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './CoverLetter.css';
 
 import CLHeader from '../../components/CoverLetter/CLHeader';
@@ -87,6 +87,38 @@ function CoverLetterPage({ onBackToMindMap }) {
   const [loadingEdit, setLoadingEdit] = useState(false);
   const [generating, setGenerating] = useState(false);
 
+  const [mindMapWidth, setMindMapWidth] = useState(50);
+  const contentRef = useRef(null);
+  const isDraggingRef = useRef(false);
+
+  const handleDividerMouseDown = (e) => {
+    e.preventDefault();
+    isDraggingRef.current = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!isDraggingRef.current || !contentRef.current) return;
+      const rect = contentRef.current.getBoundingClientRect();
+      const newWidthPx = e.clientX - rect.left;
+      const newWidthPercent = (newWidthPx / rect.width) * 100;
+      setMindMapWidth(Math.min(Math.max(newWidthPercent, 20), 60));
+    };
+    const handleMouseUp = () => {
+      isDraggingRef.current = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, []);
+
   // 추가된 부분: 페이지 진입 시 자소서 마스터 전체 조회 + fetchMindMap으로 mindMapId 채우기
   // 이유: /coverletter에 들어오면 가장 먼저 자소서 마스터 목록을 봐야 하고,
   // mindMapId도 이 시점에 store에 채워져 있어야 이후 생성/수정 요청에 쓸 수 있음
@@ -157,6 +189,9 @@ function CoverLetterPage({ onBackToMindMap }) {
         );
         // 추가된 부분: 수정 성공 알림
         await alert('자소서 마스터가 수정되었습니다.');
+        setSelectedMasterId(current.id);
+        setEditingId(current.id);
+        setView('edit');
       } else {
         const created = await createCoverLetter(dto);
         const mapped = mapMaster(created);
@@ -281,25 +316,33 @@ function CoverLetterPage({ onBackToMindMap }) {
     }
   };
 
-    // 현재 선택된 문항 (마인드맵 RAG 하이라이트용)
+  // 현재 선택된 문항 (마인드맵 RAG 하이라이트용)
   const currentSection = sections.find((s) => s.id === selectedId);
 
   // 수정된 부분: CLMindMap을 두 화면 바깥으로 꺼내서 하나만 공유
   // 이유: 두 개의 CLMindMap이 각각 마운트/언마운트되면서 React Flow 리렌더링이 일어나 깜빡임이 생겼음
   return (
-    <div className="cl-page" style={{ display: 'flex', flexDirection: 'column' }}>
+    <div
+      className="cl-page"
+      style={{ display: 'flex', flexDirection: 'column' }}
+    >
       {/* 헤더 — 화면에 따라 다른 헤더 */}
-      {view === 'list'
-        ? <CLHeader userName="자소서 마스터" />
-        : <CLHeader userName={userName} onBackToMindMap={onBackToMindMap} coverLetterId={editingId} />
-      }
+      {view === 'list' ? (
+        <CLHeader userName="자소서 마스터" />
+      ) : (
+        <CLHeader
+          userName={userName}
+          onBackToMindMap={onBackToMindMap}
+          coverLetterId={editingId}
+        />
+      )}
 
       <div className="cl-body">
         {/* 툴바 — 화면에 따라 다른 툴바 */}
         {view === 'list' ? (
           <CLToolbar
-            navLabel="자소서 편집으로 이동 →"
-            onNav={handleGoToEdit}
+            // navLabel="자소서 편집으로 이동 →"
+            // onNav={handleGoToEdit}
             showSettingsToggle={false}
             className="cl-toolbar--master"
           />
@@ -307,13 +350,17 @@ function CoverLetterPage({ onBackToMindMap }) {
           <CLToolbar
             settingsOpen={settingsOpen}
             onSettingsToggle={toggleSettings}
-            navLabel="← 자소서 마스터로 돌아가기"
-            onNav={handleBackToMasterList}
+            // navLabel="← 자소서 마스터로 돌아가기"
+            // onNav={handleBackToMasterList}
             className="cl-toolbar--master"
           />
         )}
 
-        <div className={`cl-content ${view === 'list' ? 'cl-content--master' : ''}`}>
+        <div
+          className={`cl-content ${view === 'list' ? 'cl-content--master' : ''}`}
+          ref={contentRef}
+          style={{ '--mindmap-width': `${mindMapWidth}%` }}
+        >
           {/* 추가된 부분: CLMindMap 하나를 두 화면이 공유 — DOM 유지로 깜빡임 제거 */}
           {/* 추가: 선택된 문항의 RAG 결과를 넘겨 마인드맵 하이라이트
               (목록 화면에선 currentSection이 undefined라 하이라이트 자동으로 꺼짐) */}
@@ -321,7 +368,10 @@ function CoverLetterPage({ onBackToMindMap }) {
             selectedNodeIds={currentSection?.selectedNodeIds}
             contextNodeIds={currentSection?.contextNodeIds}
           />
-          <div className="cl-content-divider" />
+          <div
+            className="cl-content-divider"
+            onMouseDown={handleDividerMouseDown}
+          />
 
           {/* 마스터 목록/폼 — display:none으로 숨김/표시 */}
           <div style={{ display: view === 'list' ? 'contents' : 'none' }}>
@@ -334,6 +384,7 @@ function CoverLetterPage({ onBackToMindMap }) {
                 onFieldChange={handleMasterFieldChange}
                 onSubmit={handleMasterSubmit}
                 saving={savingMaster}
+                onGoToEdit={handleGoToEdit}
               />
             )}
           </div>
@@ -349,6 +400,7 @@ function CoverLetterPage({ onBackToMindMap }) {
                   onAddSection={addSection}
                   onUpdateTitle={updateSectionTitle}
                   draftTitle={userName}
+                  onBackToMasterList={handleBackToMasterList}
                 />
                 <CLSettings
                   open={settingsOpen}

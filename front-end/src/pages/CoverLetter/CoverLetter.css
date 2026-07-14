@@ -107,6 +107,7 @@
   background: #fff;
   border-bottom: 1px solid #e8e4f8;
   flex-shrink: 0;
+  min-height: 70px; /* 수정해야됨 */
 }
 .cl-toolbar-center {
   flex: 1;
@@ -132,7 +133,7 @@
    cl-toolbar-left margin을 cl-toolbar--master 전용에서 공통으로 확장하고,
    편집 화면 마인드맵도 42% 고정 폭으로 통일함 */
 .cl-toolbar-left {
-  margin-left: calc(42% + 1.5rem);
+  margin-left: calc(40.35% + 1.5rem);
 }
 .cl-toolbar-left .mm-toolbar-divider {
   align-self: center;
@@ -204,8 +205,8 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  background: radial-gradient(circle, #ddd 1px, transparent 1px) #f4f6fb;
-  background-size: 24px 24px;
+  /* background: radial-gradient(circle, #ddd 1px, transparent 1px) #f4f6fb;
+  background-size: 24px 24px; */
   overflow: hidden;
 }
 
@@ -416,14 +417,17 @@
   font-size: 0.85rem;
   padding: 2rem;
 }
+/* 수정된 부분: max-width를 680px에서 100%로 변경 (제한 없이 최대로 늘림)
+   이유: 680px로도 충분히 안 늘어난다고 하셔서, 컨테이너 폭 전체를 채우도록 제한을 없앰 */
 .cl-master-form {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  max-width: 420px;
+  max-width: 100%;
+  margin: 0 auto;
 }
 .cl-master-label {
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: #1a1a2e;
   margin-top: 0.6rem;
@@ -447,6 +451,7 @@
 }
 .cl-master-submit {
   margin-top: 1rem;
+  width: 100%;
   padding: 0.65rem;
   border: none;
   border-radius: 8px;
@@ -1144,4 +1149,107 @@
 [data-theme='dark'] .cl-settings-toggle:hover {
   background: #2c2a4d;
   color: #a99cff;
+}
+
+/* 기존 flex: 0 0 42%; 를 변수 참조로 교체 */
+.cl-mindmap {
+  flex: 0 0 var(--mindmap-width, 42%);
+}
+.cl-content--master .cl-mindmap {
+  flex: 0 0 var(--mindmap-width, 42%);
+}
+
+/* 기존 .cl-content-divider의 width: 1px; background: #e8e4f8; 를 아래로 교체 */
+.cl-content-divider {
+  width: 5px;
+  cursor: col-resize;
+  background: transparent;
+  position: relative;
+  flex-shrink: 0;
+  z-index: 10;
+}
+.cl-content-divider::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 2px;
+  width: 1px;
+  background: #e8e4f8;
+}
+.cl-content-divider:hover::after {
+  background: #6c63ff;
+}
+
+/* 기존 다크모드 규칙 [data-theme='dark'] .cl-content-divider { background: #2f2f45; } 를 아래로 교체 */
+[data-theme='dark'] .cl-content-divider::after {
+  background: #2f2f45;
+}
+
+.cl-draft-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.2rem; /* 기존 .cl-draft-title에 있던 margin-bottom을 여기로 옮김 */
+}
+.cl-draft-title {
+  margin-bottom: 0; /* margin-bottom을 위 row로 옮겼으니 0으로 */
+}
+.cl-title-back-btn {
+  font-size: 1rem;
+  margin-left: -0.5rem; /* mm-icon-btn의 좌측 패딩(0.5rem)만큼 당겨서 왼쪽 여백 상쇄 */
+  padding: 0.3rem; /* 상하좌우 패딩을 좀 더 좁게 (기존 mm-icon-btn의 0.3rem 0.5rem 덮어씀 ) */
+  position: relative;
+}
+.cl-title-back-btn svg {
+  width: 18px; /* 기존 14px → 18px로 확대 */
+  height: 18px;
+}
+.cl-title-back-btn::after {
+  content: attr(data-tooltip); /* data-tooltip 속성값을 그대로 텍스트로 사용 */
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.4rem;
+  padding: 0.35rem 0.6rem;
+  background: #6c63ff;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border-radius: 6px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.1s ease 0.15s; /* 0.15초 뒤에 0.1초 동안 서서히 나타남 */
+  pointer-events: none; /* 툴팁 위에 마우스 올라가도 이벤트 안 먹게 */
+  z-index: 20;
+}
+.cl-title-back-btn:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+.cl-master-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.cl-master-submit {
+  flex: 1;
+  margin-top: 0; /* 기존 margin-top: 1rem은 .cl-master-actions로 옮겼으니 0으로 변경 */
+}
+.cl-master-goedit {
+  padding: 0.65rem 1rem;
+  border: 1.5px solid #6c63ff;
+  border-radius: 8px;
+  background: #f5f3ff;
+  color: #6c63ff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.cl-master-goedit:hover {
+  background: #ede9ff;
 }
