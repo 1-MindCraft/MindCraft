@@ -1,8 +1,11 @@
 package com.mindcraft.backend.mindmap.controller;
 
+import com.mindcraft.backend.mindmap.dto.AiKeywordResponse;
+import com.mindcraft.backend.mindmap.dto.KeywordExtractRequestDto;
 import com.mindcraft.backend.mindmap.dto.MindMapSaveDto;
 import com.mindcraft.backend.mindmap.entity.MindMap;
 import com.mindcraft.backend.mindmap.mapper.MindMapMapper;
+import com.mindcraft.backend.mindmap.service.AiKeywordService;
 import com.mindcraft.backend.mindmap.service.MindMapService;
 import com.mindcraft.backend.user.dto.UserSecurityDto;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +21,7 @@ public class MindMapController {
 
     private final MindMapService mindMapService;
     private final MindMapMapper mindMapMapper;
+    private final AiKeywordService aiKeywordService;
 
     @GetMapping
     public ResponseEntity getMindMap(
@@ -27,6 +31,16 @@ public class MindMapController {
         MindMap mindMap = mindMapService.getOrCreateMindMap(userId);
         return new ResponseEntity<>(
                 mindMapMapper.mindMapToMindMapResponseDto(mindMap),
+                HttpStatus.OK
+        );
+    }
+
+    @PostMapping("/keywords")
+    public ResponseEntity<AiKeywordResponse> extractKeywords(
+            @RequestBody KeywordExtractRequestDto dto
+    ){
+        return new ResponseEntity<>(
+                aiKeywordService.extractKeywords(dto.getNodes()),
                 HttpStatus.OK
         );
     }

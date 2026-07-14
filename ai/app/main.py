@@ -7,6 +7,8 @@ from fastapi.responses import JSONResponse
 from app.core.config import settings
 from app.routers.coverletter import router as coverletter_router
 
+from app.routers import coverletter, keyword
+
 logger = logging.getLogger("mindcraft.ai")
 
 app = FastAPI(
@@ -16,7 +18,7 @@ app = FastAPI(
 )
 
 app.include_router(coverletter_router)
-
+app.include_router(keyword.router)
 
 @app.middleware("http")
 async def log_coverletter_requests(request: Request, call_next):
