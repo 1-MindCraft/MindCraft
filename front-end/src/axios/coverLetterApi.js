@@ -28,13 +28,6 @@ export const updateCoverLetter = async (coverLetterId, dto) => {
     return res.data;
 };
 
-// 2026-07-14 추가된 부분: 현재 보고 있는 자소서 삭제 API 호출
-// 이유: 백엔드에 이미 구현된 DELETE /coverletters/{id}를 재사용해 별도 삭제 로직 충돌을 방지함
-export const deleteCoverLetter = async (coverLetterId) => {
-    const res = await jwtAxios.delete(`${ApiURL}/coverletters/${coverLetterId}`);
-    return res.data;
-};
-
 // 추가된 부분: PDF 다운로드
 // 이유: 백엔드에 export 엔드포인트가 새로 생겨서, 프론트에서 직접 만들던(jsPDF+html2canvas) 방식 대신
 // 서버가 만들어준 실제 파일을 받아오는 방식으로 바꿈. responseType: 'blob'이 핵심 —
@@ -52,4 +45,11 @@ export const exportCoverLetterAsDocx = async (coverLetterId) => {
         responseType: 'blob',
     });
     return res;
+};
+
+// 2026-07-14 추가된 부분: 선택된 자소서 마스터 삭제 API 호출
+// 이유: 자소서 마스터 화면에서 현재 선택된 마스터만 삭제하기 위해 기존 DELETE /coverletters/{id}를 호출함
+export const deleteCoverLetter = async (coverLetterId) => {
+    const res = await jwtAxios.delete(`${ApiURL}/coverletters/${coverLetterId}`);
+    return res.data;
 };
