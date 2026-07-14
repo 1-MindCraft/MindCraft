@@ -43,8 +43,15 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public User updateMyInfo(User user) {
+    public User updateMyInfo(User user, String currentPassword) {
         User findUser = findUserById(user.getId());
+
+        if (findUser.getProvider() == Provider.LOCAL) {
+            boolean isPasswordCorrect = passwordEncoder.matches(currentPassword, findUser.getPassword());
+            if(!isPasswordCorrect) {
+                throw new InvalidPasswordException("비밀번호가 일치하지 않습니다.");
+            }
+        }
 
         Optional.ofNullable(user.getName())
                 .ifPresent(name -> findUser.setName(name));
