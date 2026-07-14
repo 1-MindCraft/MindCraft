@@ -173,3 +173,35 @@
   opacity: 0.25;
   filter: grayscale(0.6);
 }
+
+/* ─── AI 키워드 툴팁 (호버 시 표시) ─── */
+.mm-node-keywords {
+  position: absolute;
+  top: calc(100% + 8px);      /* 노드 바로 아래 */
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  white-space: nowrap;
+
+  /* 평소엔 숨김 */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 20;
+}
+
+/* 노드에 마우스 올리면 표시 */
+.mm-map-node:hover .mm-node-keywords {
+  opacity: 1;
+}
+
+.mm-node-keyword-chip {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #6366f1;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
