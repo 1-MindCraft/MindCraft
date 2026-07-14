@@ -79,8 +79,8 @@ public class CustomSecurityConfig {
         );
 
         http.oauth2Login(oauth2 -> oauth2
-//                .authorizationEndpoint(endpoint -> endpoint
-//                        .authorizationRequestRepository(new HttpCookieOAuth2AuthorizationRequestRepository()))
+                .authorizationEndpoint(endpoint -> endpoint
+                        .authorizationRequestRepository(new HttpCookieOAuth2AuthorizationRequestRepository()))
                 .userInfoEndpoint(endpoint -> endpoint.userService(customOAuth2UserService))
                 .successHandler(new OAuth2SuccessHandler())
                 .failureHandler(new OAuth2FailHandler())
