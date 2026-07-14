@@ -133,7 +133,7 @@
    cl-toolbar-left margin을 cl-toolbar--master 전용에서 공통으로 확장하고,
    편집 화면 마인드맵도 42% 고정 폭으로 통일함 */
 .cl-toolbar-left {
-  margin-left: calc(42% + 1.5rem);
+  margin-left: calc(40.35% + 1.5rem);
 }
 .cl-toolbar-left .mm-toolbar-divider {
   align-self: center;
@@ -417,14 +417,17 @@
   font-size: 0.85rem;
   padding: 2rem;
 }
+/* 수정된 부분: max-width를 680px에서 100%로 변경 (제한 없이 최대로 늘림)
+   이유: 680px로도 충분히 안 늘어난다고 하셔서, 컨테이너 폭 전체를 채우도록 제한을 없앰 */
 .cl-master-form {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  max-width: 420px;
+  max-width: 100%;
+  margin: 0 auto;
 }
 .cl-master-label {
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: #1a1a2e;
   margin-top: 0.6rem;
@@ -448,6 +451,7 @@
 }
 .cl-master-submit {
   margin-top: 1rem;
+  width: 100%;
   padding: 0.65rem;
   border: none;
   border-radius: 8px;
