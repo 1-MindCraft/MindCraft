@@ -1,0 +1,29 @@
+services:
+  springboot1:
+    build: ./back-end
+    container_name: springboot1
+    env_file:
+      - ./back-end/.env
+
+  springboot2:
+    build: ./back-end
+    container_name: springboot2
+    env_file:
+      - ./back-end/.env
+
+  ai:
+    build: ./ai
+    container_name: fastapi
+    env_file:
+      - ./ai/.env
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - springboot1
+      - springboot2
