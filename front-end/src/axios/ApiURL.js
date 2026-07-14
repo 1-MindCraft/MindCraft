@@ -1,2 +1,2 @@
-const ApiURL = 'http://localhost:8080';
+const ApiURL = 'https://api.my-mindcraft.com';
 export default ApiURL;

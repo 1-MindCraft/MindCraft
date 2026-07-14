@@ -27,3 +27,6 @@ jwt:
 ai:
   server:
     base-url: ${AI_SERVER_URL}
+
+server:
+  forward-headers-strategy: framework
