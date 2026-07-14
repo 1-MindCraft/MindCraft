@@ -290,11 +290,61 @@
   color: #aaa;
   line-height: 1.5;
 }
-.cl-draft-total {
-  font-size: 0.75rem;
-  color: #888;
-  white-space: nowrap;
+/* 2026-07-14 수정된 부분: 기존 총 글자 수 스타일을 케밥 메뉴 스타일로 교체
+   이유: 같은 헤더 우측 공간에 작은 삭제 메뉴를 표시하기 위해 필요한 범위만 추가함 */
+.cl-draft-menu {
+  position: relative;
   flex-shrink: 0;
+}
+.cl-draft-kebab-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #6f6f7d;
+  font-size: 1.45rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.cl-draft-kebab-btn:hover,
+.cl-draft-kebab-btn[aria-expanded='true'] {
+  background: #f3f1fb;
+  color: #1a1a2e;
+}
+.cl-draft-menu-popover {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 30;
+  min-width: 130px;
+  padding: 0.35rem;
+  border: 1px solid #e8e4f8;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(26, 26, 46, 0.14);
+}
+.cl-draft-delete-btn {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #d83a4e;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+.cl-draft-delete-btn:hover:not(:disabled) {
+  background: #fff0f2;
+}
+.cl-draft-delete-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
 }
 
 .cl-draft-body {
@@ -1031,11 +1081,27 @@
   color: #e8e6f5;
 }
 [data-theme='dark'] .cl-draft-hint,
-[data-theme='dark'] .cl-draft-total,
 [data-theme='dark'] .cl-settings-sub,
 [data-theme='dark'] .cl-setting-desc {
   color: #9694ac;
 }
+/* 2026-07-14 추가된 부분: 새 케밥 메뉴의 기존 다크 모드 호환 스타일 */
+[data-theme='dark'] .cl-draft-kebab-btn {
+  color: #aaa8bd;
+}
+[data-theme='dark'] .cl-draft-kebab-btn:hover,
+[data-theme='dark'] .cl-draft-kebab-btn[aria-expanded='true'] {
+  background: #2c2a3d;
+  color: #e8e6f5;
+}
+[data-theme='dark'] .cl-draft-menu-popover {
+  border-color: #3b3950;
+  background: #252435;
+}
+[data-theme='dark'] .cl-draft-delete-btn:hover:not(:disabled) {
+  background: #3b2630;
+}
+
 [data-theme='dark'] .cl-section-list {
   border-color: #2f2f45;
 }

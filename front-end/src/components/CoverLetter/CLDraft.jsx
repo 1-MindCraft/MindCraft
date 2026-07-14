@@ -10,13 +10,17 @@ function CLDraft({
   onUpdateTitle,
   draftTitle = '자기소개서 초안',
   onBackToMasterList,
+  onDeleteCoverLetter,
+  deletingCoverLetter = false,
+  deleteBlocked = false,
 }) {
   const selectedIndex = sections.findIndex((s) => s.id === selectedId);
   const selected = sections[selectedIndex];
-  const totalChars = sections.reduce(
-    (sum, s) => sum + (s.content?.length || 0),
-    0
-  );
+
+  // 2026-07-14 추가된 부분: 케밥 메뉴 열림 상태와 메뉴 영역 참조
+  // 이유: 기존 "총 글자 수" 자리에 작은 삭제 메뉴를 표시하고 바깥 클릭 시 안전하게 닫기 위해 필요함
+  const [isDeleteMenuOpen, setIsDeleteMenuOpen] = useState(false);
+  const deleteMenuRef = useRef(null);
 
   // ── 제목 편집 상태 ──
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -35,6 +39,40 @@ function CLDraft({
       titleInputRef.current?.select();
     }
   }, [isEditingTitle]);
+
+  // 2026-07-14 추가된 부분: 케밥 메뉴 바깥 클릭 또는 ESC 입력 시 메뉴 닫기
+  // 이유: 작은 메뉴가 열린 채 남아 다른 화면 조작과 충돌하는 것을 방지함
+  useEffect(() => {
+    if (!isDeleteMenuOpen) return;
+
+    const handlePointerDown = (event) => {
+      if (!deleteMenuRef.current?.contains(event.target)) {
+        setIsDeleteMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setIsDeleteMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isDeleteMenuOpen]);
+
+  // 2026-07-14 추가된 부분: 삭제 메뉴 버튼 클릭 처리
+  // 이유: 메뉴를 먼저 닫은 뒤 부모가 전달한 현재 자소서 삭제 함수만 실행하도록 역할을 분리함
+  const handleDeleteClick = () => {
+    if (deletingCoverLetter || deleteBlocked) return;
+    setIsDeleteMenuOpen(false);
+    onDeleteCoverLetter?.();
+  };
 
   const startEditTitle = () => {
     setOriginalTitle(selected.title);
@@ -65,6 +103,7 @@ function CLDraft({
               <button
                 className="mm-icon-btn cl-title-back-btn"
                 onClick={onBackToMasterList}
+                disabled={deletingCoverLetter}
                 data-tooltip="자소서 마스터 목록으로 돌아가기"
               >
                 <svg
@@ -84,8 +123,38 @@ function CLDraft({
             있습니다.
           </div>
         </div>
-        <div className="cl-draft-total">
-          총 글자 수 : {totalChars.toLocaleString()}자
+        {/* 2026-07-14 수정된 부분: "총 글자 수"를 제거하고 케밥(⋮) 삭제 메뉴로 교체
+            이유: 현재 보고 있는 자소서를 이 위치에서 바로 삭제할 수 있도록 요청된 UI만 추가함 */}
+        <div className="cl-draft-menu" ref={deleteMenuRef}>
+          <button
+            type="button"
+            className="cl-draft-kebab-btn"
+            onClick={() => setIsDeleteMenuOpen((prev) => !prev)}
+            aria-label="자소서 메뉴 열기"
+            aria-haspopup="menu"
+            aria-expanded={isDeleteMenuOpen}
+          >
+            ⋮
+          </button>
+
+          {isDeleteMenuOpen && (
+            <div className="cl-draft-menu-popover" role="menu">
+              <button
+                type="button"
+                className="cl-draft-delete-btn"
+                onClick={handleDeleteClick}
+                disabled={deletingCoverLetter || deleteBlocked}
+                title={
+                  deleteBlocked
+                    ? '문항 생성이 끝난 뒤 자소서를 삭제할 수 있습니다.'
+                    : undefined
+                }
+                role="menuitem"
+              >
+                {deletingCoverLetter ? '삭제 중...' : '자소서 삭제'}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
