@@ -53,12 +53,12 @@ function CLMindMap({ selectedNodeIds, contextNodeIds }) {
       data: {
         ...node.data,
         highlight: !hasResult
-          ? undefined              // RAG 결과 없으면 전체 정상 표시
+          ? undefined // RAG 결과 없으면 전체 정상 표시
           : selectedSet.has(node.id)
-          ? 'selected'
-          : contextSet.has(node.id)
-          ? 'context'
-          : 'dimmed',
+            ? 'selected'
+            : contextSet.has(node.id)
+              ? 'context'
+              : 'dimmed',
       },
     }));
   }, [nodes, selectedNodeIds, contextNodeIds]);
@@ -92,7 +92,7 @@ function CLMindMap({ selectedNodeIds, contextNodeIds }) {
               fitViewOptions={{ maxZoom: 1 }} // 노드가 몇 개 안 될 때 지나치게 확대되는 것 방지
               colorMode="light" // 편집 화면과 통일 (OS 다크모드 설정에 안 흔들리게)
             >
-              <Background />
+              {/* <Background /> */}
             </ReactFlow>
           </div>
         ) : (
