@@ -59,3 +59,46 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/mindcraft-fastapi:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/mindcraft-fastapi:${{ github.sha }}
+  deploy:
+    needs: [build-spring, build-fastapi]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6.2.1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+      
+      - name: Upload Config files to S3
+        run: |
+          aws s3 cp docker-compose.yml s3://mindcraft-deploy/docker-compose.yml
+          aws s3 cp nginx/nginx.conf s3://mindcraft-deploy/nginx.conf
+
+      - name: EC2에 배포 명령 전송
+        run: |
+          aws ssm send-command \
+            --targets "Key=tag:Role,Values=mindcraft-backend" \
+            --document-name "AWS-RunShellScript" \
+            --comment "MindCraft backend deploy" \
+            --parameters '{"commands":[
+              "mkdir -p /home/ssm-user/MindCraft/nginx",
+              "cd /home/ssm-user/MindCraft",
+              "aws s3 cp s3://mindcraft-deploy/docker-compose.yml .",
+              "aws s3 cp s3://mindcraft-deploy/nginx.conf ./nginx/nginx.conf",
+              "command -v jq || sudo dnf install -y jq",
+              "mkdir -p back-end ai",
+              "> back-end/.env",
+              "> ai/.env",
+              "aws ssm get-parameters-by-path --path /mindcraft/prod --with-decryption --region ap-northeast-2 --query \"Parameters[*].[Name,Value]\" --output text | while IFS=$'\''\\t'\'' read -r name value; do key=$(basename $name); if [ \"$key\" = \"OPENAI_API_KEY\" ]; then echo \"$key=$value\" >> ai/.env; else echo \"$key=$value\" >> back-end/.env; fi; done",
+              "DB_PASSWORD=$(aws secretsmanager get-secret-value --secret-id rds!db-a078a9de-4369-45dc-a206-dd95d18fd56d-4hjP3o --region ap-northeast-2 --query SecretString --output text | jq -r .password)",
+              "echo DB_PASSWORD=$DB_PASSWORD >> back-end/.env",
+              "docker compose pull",
+              "docker compose down",
+              "docker compose up -d"
+            ]}'
+
+        
