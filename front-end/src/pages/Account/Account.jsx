@@ -172,11 +172,27 @@ function AccountPage() {
       return;
     }
 
+    // 추가된 부분 [2026-07-15]: 탈퇴 전 한 번 더 확인하는 모달
+    // 이유: 비밀번호만 입력하면 바로 탈퇴가 처리돼서, 실수로 탈퇴되는 걸 막기 위해
+    // "정말로 탈퇴하시겠습니까?" 확인 단계를 추가함. 새로운 모달을 따로 만들 필요 없이
+    // 공통 빈 모달(Modal.jsx)을 그대로 쓰는 ModalProvider의 confirm()을 재사용하고,
+    // 버튼 텍스트만 '예'/'아니오'로 지정함
+    const reallyWithdraw = await confirm(
+      '정말로 탈퇴하시겠습니까?\n ※ 회원 탈퇴 시 작성하신 모든 데이터는 삭제되며 복구할 수 없습니다. ※',
+      { confirmText: '예', cancelText: '아니오' }
+    );
+    // 추가된 부분 [2026-07-15]: [아니오] 선택 시 아무것도 바꾸지 않고 취소 안내만 띄운 뒤 종료
+    // 이유: 요청대로 탈퇴 취소 시에는 데이터 변경 없이 모달만 닫혀야 함
+    if (!reallyWithdraw) {
+      await alert('탈퇴 처리가 취소되었습니다.');
+      return;
+    }
+
     try {
       await deleteMe(password);
       removeCookie('user');
       resetState();
-      await alert('탈퇴 처리가 완료되었습니다');
+      await alert('탈퇴 처리가 완료되었습니다.');
       navigate('/');
     } catch (error) {
       console.log('deleteMe 실패:', error.response?.data || error);

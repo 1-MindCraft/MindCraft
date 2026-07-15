@@ -113,9 +113,25 @@ export function ModalProvider({ children }) {
       <Modal open={Boolean(modalState)} onClose={handleCancel} onConfirm={handleConfirm}>
         {modalState && (
           <>
+            {/* 수정된 부분 [2026-07-15]: 메시지에 줄바꿈(\n)이 있으면 첫 줄과 나머지 줄을 분리해서 렌더링
+                이유: 탈퇴 재확인 모달처럼 "정말로 탈퇴하시겠습니까?" 같은 메인 문구 아래에
+                "회원 탈퇴 시 작성하신 모든 데이터는 삭제되며 복구할 수 없습니다." 같은 부가 설명이
+                붙는 경우, 부가 설명만 글자를 살짝 작게 + 회색으로 구분해서 보여달라는 요청
+                before:
+                <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
+                  {modalState.message}
+                </p>
+                after: */}
             <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
-              {modalState.message}
+              {modalState.message.split('\n')[0]}
             </p>
+            {modalState.message.includes('\n') && (
+              // 추가된 부분 [2026-07-15]: 부가 설명(둘째 줄부터)을 위한 별도 문단
+              // className="modal-message-sub"의 실제 폰트 크기/색상은 Modal.css에서 지정함
+              <p className="modal-message-sub">
+                {modalState.message.split('\n').slice(1).join('\n')}
+              </p>
+            )}
             {/* 추가된 부분: prompt 타입일 때 비밀번호 입력창 렌더링
                 이유: promptPassword 모달은 사용자가 비밀번호를 입력할 곳이 있어야 함 */}
             {modalState.type === 'prompt' && (

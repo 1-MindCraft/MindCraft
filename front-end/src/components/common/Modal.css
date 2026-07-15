@@ -87,6 +87,17 @@
   border-color: #6c63ff;
 }
 
+/* 추가된 부분 [2026-07-15]: 모달 메시지의 부가 설명 문구용 스타일
+   이유: 탈퇴 재확인 모달처럼 메인 문구("정말로 탈퇴하시겠습니까?") 아래에
+   부가 설명("회원 탈퇴 시 작성하신 모든 데이터는 삭제되며 복구할 수 없습니다.")이
+   붙을 때, 메인 문구보다 살짝 작고 회색 톤으로 구분되게 요청받아서 추가함 */
+.modal-message-sub {
+  margin: 0.4rem 0 0;
+  font-size: 0.82rem;
+  color: #8a8a9e;
+  white-space: pre-wrap;
+}
+
 .modal-btn {
   padding: 0.5rem 1.1rem;
   border-radius: 8px;
