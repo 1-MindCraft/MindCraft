@@ -77,6 +77,7 @@ jobs:
         run: |
           aws s3 cp docker-compose.yml s3://mindcraft-deploy/docker-compose.yml
           aws s3 cp nginx/nginx.conf s3://mindcraft-deploy/nginx.conf
+          aws s3 cp deploy.sh s3://mindcraft-deploy/deploy.sh
 
       - name: EC2에 배포 명령 전송
         run: |
