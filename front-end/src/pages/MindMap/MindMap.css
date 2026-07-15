@@ -527,6 +527,16 @@
   justify-content: center;
   gap: 0.4rem;
 }
+/* 추가된 부분 [2026-07-15]: .mm-toolbar-right
+   이유: [ 키워드 추출 ] / [ 생성하기 ] 버튼이 헤더에서 툴바로 옮겨오면서, 툴바 오른쪽에
+   고정으로 배치하기 위해 추가함. .mm-toolbar-left와 동일하게 flex-shrink: 0으로 줘서
+   가운데(.mm-toolbar-center, flex: 1)가 남는 공간을 차지하고 이 영역은 크기가 고정되게 함 */
+.mm-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
 .mm-toolbar-saved {
   display: flex;
   align-items: center;
