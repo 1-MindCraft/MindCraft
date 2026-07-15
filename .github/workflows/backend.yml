@@ -79,7 +79,7 @@ jobs:
           aws s3 cp nginx/nginx.conf s3://mindcraft-deploy/nginx.conf
           aws s3 cp deploy.sh s3://mindcraft-deploy/deploy.sh
 
-      - name: EC2에 배포 명령 전송
+      - name: EC2에 배포 명령 전송하기
         run: |
           aws ssm send-command \
             --targets "Key=tag:Role,Values=mindcraft-backend" \

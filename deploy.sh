@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 cd /home/ssm-user/MindCraft
 mkdir -p nginx back-end ai
@@ -27,7 +27,7 @@ aws ssm get-parameters-by-path \
 done
 
 DB_PASSWORD=$(aws secretsmanager get-secret-value \
-  --secret-id "rds!db-a078a9de-4369-45dc-a206-dd95d18fd56d-4hjP3o" \
+  --secret-id "rds!db-a078a9de-4369-45dc-a206-dd95d18fd56d" \
   --region ap-northeast-2 \
   --query "SecretString" \
   --output text | jq -r '.password')
