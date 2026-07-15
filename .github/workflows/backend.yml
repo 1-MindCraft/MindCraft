@@ -3,7 +3,7 @@ name: Backend Build and Push
 on:
   push:
     branches:
-      - etc/deploy
+      - main
     paths:
       - 'back-end/**'
       - 'ai/**'
