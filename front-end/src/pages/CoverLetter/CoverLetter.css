@@ -726,6 +726,13 @@
   padding: 1.1rem 1rem 0.8rem;
   border-bottom: 1px solid #f0eef8;
   flex-shrink: 0;
+  /* 추가된 부분 [2026-07-15]: min-width: 300px
+     이유: .cl-settings가 열림/닫힘 애니메이션으로 300px→0px로 폭이 줄어드는 동안,
+     안쪽 콘텐츠까지 같이 줄어들면서 한글 텍스트가 매 프레임 재배치(reflow)되어
+     글자 하나씩 줄바꿈되는 현상이 있었음. 안쪽 콘텐츠 폭을 300px로 고정해두면
+     바깥 .cl-settings의 overflow: hidden이 잘라내는 방식으로 동작해서
+     애니메이션 중에도 텍스트 레이아웃이 흐트러지지 않음 */
+  min-width: 300px;
 }
 .cl-settings-title {
   font-size: 0.88rem;
@@ -737,11 +744,18 @@
   font-size: 0.72rem;
   color: #888;
   line-height: 1.5;
+  /* 추가된 부분 [2026-07-15]: word-break: keep-all
+     이유: 한글은 기본적으로 글자 사이 아무 데서나 줄바꿈될 수 있어서, 사이드바 폭이
+     좁아지는 애니메이션 도중 글자 단위로 뭉그러져 보이는 걸 막기 위해 단어(어절) 단위로만
+     줄바꿈되게 지정함 */
+  word-break: keep-all;
 }
 .cl-settings-body {
   flex: 1;
   overflow-y: auto;
   padding: 0.5rem 0;
+  /* 추가된 부분 [2026-07-15]: min-width: 300px (이유는 .cl-settings-header와 동일) */
+  min-width: 300px;
 }
 .cl-setting-section {
   padding: 0.9rem 1rem;
@@ -751,12 +765,16 @@
   font-weight: 800;
   color: #1a1a2e;
   margin-bottom: 0.3rem;
+  /* 추가된 부분 [2026-07-15]: word-break: keep-all (이유는 위 .cl-settings-sub와 동일) */
+  word-break: keep-all;
 }
 .cl-setting-desc {
   font-size: 0.7rem;
   color: #aaa;
   line-height: 1.5;
   margin-bottom: 0.7rem;
+  /* 추가된 부분 [2026-07-15]: word-break: keep-all (이유는 위 .cl-settings-sub와 동일) */
+  word-break: keep-all;
 }
 .cl-setting-divider {
   height: 1px;
@@ -832,6 +850,8 @@
   border-radius: 8px;
   font-size: 0.72rem;
   color: #888;
+  /* 추가된 부분 [2026-07-15]: word-break: keep-all (이유는 .cl-settings-sub와 동일) */
+  word-break: keep-all;
 }
 .cl-node-ref-icon {
   color: #6c63ff;
@@ -879,6 +899,8 @@
   padding: 0.9rem 1rem;
   border-top: 1px solid #f0eef8;
   flex-shrink: 0;
+  /* 추가된 부분 [2026-07-15]: min-width: 300px (이유는 .cl-settings-header와 동일) */
+  min-width: 300px;
 }
 .cl-btn-generate {
   width: 100%;
@@ -902,6 +924,8 @@
   color: #aaa;
   text-align: center;
   line-height: 1.5;
+  /* 추가된 부분 [2026-07-15]: word-break: keep-all (이유는 .cl-settings-sub와 동일) */
+  word-break: keep-all;
 }
 
 /* ─── MindMapPage 공용 스타일 (자체 포함) ─── */
