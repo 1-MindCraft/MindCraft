@@ -1354,3 +1354,30 @@
   cursor: not-allowed;
   opacity: 0.5;
 }
+
+/* 추가된 부분 [2026-07-15]: [ 생성하기 ] 클릭 후 생성 중일 때 뜨는 어두운 오버레이
+   이유: 화면 전체를 어둡게 덮고, 그 위에 중앙 정렬된 TextShimmerWave("Crafting")
+   애니메이션을 보여달라는 요청에 따라 추가함 */
+.cl-generating-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 18, 34, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: cl-generating-fade-in 0.2s ease;
+  /* 추가된 부분 [2026-07-15]: color: #fff
+     이유: TextShimmerWave가 baseColor/shimmerColor 기본값으로 currentColor를 사용하는데,
+     지정 안 하면 어두운 배경 위에서 기본 글자색(검정 계열)이라 잘 안 보일 수 있어서
+     오버레이 자체에 흰색을 지정해 currentColor가 흰색이 되게 함 */
+  color: #fff;
+}
+@keyframes cl-generating-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

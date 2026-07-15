@@ -705,3 +705,26 @@
   background: #2c2a4d;
   border-color: #3a3a55;
 }
+
+/* 추가된 부분 [2026-07-15]: [ 키워드 추출 ] 클릭 후 추출 중일 때 뜨는 어두운 오버레이
+   이유: 자소서 편집화면의 .cl-generating-overlay와 동일한 방식으로, 화면 전체를
+   어둡게 덮고 중앙에 TextShimmerWave 애니메이션을 보여달라는 요청에 따라 추가함 */
+.mm-extracting-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 18, 34, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: mm-extracting-fade-in 0.2s ease;
+  color: #fff;
+}
+@keyframes mm-extracting-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

@@ -7,6 +7,9 @@ import CLMindMap from '../../components/CoverLetter/CLMindMap';
 import CLDraft from '../../components/CoverLetter/CLDraft';
 import CLSettings from '../../components/CoverLetter/CLSettings';
 import CLMasterDraft from '../../components/CoverLetter/CLmasterdraft';
+// 추가된 부분 [2026-07-15]: [ 생성하기 ] 클릭 시 뜨는 오버레이에 쓸 TextShimmerWave 컴포넌트 import
+// 이유: 자소서 편집화면에서 AI 생성 중일 때 화면을 어둡게 하고 중앙에 "Crafting" 웨이브 애니메이션을 보여달라는 요청
+import { TextShimmerWave } from '../../components/loading-ui/text-shimmer-wave';
 
 import {
   getCoverLetterList,
@@ -525,6 +528,16 @@ function CoverLetterPage({ onBackToMindMap }) {
           </div>
         </div>
       </div>
+
+      {/* 추가된 부분 [2026-07-15]: [ 생성하기 ] 클릭 후 AI가 생성 중일 때 뜨는 오버레이
+          이유: 요청대로 생성 중에는 주변을 어둡게 하고, 화면 중앙에 "Crafting" 웨이브
+          반짝임 애니메이션을 보여줘서 로딩 상태를 명확히 알려주기 위함.
+          generating은 [ 생성하기 ] 버튼(CLSettings)을 누르면 true가 되는 기존 state를 그대로 사용 */}
+      {generating && (
+        <div className="cl-generating-overlay">
+          <TextShimmerWave>자소서 생성중...</TextShimmerWave>
+        </div>
+      )}
     </div>
   );
 }
