@@ -25,7 +25,7 @@ function Nav({ isMember, onLoginClick }) {
         {/* 수정된 부분: "마이페이지로 이동" 버튼 → ProfileDropdown으로 교체
             이유: 회원일 때 우측 상단에 드롭다운 형식의 프로필을 넣어달라는 요청 */}
         {isMember ? (
-          <ProfileDropdown showTheme={false} showHelp={false} />
+          <ProfileDropdown showHelp={false} />
         ) : (
           <button className="nav-btn" onClick={onLoginClick}>
             로그인 / 회원가입

@@ -16,7 +16,10 @@ function Faq() {
     <section
       className="section faq-section"
       id="faq"
-      style={{ background: '#fff' }}
+      // 삭제된 부분 [2026-07-15]: style={{ background: '#fff' }} 제거
+      // 이유: 다크모드에서 이 섹션만 흰색으로 남아 "흑백흑백" 번갈아 보이는 원인이었음 (자세한 이유는 HowItWorks.jsx와 동일)
+      // before: style={{ background: '#fff' }}
+      // after: (제거됨)
     >
       <div className="section-label">FAQ</div>
       <h2 className="section-title">자주 묻는 질문</h2>
