@@ -131,11 +131,17 @@ function LoginForm({ onSignupClick }) {
         로그인
       </button>
 
-      <div className="login-links">
-        비밀번호가 기억나지 않으신가요?
-        <span className="login-divider">|</span>
-        <a href="#">비밀번호 재설정</a>
-      </div>
+      {/* 삭제된 부분 [2026-07-15]: '비밀번호 재설정' 관련 링크 블록 전체 제거
+          이유: 로그인 모달에 비밀번호 재설정 기능이 없는데 안내 문구/링크만 남아있어서
+          불필요하다는 요청으로 삭제함. 참고: login-links/login-divider 클래스는
+          SignupForm의 '이미 계정이 있으신가요? 로그인' 부분에서도 재사용 중이라 CSS는 그대로 둠
+          before:
+          <div className="login-links">
+            비밀번호가 기억나지 않으신가요?
+            <span className="login-divider">|</span>
+            <a href="#">비밀번호 재설정</a>
+          </div>
+          after: (제거됨) */}
 
       <div className="login-or">
         <span>소셜 계정으로 간편 로그인</span>
