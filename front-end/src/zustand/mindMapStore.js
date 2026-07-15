@@ -73,6 +73,13 @@ const useMindMapStore = create((set, get) => ({
       throw error;
     }
   },
+  // 전체 삭제 — 루트(parentId 없는 노드)만 남기고 전부 제거
+  // 엣지는 parentId에서 파생되므로 별도 처리 불필요
+  clearNodes: () =>
+    set((state) => {
+      const root = state.nodes.find((n) => n.data?.parentId == null);
+      return { nodes: root ? [root] : [] };
+    }),
 }));
 
 export default useMindMapStore;

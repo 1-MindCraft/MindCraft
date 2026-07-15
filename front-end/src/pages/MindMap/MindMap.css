@@ -738,3 +738,22 @@
     opacity: 1;
   }
 }
+
+.mm-btn-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  color: #6b7280;        /* #9aa0ab → #6b7280, 읽히게 톤업 */
+  border: 1px solid #d5d8dd;  /* 테두리도 살짝 진하게 */
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.mm-btn-clear:hover {
+  color: #e5484d;
+  border-color: #e5484d;
+  background: #fff5f5;
+}
