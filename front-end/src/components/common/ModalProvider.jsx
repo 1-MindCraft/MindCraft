@@ -104,12 +104,34 @@ export function ModalProvider({ children }) {
     <ModalContext.Provider value={{ alert, confirm, promptPassword }}>
       {children}
 
-      <Modal open={Boolean(modalState)} onClose={handleCancel}>
+      {/* 수정된 부분 [2026-07-15]: onConfirm={handleConfirm} 추가
+          이유: 빈 공통 모달 컴포넌트(Modal.jsx)에 Enter 키로 바로 확인하는 기능이 생겨서,
+          alert/confirm 타입처럼 입력창이 없는 모달도 Enter만 누르면 바로 확인 버튼을 누른 것과
+          동일하게 동작하도록 연결함
+          before: <Modal open={Boolean(modalState)} onClose={handleCancel}>
+          after: */}
+      <Modal open={Boolean(modalState)} onClose={handleCancel} onConfirm={handleConfirm}>
         {modalState && (
           <>
+            {/* 수정된 부분 [2026-07-15]: 메시지에 줄바꿈(\n)이 있으면 첫 줄과 나머지 줄을 분리해서 렌더링
+                이유: 탈퇴 재확인 모달처럼 "정말로 탈퇴하시겠습니까?" 같은 메인 문구 아래에
+                "회원 탈퇴 시 작성하신 모든 데이터는 삭제되며 복구할 수 없습니다." 같은 부가 설명이
+                붙는 경우, 부가 설명만 글자를 살짝 작게 + 회색으로 구분해서 보여달라는 요청
+                before:
+                <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
+                  {modalState.message}
+                </p>
+                after: */}
             <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
-              {modalState.message}
+              {modalState.message.split('\n')[0]}
             </p>
+            {modalState.message.includes('\n') && (
+              // 추가된 부분 [2026-07-15]: 부가 설명(둘째 줄부터)을 위한 별도 문단
+              // className="modal-message-sub"의 실제 폰트 크기/색상은 Modal.css에서 지정함
+              <p className="modal-message-sub">
+                {modalState.message.split('\n').slice(1).join('\n')}
+              </p>
+            )}
             {/* 추가된 부분: prompt 타입일 때 비밀번호 입력창 렌더링
                 이유: promptPassword 모달은 사용자가 비밀번호를 입력할 곳이 있어야 함 */}
             {modalState.type === 'prompt' && (
@@ -119,7 +141,17 @@ export function ModalProvider({ children }) {
                 value={promptValue}
                 onChange={(e) => setPromptValue(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleConfirm();
+                  // 수정된 부분 [2026-07-15]: e.stopPropagation() 추가
+                  // 이유: Modal.jsx에 Enter 키로 onConfirm을 실행하는 window 레벨 리스너가 추가되면서,
+                  // 이 input에서 Enter를 누르면 여기서 한 번 + window 리스너에서 또 한 번, 총 두 번
+                  // handleConfirm이 호출되는 문제가 생겨서 이벤트 버블링을 막아 중복 실행을 방지함
+                  // before:
+                  // if (e.key === 'Enter') handleConfirm();
+                  // after:
+                  if (e.key === 'Enter') {
+                    e.stopPropagation();
+                    handleConfirm();
+                  }
                 }}
                 autoFocus
               />

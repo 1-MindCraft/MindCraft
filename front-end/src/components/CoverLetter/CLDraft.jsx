@@ -1,5 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import PENCIL_SRC from '../../assets/pencil.png';
+// 추가된 부분 [2026-07-15]: 다크모드용 흰색 연필 아이콘 import 및 useTheme 훅
+// 이유: 기존 pencil.png가 어두운 색이라 다크모드에서 안 보이는 문제를 해결하기 위해 추가함
+import PENCIL_WHITE_SRC from '../../assets/pencil-white.png';
+import { useTheme } from '../../context/ThemeContext';
 
 // 수정된 부분: draftTitle prop 추가 (이유: 자소서 마스터의 title을 CLDraft 헤더에 표시하기 위해 외부에서 받아야 함)
 function CLDraft({
@@ -16,6 +20,8 @@ function CLDraft({
   deletingSection = false,
   deleteBlocked = false,
 }) {
+  // 추가된 부분 [2026-07-15]: 현재 테마 값
+  const { theme } = useTheme();
   const selectedIndex = sections.findIndex((s) => s.id === selectedId);
   const selected = sections[selectedIndex];
 
@@ -216,8 +222,11 @@ function CLDraft({
                     onClick={startEditTitle}
                     title="제목 수정"
                   >
+                    {/* 수정된 부분 [2026-07-15]: src를 테마에 따라 조건부로 선택 (이유: 다크모드에서 안 보이는 문제 수정)
+                        before: <img src={PENCIL_SRC} alt="편집" className="cl-detail-pencil" />
+                        after: */}
                     <img
-                      src={PENCIL_SRC}
+                      src={theme === 'dark' ? PENCIL_WHITE_SRC : PENCIL_SRC}
                       alt="편집"
                       className="cl-detail-pencil"
                     />
@@ -254,7 +263,13 @@ function CLDraft({
       {/* 하단: AI 생성 안내 */}
       <div className="cl-ai-notice">
         <span className="cl-ai-icon">✦</span>
-        <div>
+        {/* 수정된 부분 [2026-07-15]: className="cl-ai-notice-text" 추가
+            이유: 이 영역에 min-width가 없어서, .cl-draft 폭이 좁아질수록(마인드맵 패널 divider를
+            끌어서 넓힐 때 등) "AI가 생성한 초안입니다" 문구가 글자 단위로 뭉그러져 보이는 문제가 있었음.
+            className을 줘서 CoverLetter.css에서 min-width를 지정할 수 있게 함
+            before: <div>
+            after: */}
+        <div className="cl-ai-notice-text">
           <div className="cl-ai-notice-title">AI가 생성한 초안입니다</div>
           <div className="cl-ai-notice-sub">
             마인드맵의 구조와 내용을 기반으로 AI가 자기소개서 초안을 생성합니다.

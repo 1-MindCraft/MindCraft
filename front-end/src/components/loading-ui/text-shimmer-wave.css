@@ -1,0 +1,20 @@
+/* 추가된 부분 [2026-07-15]: 이 파일 전체가 새로 추가된 파일입니다
+   이유: 공식 TextShimmerWave 소스가 쓰던 Tailwind 유틸리티 클래스
+   ("relative inline-block [perspective:500px]", "inline-block whitespace-pre
+   [transform-style:preserve-3d]")를, Tailwind가 없는 이 프로젝트에서
+   동일한 효과를 내도록 일반 CSS 클래스로 옮겨 적음 */
+.text-shimmer-wave {
+  position: relative;
+  display: inline-block;
+  perspective: 500px;
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+
+.text-shimmer-wave-char {
+  display: inline-block;
+  white-space: pre;
+  transform-style: preserve-3d;
+}
