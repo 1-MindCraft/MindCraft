@@ -9,6 +9,10 @@ function LoginForm({ onSignupClick }) {
   const { moveToPath } = useNavigation();
   const { doLogin, doLogout } = useLoginActions();
   const { alert } = useModal(); // 수정된 부분: 브라우저 기본 alert() 대신 커스텀 모달 사용
+  // 추가된 부분 [2026-07-15]: 로그인 요청 중복 제출 방지용 state
+  // 이유: 로그인 응답을 기다리는 동안 Enter를 한 번 더 누르면(또는 버튼을 다시 누르면)
+  // handleSubmit이 두 번 실행돼서 '로그인 성공!' 모달이 2번 뜨는 문제가 있었음
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState(() => {
     const savedEmail = localStorage.getItem('rememberedEmail');
     return {
@@ -33,6 +37,12 @@ function LoginForm({ onSignupClick }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // 추가된 부분 [2026-07-15]: 이미 로그인 요청이 진행 중이면 중복 제출 무시
+    // 이유: Enter 연타나 버튼 연타로 handleSubmit이 겹쳐 실행되면서
+    // alert('로그인 성공!')이 두 번 뜨는 문제를 막기 위함
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
     if (formData.remember) {
       localStorage.setItem('rememberedEmail', formData.email);
     } else {
@@ -49,6 +59,10 @@ function LoginForm({ onSignupClick }) {
       console.log('login 실패:', error.response?.data || error);
       // 수정된 부분: alert() → await alert() (브라우저 기본 alert창 대신 커스텀 모달로 교체)
       await alert('입력 정보를 다시 확인하세요.');
+    } finally {
+      // 추가된 부분 [2026-07-15]: 요청이 끝나면(성공/실패 상관없이) 다시 제출 가능하도록 원복
+      // 이유: 로그인 실패 시 사용자가 다시 시도할 수 있어야 하므로 finally에서 항상 해제
+      setIsSubmitting(false);
     }
   };
 
@@ -109,7 +123,11 @@ function LoginForm({ onSignupClick }) {
 
       {/* 수정된 부분: onClick={handleSubmit} 제거하고 type="submit"으로 변경
           이유: <form onSubmit>이 이제 제출을 처리하므로, onClick까지 남겨두면 중복 호출될 수 있어 제거 */}
-      <button className="login-submit" type="submit">
+      {/* 수정된 부분 [2026-07-15]: disabled={isSubmitting} 추가
+          이유: Enter뿐 아니라 버튼을 여러 번 클릭해서 생기는 중복 제출도 함께 막기 위함
+          before: <button className="login-submit" type="submit">
+          after: */}
+      <button className="login-submit" type="submit" disabled={isSubmitting}>
         로그인
       </button>
 

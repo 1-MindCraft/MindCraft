@@ -20,6 +20,10 @@
   max-width: 380px;
   margin: 1rem;
   animation: modal-pop-in 0.18s ease;
+  /* 추가된 부분 [2026-07-15]: outline: none
+     이유: JS로 focus()를 강제로 옮기는 용도(tabIndex=-1, 포커스 트랩)라서
+     브라우저 기본 파란 포커스 테두리가 보이면 오히려 어색해서 숨김 */
+  outline: none;
 }
 
 .modal-header {

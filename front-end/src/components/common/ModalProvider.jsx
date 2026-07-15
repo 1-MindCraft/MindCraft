@@ -104,7 +104,13 @@ export function ModalProvider({ children }) {
     <ModalContext.Provider value={{ alert, confirm, promptPassword }}>
       {children}
 
-      <Modal open={Boolean(modalState)} onClose={handleCancel}>
+      {/* 수정된 부분 [2026-07-15]: onConfirm={handleConfirm} 추가
+          이유: 빈 공통 모달 컴포넌트(Modal.jsx)에 Enter 키로 바로 확인하는 기능이 생겨서,
+          alert/confirm 타입처럼 입력창이 없는 모달도 Enter만 누르면 바로 확인 버튼을 누른 것과
+          동일하게 동작하도록 연결함
+          before: <Modal open={Boolean(modalState)} onClose={handleCancel}>
+          after: */}
+      <Modal open={Boolean(modalState)} onClose={handleCancel} onConfirm={handleConfirm}>
         {modalState && (
           <>
             <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
@@ -119,7 +125,17 @@ export function ModalProvider({ children }) {
                 value={promptValue}
                 onChange={(e) => setPromptValue(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleConfirm();
+                  // 수정된 부분 [2026-07-15]: e.stopPropagation() 추가
+                  // 이유: Modal.jsx에 Enter 키로 onConfirm을 실행하는 window 레벨 리스너가 추가되면서,
+                  // 이 input에서 Enter를 누르면 여기서 한 번 + window 리스너에서 또 한 번, 총 두 번
+                  // handleConfirm이 호출되는 문제가 생겨서 이벤트 버블링을 막아 중복 실행을 방지함
+                  // before:
+                  // if (e.key === 'Enter') handleConfirm();
+                  // after:
+                  if (e.key === 'Enter') {
+                    e.stopPropagation();
+                    handleConfirm();
+                  }
                 }}
                 autoFocus
               />
