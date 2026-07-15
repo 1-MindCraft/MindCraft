@@ -6,7 +6,7 @@ import CLToolbar from '../../components/CoverLetter/CLToolbar';
 import CLMindMap from '../../components/CoverLetter/CLMindMap';
 import CLDraft from '../../components/CoverLetter/CLDraft';
 import CLSettings from '../../components/CoverLetter/CLSettings';
-import CLMasterDraft from '../../components/CoverLetter/CLmasterdraft';
+import CLMasterDraft from '../../components/CoverLetter/CLMasterDraft';
 // 추가된 부분 [2026-07-15]: [ 생성하기 ] 클릭 시 뜨는 오버레이에 쓸 TextShimmerWave 컴포넌트 import
 // 이유: 자소서 편집화면에서 AI 생성 중일 때 화면을 어둡게 하고 중앙에 "Crafting" 웨이브 애니메이션을 보여달라는 요청
 import { TextShimmerWave } from '../../components/loading-ui/text-shimmer-wave';
@@ -227,7 +227,6 @@ function CoverLetterPage({ onBackToMindMap }) {
     }
   };
 
-
   // 2026-07-14 추가된 부분: 현재 선택된 자소서 마스터 하나만 삭제
   // 이유: 마스터 화면의 케밥 메뉴는 선택된 마스터만 대상으로 하며, 편집 중인 문항 삭제와 분리해야 함
   const handleDeleteSelectedMaster = async () => {
@@ -235,7 +234,9 @@ function CoverLetterPage({ onBackToMindMap }) {
     if (!target || deletingMaster || savingMaster || deletingSection) return;
 
     const targetIndex = masters.findIndex((master) => master.id === target.id);
-    const remainingAtStart = masters.filter((master) => master.id !== target.id);
+    const remainingAtStart = masters.filter(
+      (master) => master.id !== target.id
+    );
     const nextMaster =
       remainingAtStart[
         Math.min(targetIndex, Math.max(remainingAtStart.length - 1, 0))
@@ -385,16 +386,23 @@ function CoverLetterPage({ onBackToMindMap }) {
     }
   };
 
-
   // 2026-07-14 추가된 부분: 현재 선택된 자소서 항목 하나만 삭제
   // 이유: 편집 화면의 케밥 메뉴에서 자소서 전체가 아니라 지금 보고 있는 문항만 삭제해야 함
   const handleDeleteSelectedSection = async () => {
     const target = sections.find((section) => section.id === selectedId);
-    if (!target || !editingId || deletingSection || generating || deletingMaster) {
+    if (
+      !target ||
+      !editingId ||
+      deletingSection ||
+      generating ||
+      deletingMaster
+    ) {
       return;
     }
 
-    const targetIndex = sections.findIndex((section) => section.id === target.id);
+    const targetIndex = sections.findIndex(
+      (section) => section.id === target.id
+    );
     const remainingAtStart = sections.filter(
       (section) => section.id !== target.id
     );
