@@ -119,6 +119,10 @@ function AccountPage() {
       updateLoginName?.(rdata.name);
       setNameEditValue('');
       setNameEditPassword('');
+      // 추가된 부분 [2026-07-15]: closeNameModal() 호출
+      // 이유: 이름 수정이 완료되면 모달이 자동으로 닫히게 해달라는 요청.
+      // 완료 알림(alert)이 뜨기 전에 모달부터 닫아서, 알림이 이름 변경 모달 위에 겹쳐 보이지 않게 함
+      closeNameModal();
       await alert('이름 수정이 완료되었습니다.');
     } catch (error) {
       console.log('이름 수정 실패:', error.response?.data || error);
@@ -154,6 +158,10 @@ function AccountPage() {
       setCurrentPasswordForChange('');
       setNewPasswordValue('');
       setConfirmNewPasswordValue('');
+      // 추가된 부분 [2026-07-15]: closePasswordModal() 호출
+      // 이유: 비밀번호 변경이 완료되면 모달이 자동으로 닫히게 해달라는 요청.
+      // 완료 알림(alert)이 뜨기 전에 모달부터 닫아서, 알림이 비밀번호 변경 모달 위에 겹쳐 보이지 않게 함
+      closePasswordModal();
       await alert('비밀번호 변경이 완료되었습니다.');
     } catch (error) {
       console.log('비밀번호 변경 실패:', error.response?.data || error);
@@ -192,6 +200,9 @@ function AccountPage() {
       await deleteMe(password);
       removeCookie('user');
       resetState();
+      // 수정된 부분 [2026-07-15]: 문구 끝에 마침표 추가 (요청 문구와 동일하게 맞춤)
+      // before: await alert('탈퇴 처리가 완료되었습니다');
+      // after:
       await alert('탈퇴 처리가 완료되었습니다.');
       navigate('/');
     } catch (error) {
@@ -390,7 +401,18 @@ function AccountPage() {
             </Modal>
           after: */}
       {/* 추가된 부분 [2026-07-14]: 이름 변경 모달 (기존 정보 수정 모달에서 이름 변경 섹션만 분리) */}
-      <Modal open={nameModalOpen} onClose={closeNameModal} title="이름 변경">
+      {/* 수정된 부분 [2026-07-15]: onConfirm={handleNameEditSubmit} 추가
+          이유: 입력창(새 이름/비밀번호)에 값을 입력한 뒤 Enter를 누르면 [ 이름 변경 ] 버튼을
+          누른 것과 동일하게 바로 제출되게 해달라는 요청. Modal.jsx가 이미 지원하는
+          Enter → onConfirm 기능을 여기서도 연결하기만 하면 됨
+          before: <Modal open={nameModalOpen} onClose={closeNameModal} title="이름 변경">
+          after: */}
+      <Modal
+        open={nameModalOpen}
+        onClose={closeNameModal}
+        onConfirm={handleNameEditSubmit}
+        title="이름 변경"
+      >
         <input
           className="modal-input"
           style={{ marginTop: 0 }}
@@ -416,7 +438,15 @@ function AccountPage() {
       </Modal>
 
       {/* 추가된 부분 [2026-07-14]: 비밀번호 변경 모달 (기존 정보 수정 모달에서 비밀번호 변경 섹션만 분리) */}
-      <Modal open={passwordModalOpen} onClose={closePasswordModal} title="비밀번호 변경">
+      {/* 수정된 부분 [2026-07-15]: onConfirm={handlePasswordChangeSubmit} 추가 (이유는 이름 변경 모달과 동일)
+          before: <Modal open={passwordModalOpen} onClose={closePasswordModal} title="비밀번호 변경">
+          after: */}
+      <Modal
+        open={passwordModalOpen}
+        onClose={closePasswordModal}
+        onConfirm={handlePasswordChangeSubmit}
+        title="비밀번호 변경"
+      >
         <input
           type="password"
           className="modal-input"
