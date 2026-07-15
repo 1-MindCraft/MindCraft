@@ -616,34 +616,34 @@ body,
     box-shadow 0.2s,
     border-color 0.2s;
 }
-.mindcraft-page .faq-item[open] {
+/* 수정된 부분: <details>/<summary> 선택자를 class 기반 선택자로 교체
+   이유: Faq.jsx가 <details>/<summary> 대신 button+div 구조(Help.jsx와 동일한 방식)로 바뀌어서,
+   그 구조에 맞게 선택자만 교체함 (시각적으로는 동일하게 보이도록 값은 그대로 유지) */
+.mindcraft-page .faq-item.open {
   border-color: rgba(108, 99, 255, 0.4);
   box-shadow: 0 8px 24px rgba(108, 99, 255, 0.1);
 }
-.mindcraft-page .faq-item summary {
+.mindcraft-page .faq-question {
+  width: 100%;
   cursor: pointer;
   font-size: 1.08rem;
   font-weight: 700;
   color: #1a1a2e;
-  list-style: none;
+  border: none;
+  background: none;
+  font-family: inherit;
+  text-align: left;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-.mindcraft-page .faq-item summary::-webkit-details-marker {
-  display: none;
-}
-.mindcraft-page .faq-item summary::after {
-  content: '+';
+.mindcraft-page .faq-chevron {
   font-size: 1.3rem;
   color: #6c63ff;
   font-weight: 400;
   transition: transform 0.2s;
   margin-left: 1rem;
   flex-shrink: 0;
-}
-.mindcraft-page .faq-item[open] summary::after {
-  transform: rotate(45deg);
 }
 .mindcraft-page .faq-answer {
   margin-top: 0.9rem;
@@ -1294,4 +1294,244 @@ img {
 }
 .mindcraft-page [class*="signup-form--"] .login-social {
   margin-bottom: 0.5rem;
+}
+
+/* ══════════════════════════════════════
+   다크모드 (메인화면 / 회원 전용 메인화면 공용)
+══════════════════════════════════════ */
+/* 추가된 부분 [2026-07-15]: 메인화면 다크모드 스타일 전체 추가
+   이유: 다른 화면들(마인드맵, 자소서, 마이페이지)과 마찬가지로 메인화면과
+   회원 전용 메인화면(같은 MainPage 컴포넌트, Nav의 isMember로 분기만 다름)도
+   다크모드가 필요하다는 요청. 기존 앱의 다크모드 색상 팔레트(페이지 배경 #16161f,
+   텍스트 #e8e6f5, 카드 #1c1c2b, 테두리 #2f2f45/#3a3a55, 보라 계열 강조색 #8b7fff/#a99cff)를
+   그대로 맞춰서 다른 화면들과 통일감 있게 추가함.
+   참고: 구글/카카오/네이버 소셜 로그인 버튼은 각 서비스의 공식 브랜드 색상이라
+   다크모드에서도 그대로 두었음(브랜드 가이드라인상 임의 변경 X) */
+
+[data-theme='dark'] body,
+[data-theme='dark'] #root {
+  background-color: #16161f;
+}
+[data-theme='dark'] .mindcraft-page {
+  background: #16161f;
+  color: #e8e6f5;
+}
+
+/* NAV */
+[data-theme='dark'] .mindcraft-page .nav {
+  background: rgba(22, 22, 31, 0.88);
+  border-bottom-color: #2f2f45;
+}
+[data-theme='dark'] .mindcraft-page .logo-text,
+[data-theme='dark'] .mindcraft-page .footer-logo .logo-text {
+  color: #e8e6f5;
+}
+[data-theme='dark'] .mindcraft-page .nav-links a {
+  color: #b8b6cc;
+}
+[data-theme='dark'] .mindcraft-page .nav-links a:hover {
+  color: #a99cff;
+}
+
+/* HERO */
+[data-theme='dark'] .mindcraft-page .hero {
+  background: linear-gradient(
+    160deg,
+    #1c1c2e 0%,
+    #17222b 40%,
+    #201a2e 70%,
+    #172530 100%
+  );
+}
+[data-theme='dark'] .mindcraft-page .hero-badge {
+  background: rgba(139, 127, 255, 0.15);
+  color: #a99cff;
+  border-color: rgba(139, 127, 255, 0.35);
+}
+[data-theme='dark'] .mindcraft-page .hero h1 {
+  color: #e8e6f5;
+}
+[data-theme='dark'] .mindcraft-page .hero-sub {
+  color: #9694ac;
+}
+[data-theme='dark'] .mindcraft-page .btn-secondary {
+  background: #1c1c2b;
+  color: #a99cff;
+  border-color: #8b7fff;
+}
+[data-theme='dark'] .mindcraft-page .btn-secondary:hover {
+  background: #241f3d;
+}
+[data-theme='dark'] .mindcraft-page .hero-media {
+  background: linear-gradient(
+    135deg,
+    rgba(139, 127, 255, 0.08),
+    rgba(72, 202, 228, 0.08)
+  );
+  border-color: rgba(139, 127, 255, 0.35);
+  color: rgba(168, 156, 255, 0.6);
+}
+[data-theme='dark'] .mindcraft-page .scroll-hint {
+  color: #6c6a86;
+}
+
+/* COMMON SECTION */
+[data-theme='dark'] .mindcraft-page .section-title {
+  color: #e8e6f5;
+}
+[data-theme='dark'] .mindcraft-page .section-sub {
+  color: #9694ac;
+}
+
+/* HOW IT WORKS */
+[data-theme='dark'] .mindcraft-page .step-card {
+  background: #1c1c2b;
+  border-color: #2f2f45;
+}
+[data-theme='dark'] .mindcraft-page .step-card:hover {
+  box-shadow: 0 8px 32px rgba(139, 127, 255, 0.18);
+}
+[data-theme='dark'] .mindcraft-page .step-title {
+  color: #e8e6f5;
+}
+[data-theme='dark'] .mindcraft-page .step-desc {
+  color: #9694ac;
+}
+[data-theme='dark'] .mindcraft-page .step-media {
+  background: linear-gradient(
+    135deg,
+    rgba(139, 127, 255, 0.07),
+    rgba(72, 202, 228, 0.07)
+  );
+  border-color: rgba(139, 127, 255, 0.3);
+  color: rgba(168, 156, 255, 0.55);
+}
+
+/* FEATURE SECTIONS */
+[data-theme='dark'] .mindcraft-page .feature-section {
+  background: linear-gradient(160deg, #1a1a2c 0%, #17222b 100%);
+}
+[data-theme='dark'] .mindcraft-page .feature-media {
+  background: rgba(28, 28, 43, 0.65);
+  border-color: rgba(139, 127, 255, 0.35);
+  color: rgba(168, 156, 255, 0.55);
+}
+[data-theme='dark'] .mindcraft-page .feat-icon-wrap {
+  background: rgba(139, 127, 255, 0.15);
+}
+[data-theme='dark'] .mindcraft-page .feat-text h3 {
+  color: #e8e6f5;
+}
+[data-theme='dark'] .mindcraft-page .feat-text p {
+  color: #9694ac;
+}
+
+/* FINAL CTA */
+[data-theme='dark'] .mindcraft-page .cta-section {
+  background: #16161f;
+}
+
+/* FOOTER */
+[data-theme='dark'] .mindcraft-page .footer {
+  border-top-color: #2f2f45;
+  color: #6c6a86;
+}
+
+/* FAQ */
+[data-theme='dark'] .mindcraft-page .faq-item {
+  background: #1c1c2b;
+  border-color: #2f2f45;
+}
+[data-theme='dark'] .mindcraft-page .faq-item.open {
+  border-color: rgba(139, 127, 255, 0.5);
+  box-shadow: 0 8px 24px rgba(139, 127, 255, 0.15);
+}
+[data-theme='dark'] .mindcraft-page .faq-question {
+  color: #e8e6f5;
+}
+[data-theme='dark'] .mindcraft-page .faq-chevron {
+  color: #a99cff;
+}
+[data-theme='dark'] .mindcraft-page .faq-answer {
+  color: #9694ac;
+}
+
+/* FLOATING CTA / TOP 버튼 */
+[data-theme='dark'] .mindcraft-page .float-cta-btn,
+[data-theme='dark'] .mindcraft-page .top-btn {
+  background: #1c1c2b;
+  color: #a99cff;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+}
+[data-theme='dark'] .mindcraft-page .float-cta-btn:hover,
+[data-theme='dark'] .mindcraft-page .top-btn:hover {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* 로그인 모달 */
+[data-theme='dark'] .mindcraft-page .login-modal {
+  background: #1c1c2b;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+}
+[data-theme='dark'] .mindcraft-page .login-close {
+  background: rgba(255, 255, 255, 0.08);
+  color: #cfcfe0;
+}
+[data-theme='dark'] .mindcraft-page .login-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+[data-theme='dark'] .mindcraft-page .login-side,
+[data-theme='dark'] .mindcraft-page .signup-side--blue {
+  background: linear-gradient(
+    160deg,
+    #201a35 0%,
+    #182a3d 45%,
+    #241a38 75%,
+    #16283a 100%
+  );
+}
+[data-theme='dark'] .mindcraft-page .signup-side--green {
+  background: linear-gradient(
+    160deg,
+    #172a20 0%,
+    #14261e 40%,
+    #182c22 70%,
+    #12241c 100%
+  );
+}
+[data-theme='dark'] .mindcraft-page .login-side-text,
+[data-theme='dark'] .mindcraft-page .login-form h2,
+[data-theme='dark'] .mindcraft-page .login-label {
+  color: #e8e6f5;
+}
+[data-theme='dark'] .mindcraft-page .login-sub,
+[data-theme='dark'] .mindcraft-page .login-signup {
+  color: #9694ac;
+}
+[data-theme='dark'] .mindcraft-page .login-input {
+  border-color: #3a3a55;
+  background: #16161f;
+}
+[data-theme='dark'] .mindcraft-page .login-input input {
+  color: #e8e6f5;
+}
+[data-theme='dark'] .mindcraft-page .login-input-icon {
+  color: #6c6a86;
+}
+[data-theme='dark'] .mindcraft-page .login-remember {
+  color: #b8b6cc;
+}
+[data-theme='dark'] .mindcraft-page .login-remember input[type='checkbox'] {
+  border-color: #3a3a55;
+  background-color: #16161f;
+}
+[data-theme='dark'] .mindcraft-page .login-divider {
+  color: #3a3a55;
+}
+[data-theme='dark'] .mindcraft-page .login-or {
+  color: #6c6a86;
+}
+[data-theme='dark'] .mindcraft-page .login-or::before,
+[data-theme='dark'] .mindcraft-page .login-or::after {
+  background: #2f2f45;
 }

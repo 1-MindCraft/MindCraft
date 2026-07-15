@@ -24,4 +24,7 @@ public class CoverLetterSectionDto {
     private String writingStyle;
     private Integer maxChars;
     private Boolean allowCreativity;
+
+    private List<String> selectedNodeIds;
+    private List<String> contextNodeIds;
 }

@@ -1,21 +1,26 @@
 package com.mindcraft.backend.coverletter.service;
 
-import com.mindcraft.backend.coverletter.dto.CoverLetterDto;
+import com.mindcraft.backend.coverletter.dto.CoverLetterDetailDto;
+import com.mindcraft.backend.coverletter.dto.CoverLetterSummaryDto;
 import com.mindcraft.backend.coverletter.entity.CoverLetter;
-import com.mindcraft.backend.coverletter.section.entity.CoverLetterSection;
+import com.mindcraft.backend.coverletter.mapper.CoverLetterMapper;
 import com.mindcraft.backend.coverletter.repository.CoverLetterRepository;
-import com.mindcraft.backend.coverletter.section.repository.CoverLetterSectionRepository;
+import com.mindcraft.backend.coverletter.section.dto.CoverLetterSectionDto;
+import com.mindcraft.backend.coverletter.section.service.CoverLetterSectionService;
+import com.mindcraft.backend.global.exception.AccessDeniedException;
+import com.mindcraft.backend.global.exception.InvalidCoverLetterException;
 import com.mindcraft.backend.mindmap.entity.MindMap;
-import com.mindcraft.backend.mindmap.repository.MindMapRepository;
+import com.mindcraft.backend.mindmap.service.MindMapService;
 import com.mindcraft.backend.user.entity.User;
-import com.mindcraft.backend.user.repository.UserRepository;
+import com.mindcraft.backend.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,9 +28,10 @@ import java.util.Optional;
 public class CoverLetterServiceImpl implements CoverLetterService {
 
     private final CoverLetterRepository coverLetterRepository;
-    private final CoverLetterSectionRepository coverLetterSectionRepository;
-    private final MindMapRepository mindMapRepository;
-    private final UserRepository userRepository;
+    private final CoverLetterMapper mapper;
+    private final UserService userService;
+    private final MindMapService mindMapService;
+    private final CoverLetterSectionService coverLetterSectionService;
 
     /*
         mindmap : coverletter | 1 : 1
@@ -49,79 +55,89 @@ public class CoverLetterServiceImpl implements CoverLetterService {
         만들 근거가 없으므로 예외를 던진다 — 마인드맵은 이 서비스가 만드는 대상이 아니라
         mindmap 패키지(MindMapService.getOrCreateMindMap)가 책임지는 영역이기 때문이다.
      */
+//    @Override
+//    @Transactional
+//    public CoverLetterDto getOrCreate(Long userId) {
+//        MindMap mindMap = mindMapRepository.findByUserId(userId)
+//                .orElseThrow(() -> new IllegalArgumentException(
+//                        "마인드맵이 먼저 있어야 자소서를 만들 수 있습니다. userId = " + userId));
+//
+//        Optional<CoverLetter> result = coverLetterRepository.findByMindmapId(mindMap.getId());
+//        if (result.isPresent()) {
+//            CoverLetter coverLetter = result.get();
+//            List<CoverLetterSection> sections =
+//                    coverLetterSectionRepository.findByCoverLetterIdOrderByIdAsc(coverLetter.getId());
+//            return entityToDto(coverLetter, sections);
+//        }
+//        return createCoverLetter(mindMap.getId(), userId);
+//    }
+
+    // 생성
     @Override
     @Transactional
-    public CoverLetterDto getOrCreate(Long userId) {
-        MindMap mindMap = mindMapRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "마인드맵이 먼저 있어야 자소서를 만들 수 있습니다. userId = " + userId));
+    public CoverLetterSummaryDto createCoverLetter(CoverLetter coverLetter, long userId, long mindMapId) {
+        User user = userService.getMyInfo(userId);
+        MindMap mindMap = mindMapService.getMindMap(userId, mindMapId);
 
-        Optional<CoverLetter> result = coverLetterRepository.findByMindmapId(mindMap.getId());
-        if (result.isPresent()) {
-            CoverLetter coverLetter = result.get();
-            List<CoverLetterSection> sections =
-                    coverLetterSectionRepository.findByCoverLetterIdOrderByIdAsc(coverLetter.getId());
-            return entityToDto(coverLetter, sections);
-        }
-        return createCoverLetter(mindMap.getId(), userId);
-    }
-
-    private CoverLetterDto createCoverLetter(Long mindmapId, Long userId) {
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 사용자입니다. userId = " + userId));
-
-        CoverLetter coverLetter = new CoverLetter();
         coverLetter.setUser(user);
-        coverLetter.setMindmapId(mindmapId);
-        coverLetterRepository.save(coverLetter);
-        log.info("자소서 생성 완료 coverLetter = " + coverLetter);
+        coverLetter.setMindMap(mindMap);
 
-        return entityToDto(coverLetter, List.of());
+        CoverLetter savedCoverLetter = coverLetterRepository.save(coverLetter);
+        return mapper.coverLetterToCoverLetterSummaryDto(savedCoverLetter);
     }
 
-    // 상세조회 ( API 문서 : GET /coverletters/{id})
-    // coverletter 자신의 id로 자소서 + 항목 목록을 찾음 없으면 Optional.empty()
+
+    // 전체 조회
     @Override
-    public Optional<CoverLetterDto> findById(Long id) {
-        return coverLetterRepository.findById(id)
-                .map(coverLetter -> {
-                    List<CoverLetterSection> sections =
-                            coverLetterSectionRepository.findByCoverLetterIdOrderByIdAsc(coverLetter.getId());
-                    return entityToDto(coverLetter, sections);
-                });
+    public List<CoverLetterSummaryDto> getAllCoverLetters(long userId) {
+        List<CoverLetter> allByUserId = coverLetterRepository.findAllByUserId(userId);
+        return allByUserId.stream()
+                .map(mapper::coverLetterToCoverLetterSummaryDto)
+                .collect(Collectors.toList());
     }
 
+    // 하나 조회
+    @Override
+    public CoverLetterDetailDto getDetailById(long userId, long coverLetterId) {
+        CoverLetter coverLetter = verifiedCoverLetterWithUserId(userId, coverLetterId);
+        // section 가져오기
+        List<CoverLetterSectionDto> sectionList = coverLetterSectionService.getList(coverLetterId);
 
-    // 수정 대상은 이제 coverletter 자신의 id (dto,getId()) 로 찾음
-    // GET (getOrCreate) 응답에는 이미 id가 들어있으니까 프론트는 그 id를 그대로
-    // PUT /coverletters/{id} 로 보내면 된다
+        return mapper.coverLetterToCoverLetterDetailDto(coverLetter, sectionList);
+    }
 
+    // 수정
     @Override
     @Transactional
-    public boolean update(CoverLetterDto dto) {
+    public CoverLetterSummaryDto updateCoverLetter(CoverLetter coverLetter, long userId, long coverLetterId) {
+        CoverLetter findCoverLetter = verifiedCoverLetterWithUserId(userId, coverLetterId);
+        findCoverLetter.setTitle(coverLetter.getTitle());
+        findCoverLetter.setCompanyName(coverLetter.getCompanyName());
+        findCoverLetter.setCompanyIdeal(coverLetter.getCompanyIdeal());
+        findCoverLetter.setJobDescription(coverLetter.getJobDescription());
+        findCoverLetter.setUpdatedAt(LocalDateTime.now());
 
-        Optional<CoverLetter> result = coverLetterRepository.findById(dto.getId());
-        if (result.isPresent()) {
-            CoverLetter coverLetter = result.get();
+        CoverLetter savedCoverLetter = coverLetterRepository.save(findCoverLetter);
+        return mapper.coverLetterToCoverLetterSummaryDto(savedCoverLetter);
+    }
 
-            if (dto.getTitle() != null) {
-                coverLetter.setTitle(dto.getTitle());
-            }
+    // 삭제
+    @Override
+    @Transactional
+    public void deleteCoverLetter(long userId, long coverLetterId) {
+        CoverLetter coverLetter = verifiedCoverLetterWithUserId(userId, coverLetterId);
 
-            if (dto.getCompanyName() != null) {
-                coverLetter.setCompanyName(dto.getCompanyName());
-            }
+        coverLetterRepository.delete(coverLetter);
+    }
 
-            if (dto.getCompanyIdeal() != null) {
-                coverLetter.setCompanyIdeal(dto.getCompanyIdeal());
-            }
+    private CoverLetter verifiedCoverLetterWithUserId(long userId, long coverLetterId) {
+        CoverLetter coverLetter = coverLetterRepository.findById(coverLetterId)
+                .orElseThrow(() -> new InvalidCoverLetterException("문서를 찾을 수 없습니다."));
 
-            if (dto.getJobDescription() != null) {
-                coverLetter.setJobDescription(dto.getJobDescription());
-            }
-            return true;
+        if(!coverLetter.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("본인의 자소서 마스터가 아닙니다.");
         }
-        return false;
+
+        return coverLetter;
     }
 }

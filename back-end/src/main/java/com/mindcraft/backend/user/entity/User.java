@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
+@Builder
 @Table(name = "users")
 public class User {
 
@@ -29,6 +30,7 @@ public class User {
     private String password;
 
     // 이메일 회원이면 null
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(length = 50, nullable = false)
     private Provider provider = Provider.LOCAL;
@@ -43,4 +45,15 @@ public class User {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }

@@ -72,6 +72,14 @@ const MindMapNode = (props) => {
         style={{ opacity: 0, top: '50%', left: '50%' }}
       />
 
+      {data.keywords?.length > 0 && (
+        <div className="mm-node-keywords">
+          {data.keywords.map((kw) => (
+            <span key={kw} className="mm-node-keyword-chip">{kw}</span>
+          ))}
+        </div>
+      )}
+
       <div className="mm-node-actions-wrap">
         <div className="mm-node-actions">
           <button className="mm-node-action-btn" onClick={handleDeleteNode}>

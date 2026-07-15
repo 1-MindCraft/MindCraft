@@ -9,7 +9,9 @@ import {
 import { getCookie, removeCookie, setCookie } from '../utils/cookieUtil';
 import { getMindMap, saveMindMap } from '../axios/mindMapApi';
 
-import { getOrCreateCoverLetter, getCoverLetterDetail, } from '../axios/coverLetterApi';
+// 수정된 부분: getOrCreateCoverLetter → getCoverLetterList로 교체
+// 이유: coverLetterApi.js에서 그 함수가 삭제되고 목록 조회 함수로 바뀌어서 여기도 맞춰야 함
+import { getCoverLetterList, getCoverLetterDetail, } from '../axios/coverLetterApi';
 import { createSection, deleteSection, getSectionList, } from '../axios/sectionApi';
 
 function ApiTestPage() {
@@ -108,12 +110,14 @@ function ApiTestPage() {
   };
 
   // ===== 자소서 마스터 =====
+  // 수정된 부분: getOrCreateCoverLetter() → getCoverLetterList()로 교체
+  // 이유: 이제 GET /coverletters가 단건이 아니라 배열을 반환하므로
   const testGetCoverLetter = async () => {
     try {
-      const rdata = await getOrCreateCoverLetter();
-      console.log('자소서 조회/생성 성공:', rdata);
+      const rdata = await getCoverLetterList();
+      console.log('자소서 목록 조회 성공:', rdata);
     } catch (error) {
-      console.log('자소서 조회/생성 실패:', error.response?.data || error);
+      console.log('자소서 목록 조회 실패:', error.response?.data || error);
     }
   };
 
@@ -184,7 +188,8 @@ function ApiTestPage() {
       <hr />
 
       <h1>자소서 마스터</h1>
-      <button onClick={testGetCoverLetter}>자소서 조회/생성</button>
+      {/* 수정된 부분: 버튼 라벨도 "목록 조회"로 맞춤 */}
+      <button onClick={testGetCoverLetter}>자소서 목록 조회</button>
       <br />
       <button onClick={testGetDetail}>자소서 상세조회</button>
       <br />

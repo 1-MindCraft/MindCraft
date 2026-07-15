@@ -4,6 +4,7 @@ import MindMapNode from './MindMapNode';
 import { getDescendantIds, buildEdgesFromNodes } from '../../utils/mindmapTree';
 import { MindMapNodesProvider } from '../../context/MindMapNodesContext';
 import useMindMapStore from '../../zustand/mindMapStore';
+import { useModal } from '../common/ModalProvider';
 
 const nodeTypes = {
   mapNode: MindMapNode,
@@ -13,6 +14,7 @@ const nodeTypes = {
 // onNodesUpdate: 노드가 바뀔 때마다 부모로 최신 노드 배열을 올려보내는 콜백 (사이드바 동기화용)
 // tool: 'drag'(빈 캔버스를 드래그하면 화면 이동) | 'select'(빈 캔버스를 드래그하면 다중 선택)
 export default function MindMap({ tool = 'drag' }) {
+  const { confirm } = useModal(); // 수정된 부분: 브라우저 기본 confirm() 대신 커스텀 모달 사용
   const nodes = useMindMapStore((state) => state.nodes);
   const setNodes = useMindMapStore((state) => state.setNodes);
   const edges = useMemo(() => buildEdgesFromNodes(nodes), [nodes]);
@@ -24,7 +26,7 @@ export default function MindMap({ tool = 'drag' }) {
   );
 
   useEffect(() => {
-    const handleKeyDown = (e) => {
+    const handleKeyDown = async (e) => {
       if (document.activeElement.tagName === 'INPUT') return;
 
       const selectedNode = nodes.find((n) => n.selected);
@@ -51,12 +53,11 @@ export default function MindMap({ tool = 'drag' }) {
           selectedNode.id,
           ...getDescendantIds(selectedNode.id, nodes),
         ];
-        if (
-          !confirm(
-            `이 노드를 삭제하시겠습니까?\n(총 ${idsToDelete.length} 개의 노드가 삭제됩니다.)`
-          )
-        )
-          return;
+        // 수정된 부분: confirm() → await confirm() (커스텀 모달로 교체)
+        const ok = await confirm(
+          `이 노드를 삭제하시겠습니까?\n(총 ${idsToDelete.length} 개의 노드가 삭제됩니다.)`
+        );
+        if (!ok) return;
         setNodes((nds) => nds.filter((n) => !idsToDelete.includes(n.id)));
       }
     };
@@ -125,7 +126,7 @@ export default function MindMap({ tool = 'drag' }) {
             style: { strokeWidth: 2 },
           }}
         >
-          <Background />
+          {/* <Background /> */}
         </ReactFlow>
       </MindMapNodesProvider>
     </div>

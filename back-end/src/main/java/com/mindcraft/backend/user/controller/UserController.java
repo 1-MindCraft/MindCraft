@@ -49,8 +49,10 @@ public class UserController {
             @RequestBody UserUpdateDto userUpdateDto) {
         long userId = userSecurityDto.getId();
         userUpdateDto.setId(userId);
+        String currentPassword = userUpdateDto.getCurrentPassword();
+
         User user = userMapper.userUpdateDtoToUser(userUpdateDto);
-        User updatedUser = userService.updateMyInfo(user);
+        User updatedUser = userService.updateMyInfo(user, currentPassword);
         return new ResponseEntity<>(
                 userMapper.userToUserResponseDto(updatedUser),
                 HttpStatus.OK

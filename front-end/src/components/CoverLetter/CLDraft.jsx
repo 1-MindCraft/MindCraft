@@ -1,10 +1,34 @@
 import React, { useState, useRef, useEffect } from 'react';
 import PENCIL_SRC from '../../assets/pencil.png';
+// 추가된 부분 [2026-07-15]: 다크모드용 흰색 연필 아이콘 import 및 useTheme 훅
+// 이유: 기존 pencil.png가 어두운 색이라 다크모드에서 안 보이는 문제를 해결하기 위해 추가함
+import PENCIL_WHITE_SRC from '../../assets/pencil-white.png';
+import { useTheme } from '../../context/ThemeContext';
 
-function CLDraft({ sections, selectedId, onSelect, onAddSection, onUpdateTitle }) {
+// 수정된 부분: draftTitle prop 추가 (이유: 자소서 마스터의 title을 CLDraft 헤더에 표시하기 위해 외부에서 받아야 함)
+function CLDraft({
+  sections,
+  selectedId,
+  onSelect,
+  onAddSection,
+  onUpdateTitle,
+  draftTitle = '자기소개서 초안',
+  onBackToMasterList,
+  // 2026-07-14 추가된 부분: 현재 선택된 자소서 항목 삭제 관련 prop
+  // 이유: 편집 화면의 케밥 메뉴는 자소서 전체가 아니라 현재 보고 있는 항목만 삭제해야 함
+  onDeleteSection,
+  deletingSection = false,
+  deleteBlocked = false,
+}) {
+  // 추가된 부분 [2026-07-15]: 현재 테마 값
+  const { theme } = useTheme();
   const selectedIndex = sections.findIndex((s) => s.id === selectedId);
   const selected = sections[selectedIndex];
-  const totalChars = sections.reduce((sum, s) => sum + (s.content?.length || 0), 0);
+
+  // 2026-07-14 추가된 부분: 자소서 항목 삭제 케밥 메뉴 상태
+  // 이유: 기존 총 글자 수 위치에서 작은 삭제 메뉴를 열고 닫기 위해 필요함
+  const [isItemMenuOpen, setIsItemMenuOpen] = useState(false);
+  const itemMenuRef = useRef(null);
 
   // ── 제목 편집 상태 ──
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -23,6 +47,39 @@ function CLDraft({ sections, selectedId, onSelect, onAddSection, onUpdateTitle }
       titleInputRef.current?.select();
     }
   }, [isEditingTitle]);
+
+
+  // 2026-07-14 추가된 부분: 케밥 메뉴 바깥 클릭 또는 ESC 입력 시 닫기
+  // 이유: 메뉴가 열린 채 남아 다른 문항 조작을 방해하지 않도록 함
+  useEffect(() => {
+    if (!isItemMenuOpen) return;
+
+    const handlePointerDown = (event) => {
+      if (!itemMenuRef.current?.contains(event.target)) {
+        setIsItemMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setIsItemMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isItemMenuOpen]);
+
+  const handleDeleteSectionClick = () => {
+    if (!selected || deletingSection || deleteBlocked) return;
+    setIsItemMenuOpen(false);
+    onDeleteSection?.();
+  };
 
   const startEditTitle = () => {
     setOriginalTitle(selected.title);
@@ -47,10 +104,61 @@ function CLDraft({ sections, selectedId, onSelect, onAddSection, onUpdateTitle }
       {/* 헤더 */}
       <div className="cl-draft-header">
         <div>
-          <div className="cl-draft-title">자기소개서 초안</div>
-          <div className="cl-draft-hint">문항을 클릭하면 해당 내용의 참고 노드를 마인드맵에서 확인할 수 있습니다.</div>
+          {/* 수정된 부분: 하드코딩된 "자기소개서 초안" → draftTitle prop으로 교체 (이유: 자소서 마스터의 title과 동기화하기 위해) */}
+          <div className="cl-draft-title-row">
+            {onBackToMasterList && (
+              <button
+                className="mm-icon-btn cl-title-back-btn"
+                onClick={onBackToMasterList}
+                disabled={deletingSection}
+                data-tooltip="자소서 마스터 목록으로 돌아가기"
+              >
+                <svg
+                  viewBox="0 0 640 640"
+                  width="14"
+                  height="14"
+                  fill="currentColor"
+                >
+                  <path d="M73.4 297.4C60.9 309.9 60.9 330.2 73.4 342.7L233.4 502.7C245.9 515.2 266.2 515.2 278.7 502.7C291.2 490.2 291.2 469.9 278.7 457.4L173.3 352L544 352C561.7 352 576 337.7 576 320C576 302.3 561.7 288 544 288L173.3 288L278.7 182.6C291.2 170.1 291.2 149.8 278.7 137.3C266.2 124.8 245.9 124.8 233.4 137.3L73.4 297.3z" />
+                </svg>
+              </button>
+            )}
+            <div className="cl-draft-title">{draftTitle}</div>
+          </div>
+          <div className="cl-draft-hint">
+            문항을 클릭하면 해당 내용의 참고 노드를 마인드맵에서 확인할 수
+            있습니다.
+          </div>
         </div>
-        <div className="cl-draft-total">총 글자 수 : {totalChars.toLocaleString()}자</div>
+        {/* 2026-07-14 수정된 부분: "총 글자 수"를 제거하고 현재 선택된 항목 삭제 케밥 메뉴로 교체
+            이유: 편집 화면에서는 자소서 전체가 아니라 지금 보고 있는 자소서 항목만 삭제해야 함 */}
+        <div className="cl-item-menu" ref={itemMenuRef}>
+          <button
+            type="button"
+            className="cl-item-kebab-btn"
+            onClick={() => setIsItemMenuOpen((prev) => !prev)}
+            disabled={!selected || deletingSection || deleteBlocked}
+            aria-label="자소서 항목 메뉴 열기"
+            aria-haspopup="menu"
+            aria-expanded={isItemMenuOpen}
+          >
+            ⋮
+          </button>
+
+          {isItemMenuOpen && selected && (
+            <div className="cl-item-menu-popover" role="menu">
+              <button
+                type="button"
+                className="cl-item-delete-btn"
+                onClick={handleDeleteSectionClick}
+                disabled={deletingSection || deleteBlocked}
+                role="menuitem"
+              >
+                {deletingSection ? '삭제 중...' : '자소서 항목 삭제'}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="cl-draft-body">
@@ -66,7 +174,9 @@ function CLDraft({ sections, selectedId, onSelect, onAddSection, onUpdateTitle }
               <div className="cl-section-num">{idx + 1}</div>
               <div>
                 <div className="cl-section-name">{s.title}</div>
-                {s.content?.length > 0 && <div className="cl-section-chars">{s.content.length}자</div>}
+                {s.content?.length > 0 && (
+                  <div className="cl-section-chars">{s.content.length}자</div>
+                )}
               </div>
             </button>
           ))}
@@ -83,7 +193,9 @@ function CLDraft({ sections, selectedId, onSelect, onAddSection, onUpdateTitle }
             <div className="cl-detail-header">
               {isEditingTitle ? (
                 <div className="cl-detail-title-row">
-                  <span className="cl-detail-title-num">{selectedIndex + 1}.</span>
+                  <span className="cl-detail-title-num">
+                    {selectedIndex + 1}.
+                  </span>
                   <input
                     ref={titleInputRef}
                     className="cl-detail-title-input"
@@ -97,13 +209,27 @@ function CLDraft({ sections, selectedId, onSelect, onAddSection, onUpdateTitle }
                 </div>
               ) : (
                 <div className="cl-detail-title-row">
-                  <div className="cl-detail-title">{selectedIndex + 1}. {selected.title}</div>
+                  {/* 추가된 부분: onDoubleClick 추가 (이유: 제목을 더블클릭해도 편집 모드로 들어가게 해달라는 요청) */}
+                  <div
+                    className="cl-detail-title"
+                    onDoubleClick={startEditTitle}
+                    title="더블클릭해서 제목 수정"
+                  >
+                    {selectedIndex + 1}. {selected.title}
+                  </div>
                   <button
                     className="mm-icon-btn mm-icon-img-btn"
                     onClick={startEditTitle}
                     title="제목 수정"
                   >
-                    <img src={PENCIL_SRC} alt="편집" className="cl-detail-pencil" />
+                    {/* 수정된 부분 [2026-07-15]: src를 테마에 따라 조건부로 선택 (이유: 다크모드에서 안 보이는 문제 수정)
+                        before: <img src={PENCIL_SRC} alt="편집" className="cl-detail-pencil" />
+                        after: */}
+                    <img
+                      src={theme === 'dark' ? PENCIL_WHITE_SRC : PENCIL_SRC}
+                      alt="편집"
+                      className="cl-detail-pencil"
+                    />
                   </button>
                 </div>
               )}
@@ -112,7 +238,8 @@ function CLDraft({ sections, selectedId, onSelect, onAddSection, onUpdateTitle }
             <div className="cl-detail-content">
               {selected.content || (
                 <span className="cl-detail-empty">
-                  오른쪽 '생성 설정'에서 문항, 문체, 글자 수를 선택한 뒤 [생성하기] 버튼을 눌러 AI로 이 문항의 초안을 만들어보세요.
+                  오른쪽 '생성 설정'에서 문항, 문체, 글자 수를 선택한 뒤
+                  [생성하기] 버튼을 눌러 AI로 이 문항의 초안을 만들어보세요.
                 </span>
               )}
             </div>
@@ -122,7 +249,9 @@ function CLDraft({ sections, selectedId, onSelect, onAddSection, onUpdateTitle }
                 <div className="cl-source-label">참고한 마인드맵 노드</div>
                 <div className="cl-source-tags">
                   {selected.sourceNodes.map((n) => (
-                    <span key={n} className="cl-source-tag">{n}</span>
+                    <span key={n} className="cl-source-tag">
+                      {n}
+                    </span>
                   ))}
                 </div>
               </div>
@@ -134,12 +263,26 @@ function CLDraft({ sections, selectedId, onSelect, onAddSection, onUpdateTitle }
       {/* 하단: AI 생성 안내 */}
       <div className="cl-ai-notice">
         <span className="cl-ai-icon">✦</span>
-        <div>
+        {/* 수정된 부분 [2026-07-15]: className="cl-ai-notice-text" 추가
+            이유: 이 영역에 min-width가 없어서, .cl-draft 폭이 좁아질수록(마인드맵 패널 divider를
+            끌어서 넓힐 때 등) "AI가 생성한 초안입니다" 문구가 글자 단위로 뭉그러져 보이는 문제가 있었음.
+            className을 줘서 CoverLetter.css에서 min-width를 지정할 수 있게 함
+            before: <div>
+            after: */}
+        <div className="cl-ai-notice-text">
           <div className="cl-ai-notice-title">AI가 생성한 초안입니다</div>
-          <div className="cl-ai-notice-sub">마인드맵의 구조와 내용을 기반으로 AI가 자기소개서 초안을 생성합니다. 내용은 자유롭게 수정하고 보완하여 완성도를 높여보세요.</div>
+          <div className="cl-ai-notice-sub">
+            마인드맵의 구조와 내용을 기반으로 AI가 자기소개서 초안을 생성합니다.
+            내용은 자유롭게 수정하고 보완하여 완성도를 높여보세요.
+          </div>
         </div>
         <div className="cl-ai-notice-time">
-          생성 일시 {new Date().toLocaleDateString('ko-KR')} {new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} 📅
+          생성 일시 {new Date().toLocaleDateString('ko-KR')}{' '}
+          {new Date().toLocaleTimeString('ko-KR', {
+            hour: '2-digit',
+            minute: '2-digit',
+          })}{' '}
+          📅
         </div>
       </div>
     </div>

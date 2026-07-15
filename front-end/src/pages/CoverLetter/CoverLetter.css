@@ -107,6 +107,7 @@
   background: #fff;
   border-bottom: 1px solid #e8e4f8;
   flex-shrink: 0;
+  min-height: 70px; /* 수정해야됨 */
 }
 .cl-toolbar-center {
   flex: 1;
@@ -121,6 +122,44 @@
   gap: 0.5rem;
   flex-shrink: 0;
 }
+/* 추가된 부분: cl-toolbar-left / cl-btn-nav 스타일
+   이유: 자소서 마스터 ↔ 편집 화면 이동 버튼(CLToolbar 왼쪽)에 쓰일 스타일이 없어서 추가 */
+.cl-toolbar-left {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+/* 수정된 부분: 두 화면(마스터/편집) 모두 버튼 위치를 같은 기준으로 맞추기 위해
+   cl-toolbar-left margin을 cl-toolbar--master 전용에서 공통으로 확장하고,
+   편집 화면 마인드맵도 42% 고정 폭으로 통일함 */
+.cl-toolbar-left {
+  margin-left: calc(40.35% + 1.5rem);
+}
+.cl-toolbar-left .mm-toolbar-divider {
+  align-self: center;
+  flex-shrink: 0;
+  height: 28px;
+  margin: 0 0.9rem 0 0;
+}
+
+.cl-btn-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.9rem;
+  border: 1.5px solid #6c63ff;
+  border-radius: 8px;
+  background: #f5f3ff;
+  color: #6c63ff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+.cl-btn-nav:hover {
+  background: #ede9ff;
+}
+
 .cl-btn-settings {
   display: flex;
   align-items: center;
@@ -162,14 +201,24 @@
 
 /* ─── 마인드맵 영역 ─── */
 .cl-mindmap {
-  flex: 1;
+  flex: 0 0 42%;
   position: relative;
   display: flex;
   flex-direction: column;
-  background: radial-gradient(circle, #ddd 1px, transparent 1px) #f4f6fb;
-  background-size: 24px 24px;
+  /* background: radial-gradient(circle, #ddd 1px, transparent 1px) #f4f6fb;
+  background-size: 24px 24px; */
   overflow: hidden;
 }
+
+/* 추가된 부분: 마인드맵은 편집화면과 비슷한 비율(약 42%)로 제한하고,
+   폼 쪽(cl-draft)이 나머지를 전부 가져가도록 함 */
+.cl-content--master .cl-mindmap {
+  flex: 0 0 42%;
+}
+.cl-content--master .cl-draft {
+  flex: 1 1 58%;
+}
+
 .cl-mindmap-label {
   position: absolute;
   top: 1rem;
@@ -241,11 +290,64 @@
   color: #aaa;
   line-height: 1.5;
 }
-.cl-draft-total {
-  font-size: 0.75rem;
-  color: #888;
-  white-space: nowrap;
+/* 2026-07-14 수정된 부분: 기존 총 글자 수 스타일을 공통 케밥 삭제 메뉴 스타일로 교체
+   이유: 마스터 화면과 문항 편집 화면에서 현재 선택된 항목만 삭제하는 동일한 UI를 사용하기 위해 필요함 */
+.cl-item-menu {
+  position: relative;
   flex-shrink: 0;
+}
+.cl-item-kebab-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #666;
+  font-family: inherit;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.cl-item-kebab-btn:hover {
+  background: #f5f3ff;
+  color: #4f46d8;
+}
+.cl-item-kebab-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+.cl-item-menu-popover {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 50;
+  min-width: 150px;
+  padding: 0.35rem;
+  border: 1px solid #e8e4f8;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(25, 20, 60, 0.14);
+}
+.cl-item-delete-btn {
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #d64545;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.cl-item-delete-btn:hover {
+  background: #fff1f1;
+}
+.cl-item-delete-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .cl-draft-body {
@@ -320,6 +422,11 @@
   margin-top: 0.15rem;
 }
 .cl-add-section {
+  width: 100%;
+  box-sizing: border-box;
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: break-word;
   padding: 0.65rem 0.6rem;
   border: 1.5px dashed #d4d0f0;
   border-radius: 8px;
@@ -335,6 +442,94 @@
 }
 .cl-add-section:hover {
   background: #f5f3ff;
+}
+
+/* 수정된 부분: cl-add-section에 width:100%, box-sizing, 줄바꿈 규칙 추가
+   이유: "+ 자소서 마스터 생성하기"처럼 글자가 긴 텍스트가 180px 목록 폭을 넘어
+   삐져나오던 문제를 고침 (위 .cl-add-section 규칙 자체에 이미 반영되어 있음) */
+
+/* 추가된 부분: 자소서 마스터 폼(CLMasterDraft) 전용 스타일
+   이유: 새로 만든 컴포넌트의 입력창/버튼/빈 상태 문구 스타일이 없어서 추가 */
+/* 수정된 부분: cl-master-empty에 text-align:center 추가 (이유: 글자를 가운데 정렬해달라는 요청) */
+.cl-master-empty {
+  padding: 0.8rem 0.4rem;
+  font-size: 0.78rem;
+  color: #888;
+  text-align: center;
+}
+/* 수정된 부분: span을 block으로 쌓아서 두 줄로 분리 (이유: <br/> 방식은 목록 폭 180px에서 의도한 위치 전에 자동 줄바꿈이 먼저 일어나서 동작 안 했음) */
+.cl-master-empty span {
+  display: block;
+}
+.cl-master-empty-detail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #888;
+  font-size: 0.85rem;
+  padding: 2rem;
+}
+/* 수정된 부분: max-width를 680px에서 100%로 변경 (제한 없이 최대로 늘림)
+   이유: 680px로도 충분히 안 늘어난다고 하셔서, 컨테이너 폭 전체를 채우도록 제한을 없앰 */
+.cl-master-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-width: 100%;
+  margin: 0 auto;
+}
+/* 2026-07-15 추가된 부분: 자소서 마스터 폼의 제목 라벨과 케밥 메뉴를 한 줄에 배치
+   이유: 케밥 메뉴를 폼 내부의 "제목" 바로 옆에 위치시키기 위함 */
+.cl-master-title-field-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: fit-content;
+  margin-top: 0.6rem;
+}
+.cl-master-title-field-row .cl-master-label {
+  margin-top: 0;
+}
+.cl-master-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-top: 0.6rem;
+}
+.cl-master-input,
+.cl-master-textarea {
+  padding: 0.55rem 0.75rem;
+  border: 1.5px solid #e5e2f5;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  color: #1a1a2e;
+}
+.cl-master-input:focus,
+.cl-master-textarea:focus {
+  outline: none;
+  border-color: #6c63ff;
+}
+.cl-master-textarea {
+  resize: vertical;
+}
+.cl-master-submit {
+  margin-top: 1rem;
+  width: 100%;
+  padding: 0.65rem;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #6c63ff, #8b7fff);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+.cl-master-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* 문항 상세 */
@@ -356,12 +551,14 @@
   width: 100%;
 }
 
+/* 추가된 부분: cursor:pointer 추가 (이유: 더블클릭으로 편집 가능하다는 걸 커서로도 알 수 있게) */
 .cl-detail-title {
   font-size: 1rem;
   font-weight: 800;
   color: #1a1a2e;
   flex: 1;
   min-width: 0;
+  cursor: pointer;
 }
 
 .cl-detail-edit-btn {
@@ -451,16 +648,30 @@
   flex-shrink: 0;
   margin-top: 0.1rem;
 }
+/* 추가된 부분 [2026-07-15]: .cl-ai-notice-text
+   이유: 아이콘/시간 사이에 낀 가운데 영역이라 min-width가 없으면 .cl-draft 폭이
+   좁아질 때 이 영역부터 계속 줄어들어 텍스트가 글자 단위로 뭉그러졌음.
+   flex: 1로 남는 공간을 채우되, min-width로 최소 폭을 지정해서 그 이하로는
+   줄어들지 않게(대신 필요하면 줄바꿈만 되게) 함 */
+.cl-ai-notice-text {
+  flex: 1;
+  min-width: 220px;
+}
 .cl-ai-notice-title {
   font-size: 0.78rem;
   font-weight: 700;
   color: #1a1a2e;
   margin-bottom: 0.1rem;
+  /* 추가된 부분 [2026-07-15]: word-break: keep-all (이유: 다른 사이드바 텍스트와 동일하게
+     한글이 글자 단위로 줄바꿈되지 않고 어절 단위로만 줄바꿈되게 함) */
+  word-break: keep-all;
 }
 .cl-ai-notice-sub {
   font-size: 0.72rem;
   color: #888;
   line-height: 1.5;
+  /* 추가된 부분 [2026-07-15]: word-break: keep-all (이유는 .cl-ai-notice-title과 동일) */
+  word-break: keep-all;
 }
 .cl-ai-notice-time {
   font-size: 0.7rem;
@@ -529,6 +740,13 @@
   padding: 1.1rem 1rem 0.8rem;
   border-bottom: 1px solid #f0eef8;
   flex-shrink: 0;
+  /* 추가된 부분 [2026-07-15]: min-width: 300px
+     이유: .cl-settings가 열림/닫힘 애니메이션으로 300px→0px로 폭이 줄어드는 동안,
+     안쪽 콘텐츠까지 같이 줄어들면서 한글 텍스트가 매 프레임 재배치(reflow)되어
+     글자 하나씩 줄바꿈되는 현상이 있었음. 안쪽 콘텐츠 폭을 300px로 고정해두면
+     바깥 .cl-settings의 overflow: hidden이 잘라내는 방식으로 동작해서
+     애니메이션 중에도 텍스트 레이아웃이 흐트러지지 않음 */
+  min-width: 300px;
 }
 .cl-settings-title {
   font-size: 0.88rem;
@@ -540,11 +758,18 @@
   font-size: 0.72rem;
   color: #888;
   line-height: 1.5;
+  /* 추가된 부분 [2026-07-15]: word-break: keep-all
+     이유: 한글은 기본적으로 글자 사이 아무 데서나 줄바꿈될 수 있어서, 사이드바 폭이
+     좁아지는 애니메이션 도중 글자 단위로 뭉그러져 보이는 걸 막기 위해 단어(어절) 단위로만
+     줄바꿈되게 지정함 */
+  word-break: keep-all;
 }
 .cl-settings-body {
   flex: 1;
   overflow-y: auto;
   padding: 0.5rem 0;
+  /* 추가된 부분 [2026-07-15]: min-width: 300px (이유는 .cl-settings-header와 동일) */
+  min-width: 300px;
 }
 .cl-setting-section {
   padding: 0.9rem 1rem;
@@ -554,12 +779,16 @@
   font-weight: 800;
   color: #1a1a2e;
   margin-bottom: 0.3rem;
+  /* 추가된 부분 [2026-07-15]: word-break: keep-all (이유는 위 .cl-settings-sub와 동일) */
+  word-break: keep-all;
 }
 .cl-setting-desc {
   font-size: 0.7rem;
   color: #aaa;
   line-height: 1.5;
   margin-bottom: 0.7rem;
+  /* 추가된 부분 [2026-07-15]: word-break: keep-all (이유는 위 .cl-settings-sub와 동일) */
+  word-break: keep-all;
 }
 .cl-setting-divider {
   height: 1px;
@@ -635,6 +864,8 @@
   border-radius: 8px;
   font-size: 0.72rem;
   color: #888;
+  /* 추가된 부분 [2026-07-15]: word-break: keep-all (이유는 .cl-settings-sub와 동일) */
+  word-break: keep-all;
 }
 .cl-node-ref-icon {
   color: #6c63ff;
@@ -682,6 +913,8 @@
   padding: 0.9rem 1rem;
   border-top: 1px solid #f0eef8;
   flex-shrink: 0;
+  /* 추가된 부분 [2026-07-15]: min-width: 300px (이유는 .cl-settings-header와 동일) */
+  min-width: 300px;
 }
 .cl-btn-generate {
   width: 100%;
@@ -705,6 +938,8 @@
   color: #aaa;
   text-align: center;
   line-height: 1.5;
+  /* 추가된 부분 [2026-07-15]: word-break: keep-all (이유는 .cl-settings-sub와 동일) */
+  word-break: keep-all;
 }
 
 /* ─── MindMapPage 공용 스타일 (자체 포함) ─── */
@@ -899,10 +1134,29 @@
   color: #e8e6f5;
 }
 [data-theme='dark'] .cl-draft-hint,
-[data-theme='dark'] .cl-draft-total,
 [data-theme='dark'] .cl-settings-sub,
 [data-theme='dark'] .cl-setting-desc {
   color: #9694ac;
+}
+
+/* 2026-07-14 추가된 부분: 케밥 삭제 메뉴 다크 모드 호환 */
+[data-theme='dark'] .cl-item-kebab-btn {
+  color: #c8c5d8;
+}
+[data-theme='dark'] .cl-item-kebab-btn:hover {
+  background: #2c2a4d;
+  color: #b8b1ff;
+}
+[data-theme='dark'] .cl-item-menu-popover {
+  border-color: #3a3a55;
+  background: #242435;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+[data-theme='dark'] .cl-item-delete-btn {
+  color: #ff8d8d;
+}
+[data-theme='dark'] .cl-item-delete-btn:hover {
+  background: #3a252d;
 }
 [data-theme='dark'] .cl-section-list {
   border-color: #2f2f45;
@@ -975,6 +1229,18 @@
   border-color: #3a3a55;
   color: #e8e6f5;
 }
+/* 추가된 부분 [2026-07-15]: 자소서 마스터 폼(cl-master-label/input/textarea) 다크모드 규칙
+   이유: 다크모드로 바꿔도 이 요소들엔 다크모드 규칙이 없어서 라이트모드 글자색(#1a1a2e, 어두운 남색)이
+   그대로 남아있었고, 배경만 어두워지면서 글자가 안 보이는 문제가 있었음 -> 글자색을 밝은 색(#fff)으로 지정 */
+[data-theme='dark'] .cl-master-label {
+  color: #fff;
+}
+[data-theme='dark'] .cl-master-input,
+[data-theme='dark'] .cl-master-textarea {
+  background: #16161f;
+  border-color: #3a3a55;
+  color: #fff;
+}
 [data-theme='dark'] .cl-toggle {
   background: #3a3a55;
 }
@@ -1017,4 +1283,139 @@
 [data-theme='dark'] .cl-settings-toggle:hover {
   background: #2c2a4d;
   color: #a99cff;
+}
+
+/* 기존 flex: 0 0 42%; 를 변수 참조로 교체 */
+.cl-mindmap {
+  flex: 0 0 var(--mindmap-width, 42%);
+}
+.cl-content--master .cl-mindmap {
+  flex: 0 0 var(--mindmap-width, 42%);
+}
+
+/* 기존 .cl-content-divider의 width: 1px; background: #e8e4f8; 를 아래로 교체 */
+.cl-content-divider {
+  width: 5px;
+  cursor: col-resize;
+  background: transparent;
+  position: relative;
+  flex-shrink: 0;
+  z-index: 10;
+}
+.cl-content-divider::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 2px;
+  width: 1px;
+  background: #e8e4f8;
+}
+.cl-content-divider:hover::after {
+  background: #6c63ff;
+}
+
+/* 기존 다크모드 규칙 [data-theme='dark'] .cl-content-divider { background: #2f2f45; } 를 아래로 교체 */
+[data-theme='dark'] .cl-content-divider::after {
+  background: #2f2f45;
+}
+
+.cl-draft-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.2rem; /* 기존 .cl-draft-title에 있던 margin-bottom을 여기로 옮김 */
+}
+.cl-draft-title {
+  margin-bottom: 0; /* margin-bottom을 위 row로 옮겼으니 0으로 */
+}
+.cl-title-back-btn {
+  font-size: 1rem;
+  margin-left: -0.5rem; /* mm-icon-btn의 좌측 패딩(0.5rem)만큼 당겨서 왼쪽 여백 상쇄 */
+  padding: 0.3rem; /* 상하좌우 패딩을 좀 더 좁게 (기존 mm-icon-btn의 0.3rem 0.5rem 덮어씀 ) */
+  position: relative;
+}
+.cl-title-back-btn svg {
+  width: 18px; /* 기존 14px → 18px로 확대 */
+  height: 18px;
+}
+.cl-title-back-btn::after {
+  content: attr(data-tooltip); /* data-tooltip 속성값을 그대로 텍스트로 사용 */
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.4rem;
+  padding: 0.35rem 0.6rem;
+  background: #6c63ff;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border-radius: 6px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.1s ease 0.15s; /* 0.15초 뒤에 0.1초 동안 서서히 나타남 */
+  pointer-events: none; /* 툴팁 위에 마우스 올라가도 이벤트 안 먹게 */
+  z-index: 20;
+}
+.cl-title-back-btn:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+.cl-master-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.cl-master-submit {
+  flex: 1;
+  margin-top: 0; /* 기존 margin-top: 1rem은 .cl-master-actions로 옮겼으니 0으로 변경 */
+}
+.cl-master-goedit {
+  padding: 0.65rem 1rem;
+  border: 1.5px solid #6c63ff;
+  border-radius: 8px;
+  background: #f5f3ff;
+  color: #6c63ff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.cl-master-goedit:hover {
+  background: #ede9ff;
+}
+
+.cl-master-goedit:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* 추가된 부분 [2026-07-15]: [ 생성하기 ] 클릭 후 생성 중일 때 뜨는 어두운 오버레이
+   이유: 화면 전체를 어둡게 덮고, 그 위에 중앙 정렬된 TextShimmerWave("Crafting")
+   애니메이션을 보여달라는 요청에 따라 추가함 */
+.cl-generating-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 18, 34, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: cl-generating-fade-in 0.2s ease;
+  /* 추가된 부분 [2026-07-15]: color: #fff
+     이유: TextShimmerWave가 baseColor/shimmerColor 기본값으로 currentColor를 사용하는데,
+     지정 안 하면 어두운 배경 위에서 기본 글자색(검정 계열)이라 잘 안 보일 수 있어서
+     오버레이 자체에 흰색을 지정해 currentColor가 흰색이 되게 함 */
+  color: #fff;
+}
+@keyframes cl-generating-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

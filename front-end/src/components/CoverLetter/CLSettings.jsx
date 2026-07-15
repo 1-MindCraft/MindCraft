@@ -94,17 +94,19 @@ function CLSettings({ open, onToggle, onGenerate, generating }) {
 
           <div className="cl-setting-divider" />
 
-          {/* 3. 마인드맵 노드 참조 (source_node) */}
-          <section className="cl-setting-section">
-            <div className="cl-setting-label">마인드맵 노드 참조</div>
-            <div className="cl-setting-desc">AI가 자기소개서를 생성할 때 마인드맵의 노드 내용을 참고합니다. 마인드맵에서 관련 노드를 선택하면 자동으로 연결됩니다.</div>
-            <div className="cl-node-ref-box">
-              <span className="cl-node-ref-icon">⊞</span>
-              마인드맵에서 노드를 선택하면 자동 연결됩니다
-            </div>
-          </section>
+          {/* 삭제된 부분 [2026-07-15]: '마인드맵 노드 참조' 섹션 전체 제거
+              이유: 섹션 라벨/설명/안내 문구 박스를 포함해 이 섹션 자체가 불필요하다는 요청으로 삭제함.
+              바로 아래 있던 구분선(cl-setting-divider)도 같이 지워서, 이 섹션이 있던 자리에
+              구분선 두 개가 나란히 남지 않게 함
+              before:
+              {/* 3. 마인드맵 노드 참조 (source_node) *\/}
+              <section className="cl-setting-section">
+                <div className="cl-setting-label">마인드맵 노드 참조</div>
+                <div className="cl-setting-desc">AI가 자기소개서를 생성할 때 마인드맵의 노드 내용을 참고합니다. 마인드맵에서 관련 노드를 선택하면 자동으로 연결됩니다.</div>
+              </section>
 
-          <div className="cl-setting-divider" />
+              <div className="cl-setting-divider" />
+              after: (제거됨) */}
 
           {/* 4. AI 창의적 제작 허용 (allow_creativity) */}
           <section className="cl-setting-section">

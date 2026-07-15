@@ -11,4 +11,7 @@ public interface MindMapRepository extends JpaRepository<MindMap, Long> {
 
     @Query("SELECT m FROM MindMap m WHERE m.user.id = :userId")
     Optional<MindMap> findByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT m FROM MindMap m WHERE m.user.id = :userId AND m.id = :mindMapId")
+    Optional<MindMap> findByUserIdAndMindMapId(@Param("userId") Long userId, @Param("mindMapId") Long mindMapId);
 }

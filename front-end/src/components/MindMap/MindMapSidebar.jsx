@@ -114,7 +114,9 @@ function MindMapSidebar({ open, onToggle, nodes = [], onDeleteNode }) {
           }
         </div>
 
-        <button className="mm-sidebar-add">+ 노드 추가</button>
+        {/* 수정된 부분: "+ 노드 추가" 버튼을 여기서 삭제함
+            이유: onClick이 아예 연결되어 있지 않아 눌러도 아무 동작도 안 하던 죽은 버튼이었고,
+            삭제해달라는 요청이 있어서 삭제 */}
       </aside>
 
       {/* 토글 버튼 */}

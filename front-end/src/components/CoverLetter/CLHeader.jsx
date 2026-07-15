@@ -1,14 +1,31 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PENCIL_SRC from '../../assets/pencil.png';
+// 추가된 부분 [2026-07-15]: 다크모드용 흰색 연필 아이콘 import
+// 이유: 기존 pencil.png가 어두운 색이라 다크모드에서 안 보이는 문제를 해결하기 위해 추가함
+import PENCIL_WHITE_SRC from '../../assets/pencil-white.png';
 import PDF_SRC from '../../assets/pdf.png';
 import DOCX_SRC from '../../assets/docx.png';
 import ProfileDropdown from '../common/ProfileDropdown';
 import AppHeader from '../common/AppHeader';
+// 수정된 부분: 프론트에서 직접 만들던 utils/coverLetterExport(jsPDF+html2canvas+docx) import를
+// 백엔드 호출 함수로 교체
+// 이유: 이제 PDF/DOCX를 백엔드(OpenPDF/Apache POI)가 실제 텍스트로 만들어주므로,
+// 프론트는 그 결과 파일을 받아서 다운로드만 시켜주면 됨
+import { exportCoverLetterAsPdf, exportCoverLetterAsDocx } from '../../axios/coverLetterApi';
+import { downloadFromResponse } from '../../utils/downloadFromResponse';
+import { useModal } from '../common/ModalProvider';
+// 추가된 부분 [2026-07-15]: 현재 테마 값을 알기 위한 useTheme 훅 import
+import { useTheme } from '../../context/ThemeContext';
 
 // title/onTitleChange가 내려오면(자소서 생성 요청과 제목을 공유해야 하는 경우) 그걸 그대로 사용하고,
 // 안 내려오면(단독으로 쓰는 경우) 기존처럼 내부 상태로 동작
-function CLHeader({ userName = '프로젝트 매니저 지원', onBackToMindMap, title, onTitleChange }) {
+// 수정된 부분: sections prop을 coverLetterId prop으로 교체
+// 이유: 이제 백엔드가 coverLetterId 하나만 받아서 자기 DB에서 title/sections를 직접 조회해
+// PDF/DOCX를 만들어주므로, 프론트가 문항 데이터를 따로 들고 넘길 필요가 없어짐
+function CLHeader({ userName = '프로젝트 매니저 지원', onBackToMindMap, title, onTitleChange, coverLetterId }) {
+  // 추가된 부분 [2026-07-15]: 현재 테마 값
+  const { theme } = useTheme();
   const [internalTitle, setInternalTitle] = useState(userName);
   const isControlled = title !== undefined && onTitleChange !== undefined;
   const currentTitle = isControlled ? title : internalTitle;
@@ -17,6 +34,11 @@ function CLHeader({ userName = '프로젝트 매니저 지원', onBackToMindMap,
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef(null);
   const navigate = useNavigate();
+  const { alert } = useModal(); // 수정된 부분: 브라우저 기본 alert() 대신 커스텀 모달 사용
+
+  // PDF/DOCX 생성 중 상태 — 응답 오는 동안 중복 클릭 방지 + "내보내는 중" 표시용
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [isExportingDocx, setIsExportingDocx] = useState(false);
 
   useEffect(() => {
     if (isEditing) {
@@ -46,6 +68,39 @@ function CLHeader({ userName = '프로젝트 매니저 지원', onBackToMindMap,
     }
   };
 
+  // 수정된 부분: PDF 다운로드 핸들러가 프론트 생성 로직 대신 백엔드 API를 호출하도록 변경
+  // 이유: 백엔드에 GET /coverletters/{id}/export/pdf 엔드포인트가 새로 생겼기 때문
+  const handleExportPdf = async () => {
+    if (isExportingPdf || !coverLetterId) return;
+    setIsExportingPdf(true);
+    try {
+      const res = await exportCoverLetterAsPdf(coverLetterId);
+      downloadFromResponse(res, `${currentTitle || '자기소개서'}.pdf`);
+    } catch (error) {
+      console.error('PDF 내보내기 실패:', error);
+      // 수정된 부분: alert() → await alert() (커스텀 모달로 교체)
+      await alert('PDF를 만드는 중 문제가 발생했어요. 다시 시도해주세요.');
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
+
+  // 수정된 부분: DOCX 다운로드 핸들러도 동일하게 백엔드 API 호출로 변경
+  const handleExportDocx = async () => {
+    if (isExportingDocx || !coverLetterId) return;
+    setIsExportingDocx(true);
+    try {
+      const res = await exportCoverLetterAsDocx(coverLetterId);
+      downloadFromResponse(res, `${currentTitle || '자기소개서'}.docx`);
+    } catch (error) {
+      console.error('DOCX 내보내기 실패:', error);
+      // 수정된 부분: alert() → await alert() (커스텀 모달로 교체)
+      await alert('DOCX를 만드는 중 문제가 발생했어요. 다시 시도해주세요.');
+    } finally {
+      setIsExportingDocx(false);
+    }
+  };
+
   return (
     <AppHeader
       logoAreaWidth="260px"
@@ -68,8 +123,11 @@ function CLHeader({ userName = '프로젝트 매니저 지원', onBackToMindMap,
             className="mm-icon-btn mm-icon-img-btn"
             onClick={() => setIsEditing((p) => !p)}
           >
+            {/* 수정된 부분 [2026-07-15]: src를 테마에 따라 조건부로 선택 (이유: 다크모드에서 안 보이는 문제 수정)
+                before: <img src={PENCIL_SRC} alt="편집" style={{ ... }} />
+                after: */}
             <img
-              src={PENCIL_SRC}
+              src={theme === 'dark' ? PENCIL_WHITE_SRC : PENCIL_SRC}
               alt="편집"
               style={{
                 width: '14px',
@@ -87,13 +145,19 @@ function CLHeader({ userName = '프로젝트 매니저 지원', onBackToMindMap,
           <button className="cl-btn-back" onClick={handleBack}>
             ← 마인드맵 편집으로 돌아가기
           </button>
-          <button className="cl-btn-pdf">
-            <img src={PDF_SRC} alt="PDF" className="cl-file-icon" /> PDF
+          {/* 수정된 부분: onClick이 이제 백엔드 export API를 호출함 (기존엔 프론트에서 직접 생성) */}
+          <button className="cl-btn-pdf" onClick={handleExportPdf} disabled={isExportingPdf}>
+            <img src={PDF_SRC} alt="PDF" className="cl-file-icon" />{' '}
+            {isExportingPdf ? '내보내는 중...' : 'PDF'}
           </button>
-          <button className="cl-btn-docx">
-            <img src={DOCX_SRC} alt="DOCX" className="cl-file-icon" /> DOCX
+          <button className="cl-btn-docx" onClick={handleExportDocx} disabled={isExportingDocx}>
+            <img src={DOCX_SRC} alt="DOCX" className="cl-file-icon" />{' '}
+            {isExportingDocx ? '내보내는 중...' : 'DOCX'}
           </button>
-          <ProfileDropdown userName="마인드크래프트 회원" />
+          {/* [수정됨 | 2026-07-10]
+              고정 사용자 이름 prop을 제거했습니다.
+              수정 이유: ProfileDropdown이 Zustand loginState.name을 직접 사용합니다. */}
+          <ProfileDropdown />
         </div>
       }
     />

@@ -1,83 +1,54 @@
-import React, { useState } from 'react';
-import HAND_SRC from '../../assets/hand-tool.png';
+import React from 'react';
+// 수정된 부분: HAND_SRC(드래그 도구 아이콘) import 삭제
+// 이유: 아래에서 드래그 도구 버튼 자체를 지웠기 때문에 더 이상 필요 없어짐
 
-const COLORS = [
-  { id: 'blue',   hex: '#6c63ff' },
-  { id: 'green',  hex: '#22c55e' },
-  { id: 'purple', hex: '#a855f7' },
-  { id: 'orange', hex: '#f97316' },
-  { id: 'pink',   hex: '#ec4899' },
-  { id: 'gray',   hex: '#94a3b8' },
-];
+// 수정된 부분: 함수 컴포넌트 시작 부분에 있던 useState 3개(tool, zoom, activeColor)와
+// COLORS 배열, handleZoom 함수를 전부 삭제
+// 이유: CLMindMap이 읽기 전용(ReadOnly)으로 바뀌면서, 이 상태들이 제어하던
+// 드래그/선택 도구·확대축소·색상 선택 버튼들이 전부 의미 없어졌기 때문
 
-function CLToolbar({ onSettingsToggle, settingsOpen }) {
-  const [tool, setTool] = useState('drag');
-  const [zoom, setZoom] = useState(100);
-  const [activeColor, setActiveColor] = useState('blue');
-  const handleZoom = (d) => setZoom((p) => Math.min(200, Math.max(25, p + d)));
-
+// 추가된 부분: navLabel/onNav prop 추가, showSettingsToggle prop 추가
+// 이유: 자소서 마스터 화면 ↔ 자소서 편집 화면을 오가는 버튼을 툴바에 넣어야 하고(navLabel/onNav),
+// 마스터 화면에는 CLSettings(생성 설정) 자체가 없으니 그 토글 버튼을 숨길 수 있어야 해서(showSettingsToggle) 추가
+function CLToolbar({ onSettingsToggle, settingsOpen, navLabel, onNav, showSettingsToggle = true, className = '' }) {
   return (
-    <div className="cl-toolbar">
-      {/* 중앙: 도구 / undo/redo / 줌 / 색상 / 테마 */}
-      <div className="cl-toolbar-center">
-        <div className="mm-toolbar-group">
-          <button
-            className={`mm-tool-btn mm-tool-img-btn ${tool === 'drag' ? 'active' : ''}`}
-            onClick={() => setTool('drag')} title="드래그"
-          >
-            <img src={HAND_SRC} alt="드래그" style={{ width: '18px', height: '18px', objectFit: 'contain', display: 'block', opacity: tool === 'drag' ? 1 : 0.6 }} />
-          </button>
-          <button
-            className={`mm-tool-btn mm-tool-img-btn ${tool === 'select' ? 'active' : ''}`}
-            onClick={() => setTool('select')} title="선택"
-          >
-            <svg className="mm-tool-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" fill="currentColor">
-              <path d="M14.78 5a1 1 0 00-.69.28L15 6.28 36.69 27.59l-9.38.81a1 1 0 00-.77 1.53L32.78 43.5l-2.56 1.16-6-13.84a1 1 0 00-1.6-.34L16 36.69V8.28l20.69 19.31-9.38.81z"/>
-            </svg>
-          </button>
-          <button className="mm-icon-btn" title="실행 취소">↩</button>
-          <button className="mm-icon-btn" title="다시 실행">↪</button>
-        </div>
-
-        <div className="mm-toolbar-divider" />
-
-        <div className="mm-toolbar-group">
-          <button className="mm-tool-btn" onClick={() => handleZoom(-10)}>−</button>
-          <span className="mm-zoom-label">{zoom}%</span>
-          <button className="mm-tool-btn" onClick={() => handleZoom(10)}>+</button>
-          <button className="mm-tool-btn" title="화면에 맞추기">⛶</button>
-        </div>
-
-        <div className="mm-toolbar-divider" />
-
-        <div className="mm-toolbar-group">
-          {COLORS.map((c) => (
-            <button
-              key={c.id}
-              className={`mm-color-dot ${activeColor === c.id ? 'active' : ''}`}
-              style={{ background: c.hex }}
-              onClick={() => setActiveColor(c.id)}
-            />
-          ))}
-        </div>
-
-        <div className="mm-toolbar-divider" />
-
-        <div className="mm-toolbar-group">
-          <button className="mm-tool-btn mm-btn-theme">테마 ▾</button>
-        </div>
+    <div className={`cl-toolbar ${className}`}>
+      {/* 추가된 부분: 왼쪽에 이동/돌아가기 버튼 자리 추가
+          이유: 자소서 마스터 화면일 땐 "→ 자소서 편집으로 이동", 편집 화면일 땐
+          "← 자소서 마스터로 돌아가기"가 여기 뜨도록 함 (navLabel이 없으면 아무것도 안 보임) */}
+      <div className="cl-toolbar-left">
+        {navLabel && (
+          <>
+            <div className="mm-toolbar-divider" />
+            <button className="cl-btn-nav" onClick={onNav}>
+              {navLabel}
+            </button>
+          </>
+        )}
       </div>
 
-      {/* 오른쪽: 생성 설정 버튼 */}
-      <div className="cl-toolbar-right">
-        <div className="mm-toolbar-divider" />
-        <button
-          className={`cl-btn-settings ${settingsOpen ? 'active' : ''}`}
-          onClick={onSettingsToggle}
-        >
-          ✦ 생성 설정
-        </button>
-      </div>
+      {/* 수정된 부분: 원래 여기 있던 도구 버튼들(드래그/선택, 실행취소/다시실행,
+          확대·축소, 색상 점, 테마)을 전부 삭제하고 빈 스페이서만 남김
+          이유: 마인드맵이 읽기 전용이라 편집 도구 자체가 필요 없어짐.
+
+          다만 이 div(flex:1)를 완전히 없애면 아래 "생성 설정" 버튼이
+          오른쪽 끝에 붙어있게 해주던 여백이 사라지므로, 내용은 비우되
+          div는 스페이서 용도로 그대로 남김 */}
+      <div className="cl-toolbar-center" />
+
+      {/* 수정된 부분: showSettingsToggle이 false면 "생성 설정" 버튼 자체를 안 그림
+          이유: 자소서 마스터 화면에는 CLSettings 패널이 없어서 이 토글 버튼도 필요 없음 */}
+      {showSettingsToggle && (
+        <div className="cl-toolbar-right">
+          <div className="mm-toolbar-divider" />
+          <button
+            className={`cl-btn-settings ${settingsOpen ? 'active' : ''}`}
+            onClick={onSettingsToggle}
+          >
+            ✦ 생성 설정
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -86,10 +86,28 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AiGenerationException.class)
     public ResponseEntity<Map<String, String>> handleAiGeneration(AiGenerationException e) {
-        log.error("AI Generation Exception : {}", e.getMessage(), e);
+        log.error("AI Generation Exception : {}", e.getMessage());
 
         return ResponseEntity
                 .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(Map.of("error", e.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidCoverLetterException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidCoverLetter(InvalidCoverLetterException e) {
+        log.error("Invalid CoverLetter : {}", e.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", e.getMessage()));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, String>> handleAccessDenied(AccessDeniedException e) {
+        log.error("Access Denied : {}", e.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
                 .body(Map.of("error", e.getMessage()));
     }
 }

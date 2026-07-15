@@ -122,3 +122,86 @@
 .mm-node-action-btn:hover {
   background: rgba(255, 255, 255, 0.5);
 }
+
+/* ═══════════════════════════════════
+    RAG 하이라이트 (자소서 화면 전용)
+═══════════════════════════════════ */
+
+.mm-map-node.hl-selected {
+  box-shadow:
+    0 0 8px rgba(34, 211, 238, 0.9),
+    0 0 20px rgba(34, 211, 238, 0.7),
+    0 0 36px rgba(34, 211, 238, 0.45),
+    0 0 0 3px #22d3ee;
+  animation: mm-neon-pulse 1.8s ease-in-out infinite;
+  z-index: 10;
+}
+
+.mm-map-node.hl-selected:hover {
+  box-shadow:
+    0 0 14px rgba(34, 211, 238, 1),
+    0 0 30px rgba(34, 211, 238, 0.85),
+    0 0 52px rgba(34, 211, 238, 0.6),
+    0 0 0 3px #22d3ee;
+}
+
+@keyframes mm-neon-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 8px rgba(34, 211, 238, 0.9),
+      0 0 20px rgba(34, 211, 238, 0.7),
+      0 0 36px rgba(34, 211, 238, 0.45),
+      0 0 0 3px #22d3ee;
+  }
+  50% {
+    box-shadow:
+      0 0 14px rgba(34, 211, 238, 1),
+      0 0 30px rgba(34, 211, 238, 0.85),
+      0 0 52px rgba(34, 211, 238, 0.6),
+      0 0 0 3px #22d3ee;
+  }
+}
+
+/* 조상 — 맥락으로 포함됨. 은은하게 표시 */
+.mm-map-node.hl-context {
+  opacity: 1;
+  box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.45), 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* 진짜 미포함 — 회색 (오른쪽 스타일 유지) */
+.mm-map-node.hl-dimmed {
+  opacity: 0.25;
+  filter: grayscale(0.6);
+}
+
+/* ─── AI 키워드 툴팁 (호버 시 표시) ─── */
+.mm-node-keywords {
+  position: absolute;
+  top: calc(100% + 8px);      /* 노드 바로 아래 */
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  white-space: nowrap;
+
+  /* 평소엔 숨김 */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 20;
+}
+
+/* 노드에 마우스 올리면 표시 */
+.mm-map-node:hover .mm-node-keywords {
+  opacity: 1;
+}
+
+.mm-node-keyword-chip {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #6366f1;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
