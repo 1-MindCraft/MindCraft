@@ -111,7 +111,9 @@ function AccountPage() {
       await alert('이름 수정이 완료되었습니다.');
     } catch (error) {
       console.log('이름 수정 실패:', error.response?.data || error);
-      await alert(error.response?.data?.error || '이름 수정 중 오류가 발생했습니다.');
+      await alert(
+        error.response?.data?.error || '이름 수정 중 오류가 발생했습니다.'
+      );
     }
   };
 
@@ -169,7 +171,9 @@ function AccountPage() {
       navigate('/');
     } catch (error) {
       console.log('deleteMe 실패:', error.response?.data || error);
-      await alert(error.response?.data?.error || '비밀번호가 일치하지 않습니다.');
+      await alert(
+        error.response?.data?.error || '비밀번호가 일치하지 않습니다.'
+      );
     }
   };
 
@@ -282,7 +286,10 @@ function AccountPage() {
                   {/* 추가된 부분: [ 정보 수정 ] 버튼 — 비밀번호 항목 바로 아래 신설 */}
                   <div className="account-field">
                     <div className="account-field-row">
-                      <button className="account-field-btn" onClick={openInfoModal}>
+                      <button
+                        className="account-field-btn"
+                        onClick={openInfoModal}
+                      >
                         정보 수정
                       </button>
                     </div>
