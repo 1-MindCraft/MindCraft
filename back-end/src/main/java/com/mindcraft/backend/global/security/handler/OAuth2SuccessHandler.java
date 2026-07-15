@@ -5,6 +5,7 @@ import com.mindcraft.backend.user.dto.UserSecurityDto;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
@@ -13,8 +14,8 @@ import java.util.Map;
 
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
-    // TODO : application.properties로 빼기
-    private static final String FRONTEND_URL = "http://localhost:5173/oauth2/callback";
+    @Value("${frontend.url}")
+    private String FRONTEND_URL;
 
     @Override
     public void onAuthenticationSuccess(
