@@ -349,8 +349,13 @@ function AccountPage() {
                     <div className="account-card-thumb">📝</div>
                     <div className="account-card-title">{c.title}</div>
                     <div className="account-card-meta">
-                      {c.chars.toLocaleString()}자
-                      {c.updatedAt ? ` · 마지막 수정 ${c.updatedAt}` : ''}
+                      {/* 수정된 부분 [2026-07-15]: 글자수(자) 텍스트 제거
+                          이유: 마이페이지 자기소개서 카드에 뜨는 "NN자" 표시가 불필요하다는 요청으로 삭제.
+                          글자수 앞에 붙던 " · " 구분자도 같이 제거해서 updatedAt만 있을 때
+                          맨 앞에 어색한 " · "가 남지 않도록 함
+                          before: {c.chars.toLocaleString()}자{c.updatedAt ? ` · 마지막 수정 ${c.updatedAt}` : ''}
+                          after: */}
+                      {c.updatedAt ? `마지막 수정 ${c.updatedAt}` : ''}
                     </div>
                   </div>
                 ))}
