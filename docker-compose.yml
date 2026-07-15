@@ -1,18 +1,18 @@
 services:
   springboot1:
-    build: ./back-end
+    image: seyun/mindcraft-spring:latest
     container_name: springboot1
     env_file:
       - ./back-end/.env
 
   springboot2:
-    build: ./back-end
+    image: seyun/mindcraft-spring:latest
     container_name: springboot2
     env_file:
       - ./back-end/.env
 
   ai:
-    build: ./ai
+    image: seyun/mindcraft-fastapi:latest
     container_name: fastapi
     env_file:
       - ./ai/.env
