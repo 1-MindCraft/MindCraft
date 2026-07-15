@@ -79,12 +79,20 @@ function AccountPage() {
   //   const handleNameEditSubmit = async () => { ... await updateMyInfo({ name: trimmed }); ... };
   //   const handlePasswordChangeSubmit = async () => { ... await updateMyInfo({ password: newPassword, currentPassword }); ... };
   // after:
-  // 추가된 부분: 정보 수정 모달 열림 여부
-  const [infoModalOpen, setInfoModalOpen] = useState(false);
+  // 수정된 부분 [2026-07-14]: 정보 수정 모달(하나로 통합) 대신 이름 변경 모달 / 비밀번호 변경 모달을 각각 분리
+  // before:
+  //   const [infoModalOpen, setInfoModalOpen] = useState(false);
+  //   const openInfoModal = () => setInfoModalOpen(true);
+  //   const closeInfoModal = () => setInfoModalOpen(false);
+  // after:
+  // 추가된 부분 [2026-07-14]: 이름 변경 모달 / 비밀번호 변경 모달을 각각 따로 열고 닫음
+  const [nameModalOpen, setNameModalOpen] = useState(false);
+  const openNameModal = () => setNameModalOpen(true);
+  const closeNameModal = () => setNameModalOpen(false);
 
-  // 추가된 부분: 정보 수정 모달 열기/닫기 (지금은 빈 모달이라 입력값 초기화할 게 없음)
-  const openInfoModal = () => setInfoModalOpen(true);
-  const closeInfoModal = () => setInfoModalOpen(false);
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const openPasswordModal = () => setPasswordModalOpen(true);
+  const closePasswordModal = () => setPasswordModalOpen(false);
 
   // 추가된 부분: 이름 변경 섹션 입력값
   const [nameEditValue, setNameEditValue] = useState('');
@@ -103,11 +111,18 @@ function AccountPage() {
     }
 
     try {
-      const rdata = await updateMyInfo({ name: trimmed });
+      const rdata = await updateMyInfo({
+        name: trimmed,
+        currentPassword: nameEditPassword,
+      });
       setMyInfo((prev) => ({ ...prev, name: rdata.name }));
       updateLoginName?.(rdata.name);
       setNameEditValue('');
       setNameEditPassword('');
+      // 추가된 부분 [2026-07-15]: closeNameModal() 호출
+      // 이유: 이름 수정이 완료되면 모달이 자동으로 닫히게 해달라는 요청.
+      // 완료 알림(alert)이 뜨기 전에 모달부터 닫아서, 알림이 이름 변경 모달 위에 겹쳐 보이지 않게 함
+      closeNameModal();
       await alert('이름 수정이 완료되었습니다.');
     } catch (error) {
       console.log('이름 수정 실패:', error.response?.data || error);
@@ -145,6 +160,10 @@ function AccountPage() {
       setCurrentPasswordForChange('');
       setNewPasswordValue('');
       setConfirmNewPasswordValue('');
+      // 추가된 부분 [2026-07-15]: closePasswordModal() 호출
+      // 이유: 비밀번호 변경이 완료되면 모달이 자동으로 닫히게 해달라는 요청.
+      // 완료 알림(alert)이 뜨기 전에 모달부터 닫아서, 알림이 비밀번호 변경 모달 위에 겹쳐 보이지 않게 함
+      closePasswordModal();
       await alert('비밀번호 변경이 완료되었습니다.');
     } catch (error) {
       console.log('비밀번호 변경 실패:', error.response?.data || error);
@@ -163,11 +182,30 @@ function AccountPage() {
       return;
     }
 
+    // 추가된 부분 [2026-07-15]: 탈퇴 전 한 번 더 확인하는 모달
+    // 이유: 비밀번호만 입력하면 바로 탈퇴가 처리돼서, 실수로 탈퇴되는 걸 막기 위해
+    // "정말로 탈퇴하시겠습니까?" 확인 단계를 추가함. 새로운 모달을 따로 만들 필요 없이
+    // 공통 빈 모달(Modal.jsx)을 그대로 쓰는 ModalProvider의 confirm()을 재사용하고,
+    // 버튼 텍스트만 '예'/'아니오'로 지정함
+    const reallyWithdraw = await confirm(
+      '정말로 탈퇴하시겠습니까?\n ※ 회원 탈퇴 시 작성하신 모든 데이터는 삭제되며 복구할 수 없습니다. ※',
+      { confirmText: '예', cancelText: '아니오' }
+    );
+    // 추가된 부분 [2026-07-15]: [아니오] 선택 시 아무것도 바꾸지 않고 취소 안내만 띄운 뒤 종료
+    // 이유: 요청대로 탈퇴 취소 시에는 데이터 변경 없이 모달만 닫혀야 함
+    if (!reallyWithdraw) {
+      await alert('탈퇴 처리가 취소되었습니다.');
+      return;
+    }
+
     try {
       await deleteMe(password);
       removeCookie('user');
       resetState();
-      await alert('탈퇴 처리가 완료되었습니다');
+      // 수정된 부분 [2026-07-15]: 문구 끝에 마침표 추가 (요청 문구와 동일하게 맞춤)
+      // before: await alert('탈퇴 처리가 완료되었습니다');
+      // after:
+      await alert('탈퇴 처리가 완료되었습니다.');
       navigate('/');
     } catch (error) {
       console.log('deleteMe 실패:', error.response?.data || error);
@@ -249,6 +287,12 @@ function AccountPage() {
                 <div className="account-field-label">이름</div>
                 <div className="account-field-row">
                   <span className="account-field-value">{myInfo.name}</span>
+                  {/* 수정된 부분 [2026-07-14]: [ 이름 변경 ] 버튼 재배치 — 이름 필드 옆
+                      before: <span>{myInfo.name}</span> (버튼 없음, 정보 수정 버튼이 비밀번호 밑에 있었음)
+                      after: */}
+                  <button className="account-field-btn" onClick={openNameModal}>
+                    이름 변경
+                  </button>
                 </div>
               </div>
 
@@ -280,17 +324,11 @@ function AccountPage() {
                       <span className="account-field-value account-field-value--muted">
                         ••••••••
                       </span>
-                    </div>
-                  </div>
-
-                  {/* 추가된 부분: [ 정보 수정 ] 버튼 — 비밀번호 항목 바로 아래 신설 */}
-                  <div className="account-field">
-                    <div className="account-field-row">
-                      <button
-                        className="account-field-btn"
-                        onClick={openInfoModal}
-                      >
-                        정보 수정
+                      {/* 수정된 부분 [2026-07-14]: [ 정보 수정 ] 버튼을 [ 비밀번호 변경 ] 버튼으로 교체하고 비밀번호 필드 옆으로 재배치
+                          before: <span>••••••••</span> (버튼 없음, [정보 수정]은 이 필드 아래 별도 블록에 있었음)
+                          after: */}
+                      <button className="account-field-btn" onClick={openPasswordModal}>
+                        비밀번호 변경
                       </button>
                     </div>
                   </div>
@@ -342,8 +380,13 @@ function AccountPage() {
                     <div className="account-card-thumb">📝</div>
                     <div className="account-card-title">{c.title}</div>
                     <div className="account-card-meta">
-                      {c.chars.toLocaleString()}자
-                      {c.updatedAt ? ` · 마지막 수정 ${c.updatedAt}` : ''}
+                      {/* 수정된 부분 [2026-07-15]: 글자수(자) 텍스트 제거
+                          이유: 마이페이지 자기소개서 카드에 뜨는 "NN자" 표시가 불필요하다는 요청으로 삭제.
+                          글자수 앞에 붙던 " · " 구분자도 같이 제거해서 updatedAt만 있을 때
+                          맨 앞에 어색한 " · "가 남지 않도록 함
+                          before: {c.chars.toLocaleString()}자{c.updatedAt ? ` · 마지막 수정 ${c.updatedAt}` : ''}
+                          after: */}
+                      {c.updatedAt ? `마지막 수정 ${c.updatedAt}` : ''}
                     </div>
                   </div>
                 ))}
@@ -353,21 +396,27 @@ function AccountPage() {
         </div>
       </div>
 
-      {/* 추가된 부분: 정보 수정 모달 (로그인 모달과 같은 Modal 컴포넌트 재사용) */}
-      {/* 수정된 부분: 모달 안 내용(이름 변경/비밀번호 변경 두 섹션)을 전부 제거하고 빈 모달만 남김
-          이유: 버튼 + 빈 모달이 열리는 것까지만 부탁하신 거라, 입력창/제출 버튼은 아직 안 넣음
+      {/* 수정된 부분 [2026-07-14]: 정보 수정 모달(하나, 안에 두 섹션) → 이름 변경 모달 / 비밀번호 변경 모달(각각 독립)로 분리
           before:
-            <Modal ...>
-              이름 변경 섹션 — input(이름), input(비밀번호 확인), button
-              비밀번호 변경 섹션 — input(새 비밀번호), input(현재 비밀번호), input(비밀번호 확인), button
-              공통 [ 취소 ] 버튼
+            <Modal open={infoModalOpen} title="정보 수정">
+              이름 변경 섹션...
+              구분선
+              비밀번호 변경 섹션...
             </Modal>
           after: */}
-      <Modal open={infoModalOpen} onClose={closeInfoModal} title="정보 수정">
-        {/* 이름 변경 섹션 */}
-        <div className="account-field-label" style={{ marginBottom: '0.4rem' }}>
-          이름 변경
-        </div>
+      {/* 추가된 부분 [2026-07-14]: 이름 변경 모달 (기존 정보 수정 모달에서 이름 변경 섹션만 분리) */}
+      {/* 수정된 부분 [2026-07-15]: onConfirm={handleNameEditSubmit} 추가
+          이유: 입력창(새 이름/비밀번호)에 값을 입력한 뒤 Enter를 누르면 [ 이름 변경 ] 버튼을
+          누른 것과 동일하게 바로 제출되게 해달라는 요청. Modal.jsx가 이미 지원하는
+          Enter → onConfirm 기능을 여기서도 연결하기만 하면 됨
+          before: <Modal open={nameModalOpen} onClose={closeNameModal} title="이름 변경">
+          after: */}
+      <Modal
+        open={nameModalOpen}
+        onClose={closeNameModal}
+        onConfirm={handleNameEditSubmit}
+        title="이름 변경"
+      >
         <input
           className="modal-input"
           style={{ marginTop: 0 }}
@@ -390,13 +439,18 @@ function AccountPage() {
         >
           이름 변경
         </button>
+      </Modal>
 
-        <div className="account-field-divider" style={{ margin: '1.2rem 0' }} />
-
-        {/* 비밀번호 변경 섹션 */}
-        <div className="account-field-label" style={{ marginBottom: '0.4rem' }}>
-          비밀번호 변경
-        </div>
+      {/* 추가된 부분 [2026-07-14]: 비밀번호 변경 모달 (기존 정보 수정 모달에서 비밀번호 변경 섹션만 분리) */}
+      {/* 수정된 부분 [2026-07-15]: onConfirm={handlePasswordChangeSubmit} 추가 (이유는 이름 변경 모달과 동일)
+          before: <Modal open={passwordModalOpen} onClose={closePasswordModal} title="비밀번호 변경">
+          after: */}
+      <Modal
+        open={passwordModalOpen}
+        onClose={closePasswordModal}
+        onConfirm={handlePasswordChangeSubmit}
+        title="비밀번호 변경"
+      >
         <input
           type="password"
           className="modal-input"

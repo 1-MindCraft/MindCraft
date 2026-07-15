@@ -14,7 +14,7 @@ function Footer() {
           MIND <span>CRAFT</span>
         </span>
       </div>
-      <span>© 2025 MindCraft Team · SIAT 팀 프로젝트</span>
+      <span>© 2026 MindCraft Team · SIAT 팀 프로젝트</span>
     </footer>
   );
 }

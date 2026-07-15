@@ -1,5 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import PENCIL_SRC from '../../assets/pencil.png';
+// 추가된 부분 [2026-07-15]: 다크모드용 흰색 연필 아이콘 import 및 useTheme 훅
+// 이유: 기존 pencil.png가 어두운 색이라 다크모드에서 안 보이는 문제를 해결하기 위해 추가함
+import PENCIL_WHITE_SRC from '../../assets/pencil-white.png';
+import { useTheme } from '../../context/ThemeContext';
 
 // 수정된 부분: draftTitle prop 추가 (이유: 자소서 마스터의 title을 CLDraft 헤더에 표시하기 위해 외부에서 받아야 함)
 function CLDraft({
@@ -10,13 +14,21 @@ function CLDraft({
   onUpdateTitle,
   draftTitle = '자기소개서 초안',
   onBackToMasterList,
+  // 2026-07-14 추가된 부분: 현재 선택된 자소서 항목 삭제 관련 prop
+  // 이유: 편집 화면의 케밥 메뉴는 자소서 전체가 아니라 현재 보고 있는 항목만 삭제해야 함
+  onDeleteSection,
+  deletingSection = false,
+  deleteBlocked = false,
 }) {
+  // 추가된 부분 [2026-07-15]: 현재 테마 값
+  const { theme } = useTheme();
   const selectedIndex = sections.findIndex((s) => s.id === selectedId);
   const selected = sections[selectedIndex];
-  const totalChars = sections.reduce(
-    (sum, s) => sum + (s.content?.length || 0),
-    0
-  );
+
+  // 2026-07-14 추가된 부분: 자소서 항목 삭제 케밥 메뉴 상태
+  // 이유: 기존 총 글자 수 위치에서 작은 삭제 메뉴를 열고 닫기 위해 필요함
+  const [isItemMenuOpen, setIsItemMenuOpen] = useState(false);
+  const itemMenuRef = useRef(null);
 
   // ── 제목 편집 상태 ──
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -35,6 +47,39 @@ function CLDraft({
       titleInputRef.current?.select();
     }
   }, [isEditingTitle]);
+
+
+  // 2026-07-14 추가된 부분: 케밥 메뉴 바깥 클릭 또는 ESC 입력 시 닫기
+  // 이유: 메뉴가 열린 채 남아 다른 문항 조작을 방해하지 않도록 함
+  useEffect(() => {
+    if (!isItemMenuOpen) return;
+
+    const handlePointerDown = (event) => {
+      if (!itemMenuRef.current?.contains(event.target)) {
+        setIsItemMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setIsItemMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isItemMenuOpen]);
+
+  const handleDeleteSectionClick = () => {
+    if (!selected || deletingSection || deleteBlocked) return;
+    setIsItemMenuOpen(false);
+    onDeleteSection?.();
+  };
 
   const startEditTitle = () => {
     setOriginalTitle(selected.title);
@@ -65,6 +110,7 @@ function CLDraft({
               <button
                 className="mm-icon-btn cl-title-back-btn"
                 onClick={onBackToMasterList}
+                disabled={deletingSection}
                 data-tooltip="자소서 마스터 목록으로 돌아가기"
               >
                 <svg
@@ -84,8 +130,34 @@ function CLDraft({
             있습니다.
           </div>
         </div>
-        <div className="cl-draft-total">
-          총 글자 수 : {totalChars.toLocaleString()}자
+        {/* 2026-07-14 수정된 부분: "총 글자 수"를 제거하고 현재 선택된 항목 삭제 케밥 메뉴로 교체
+            이유: 편집 화면에서는 자소서 전체가 아니라 지금 보고 있는 자소서 항목만 삭제해야 함 */}
+        <div className="cl-item-menu" ref={itemMenuRef}>
+          <button
+            type="button"
+            className="cl-item-kebab-btn"
+            onClick={() => setIsItemMenuOpen((prev) => !prev)}
+            disabled={!selected || deletingSection || deleteBlocked}
+            aria-label="자소서 항목 메뉴 열기"
+            aria-haspopup="menu"
+            aria-expanded={isItemMenuOpen}
+          >
+            ⋮
+          </button>
+
+          {isItemMenuOpen && selected && (
+            <div className="cl-item-menu-popover" role="menu">
+              <button
+                type="button"
+                className="cl-item-delete-btn"
+                onClick={handleDeleteSectionClick}
+                disabled={deletingSection || deleteBlocked}
+                role="menuitem"
+              >
+                {deletingSection ? '삭제 중...' : '자소서 항목 삭제'}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -150,8 +222,11 @@ function CLDraft({
                     onClick={startEditTitle}
                     title="제목 수정"
                   >
+                    {/* 수정된 부분 [2026-07-15]: src를 테마에 따라 조건부로 선택 (이유: 다크모드에서 안 보이는 문제 수정)
+                        before: <img src={PENCIL_SRC} alt="편집" className="cl-detail-pencil" />
+                        after: */}
                     <img
-                      src={PENCIL_SRC}
+                      src={theme === 'dark' ? PENCIL_WHITE_SRC : PENCIL_SRC}
                       alt="편집"
                       className="cl-detail-pencil"
                     />
@@ -188,7 +263,13 @@ function CLDraft({
       {/* 하단: AI 생성 안내 */}
       <div className="cl-ai-notice">
         <span className="cl-ai-icon">✦</span>
-        <div>
+        {/* 수정된 부분 [2026-07-15]: className="cl-ai-notice-text" 추가
+            이유: 이 영역에 min-width가 없어서, .cl-draft 폭이 좁아질수록(마인드맵 패널 divider를
+            끌어서 넓힐 때 등) "AI가 생성한 초안입니다" 문구가 글자 단위로 뭉그러져 보이는 문제가 있었음.
+            className을 줘서 CoverLetter.css에서 min-width를 지정할 수 있게 함
+            before: <div>
+            after: */}
+        <div className="cl-ai-notice-text">
           <div className="cl-ai-notice-title">AI가 생성한 초안입니다</div>
           <div className="cl-ai-notice-sub">
             마인드맵의 구조와 내용을 기반으로 AI가 자기소개서 초안을 생성합니다.

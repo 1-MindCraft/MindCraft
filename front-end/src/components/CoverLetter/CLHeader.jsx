@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PENCIL_SRC from '../../assets/pencil.png';
+// 추가된 부분 [2026-07-15]: 다크모드용 흰색 연필 아이콘 import
+// 이유: 기존 pencil.png가 어두운 색이라 다크모드에서 안 보이는 문제를 해결하기 위해 추가함
+import PENCIL_WHITE_SRC from '../../assets/pencil-white.png';
 import PDF_SRC from '../../assets/pdf.png';
 import DOCX_SRC from '../../assets/docx.png';
 import ProfileDropdown from '../common/ProfileDropdown';
@@ -12,6 +15,8 @@ import AppHeader from '../common/AppHeader';
 import { exportCoverLetterAsPdf, exportCoverLetterAsDocx } from '../../axios/coverLetterApi';
 import { downloadFromResponse } from '../../utils/downloadFromResponse';
 import { useModal } from '../common/ModalProvider';
+// 추가된 부분 [2026-07-15]: 현재 테마 값을 알기 위한 useTheme 훅 import
+import { useTheme } from '../../context/ThemeContext';
 
 // title/onTitleChange가 내려오면(자소서 생성 요청과 제목을 공유해야 하는 경우) 그걸 그대로 사용하고,
 // 안 내려오면(단독으로 쓰는 경우) 기존처럼 내부 상태로 동작
@@ -19,6 +24,8 @@ import { useModal } from '../common/ModalProvider';
 // 이유: 이제 백엔드가 coverLetterId 하나만 받아서 자기 DB에서 title/sections를 직접 조회해
 // PDF/DOCX를 만들어주므로, 프론트가 문항 데이터를 따로 들고 넘길 필요가 없어짐
 function CLHeader({ userName = '프로젝트 매니저 지원', onBackToMindMap, title, onTitleChange, coverLetterId }) {
+  // 추가된 부분 [2026-07-15]: 현재 테마 값
+  const { theme } = useTheme();
   const [internalTitle, setInternalTitle] = useState(userName);
   const isControlled = title !== undefined && onTitleChange !== undefined;
   const currentTitle = isControlled ? title : internalTitle;
@@ -116,8 +123,11 @@ function CLHeader({ userName = '프로젝트 매니저 지원', onBackToMindMap,
             className="mm-icon-btn mm-icon-img-btn"
             onClick={() => setIsEditing((p) => !p)}
           >
+            {/* 수정된 부분 [2026-07-15]: src를 테마에 따라 조건부로 선택 (이유: 다크모드에서 안 보이는 문제 수정)
+                before: <img src={PENCIL_SRC} alt="편집" style={{ ... }} />
+                after: */}
             <img
-              src={PENCIL_SRC}
+              src={theme === 'dark' ? PENCIL_WHITE_SRC : PENCIL_SRC}
               alt="편집"
               style={{
                 width: '14px',

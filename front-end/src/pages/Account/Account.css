@@ -119,9 +119,20 @@
   padding: 0 2px;
   flex: 1;
 }
+/* 수정된 부분 [2026-07-15]: font-size를 0.8rem → 0.75rem으로 살짝 축소,
+   color를 amber(#d97706)에서 danger 버튼과 동일한 빨간색(#ef4444)으로 변경
+   이유: 문구 크기를 살짝 작게 하고, [탈퇴하기] 버튼(account-field-btn--danger)과
+   같은 색 계열로 맞춰서 경고 느낌을 통일해달라는 요청
+   before:
+   .account-field-warning {
+     font-size: 0.8rem;
+     color: #d97706;
+     flex: 1;
+   }
+   after: */
 .account-field-warning {
-  font-size: 0.8rem;
-  color: #d97706;
+  font-size: 0.75rem;
+  color: #ef4444;
   flex: 1;
 }
 .account-field-btn {
@@ -189,6 +200,12 @@
   font-weight: 700;
   color: #1a1a2e;
   margin-bottom: 0.3rem;
+  /* 추가된 부분 [2026-07-15]: 한 줄 말줄임(ellipsis) 처리
+     이유: 자소서 제목(이름)이 길면 카드 밖으로 옆으로 삐져나오던 문제가 있어서,
+     카드 폭을 넘어가는 글자는 자르고 "..."으로 표시되게 함 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .account-card-meta {
   font-size: 0.74rem;
@@ -263,6 +280,12 @@
 }
 [data-theme='dark'] .account-field-btn--danger {
   border-color: #6b3a3a;
+  color: #ff6b6b;
+}
+/* 추가된 부분 [2026-07-15]: 다크모드용 account-field-warning 색상 규칙
+   이유: 위에서 라이트모드 색을 danger 버튼과 맞췄으니, 다크모드에서도 danger 버튼의
+   다크모드 색(#ff6b6b)과 동일하게 맞춰야 일관성이 유지됨 (기존엔 다크모드 규칙이 아예 없었음) */
+[data-theme='dark'] .account-field-warning {
   color: #ff6b6b;
 }
 [data-theme='dark'] .account-field-btn--danger:hover {

@@ -6,15 +6,19 @@ import CLToolbar from '../../components/CoverLetter/CLToolbar';
 import CLMindMap from '../../components/CoverLetter/CLMindMap';
 import CLDraft from '../../components/CoverLetter/CLDraft';
 import CLSettings from '../../components/CoverLetter/CLSettings';
-import CLMasterDraft from '../../components/CoverLetter/CLMasterDraft';
+import CLMasterDraft from '../../components/CoverLetter/CLmasterdraft';
+// 추가된 부분 [2026-07-15]: [ 생성하기 ] 클릭 시 뜨는 오버레이에 쓸 TextShimmerWave 컴포넌트 import
+// 이유: 자소서 편집화면에서 AI 생성 중일 때 화면을 어둡게 하고 중앙에 "Crafting" 웨이브 애니메이션을 보여달라는 요청
+import { TextShimmerWave } from '../../components/loading-ui/text-shimmer-wave';
 
 import {
   getCoverLetterList,
   createCoverLetter,
   updateCoverLetter,
   getCoverLetterDetail,
+  deleteCoverLetter,
 } from '../../axios/coverLetterApi';
-import { createSection } from '../../axios/sectionApi';
+import { createSection, deleteSection } from '../../axios/sectionApi';
 import { getMindMap } from '../../axios/mindMapApi';
 import useMindMapStore from '../../zustand/mindMapStore';
 import { useModal } from '../../components/common/ModalProvider';
@@ -36,6 +40,9 @@ const mapSection = (s) => {
     // 추가: 마인드맵 하이라이트용 (selected = 네온, context = 조상)
     selectedNodeIds: selectedIds,
     contextNodeIds: s.contextNodeIds || [],
+    // 2026-07-14 추가된 부분: 서버에 저장된 문항 여부
+    // 이유: 저장 전 임시 문항은 DELETE API를 호출하지 않고 프론트 목록에서만 제거해야 함
+    saved: true,
   };
 };
 
@@ -75,6 +82,9 @@ function CoverLetterPage({ onBackToMindMap }) {
   const [selectedMasterId, setSelectedMasterId] = useState(null);
   const [loadingList, setLoadingList] = useState(true);
   const [savingMaster, setSavingMaster] = useState(false);
+  // 2026-07-14 추가된 부분: 선택된 자소서 마스터 삭제 진행 상태
+  // 이유: 저장 요청과 삭제 요청이 동시에 실행되는 충돌 및 중복 삭제를 막기 위해 필요함
+  const [deletingMaster, setDeletingMaster] = useState(false);
 
   // 문항 편집 화면 상태
   const [editingId, setEditingId] = useState(null); // 추가된 부분: 지금 편집 중인 자소서의 id (URL 파라미터 대신 state로 관리)
@@ -86,6 +96,9 @@ function CoverLetterPage({ onBackToMindMap }) {
   const [settingsOpen, setSettingsOpen] = useState(true);
   const [loadingEdit, setLoadingEdit] = useState(false);
   const [generating, setGenerating] = useState(false);
+  // 2026-07-14 추가된 부분: 선택된 자소서 항목 삭제 진행 상태
+  // 이유: AI 생성 요청과 항목 삭제 요청이 동시에 실행되는 충돌 및 중복 삭제를 막기 위해 필요함
+  const [deletingSection, setDeletingSection] = useState(false);
 
   const [mindMapWidth, setMindMapWidth] = useState(50);
   const contentRef = useRef(null);
@@ -143,6 +156,8 @@ function CoverLetterPage({ onBackToMindMap }) {
 
   // 추가된 부분: "+ 자소서 마스터 생성하기" — 임시 항목을 목록에 추가하고 선택함 (아직 저장 안 됨)
   const handleAddMaster = () => {
+    if (savingMaster || deletingMaster) return;
+
     const newMaster = {
       id: tempIdCounter--,
       title: '',
@@ -167,7 +182,7 @@ function CoverLetterPage({ onBackToMindMap }) {
   // 추가된 부분: 생성하기(저장 전) / 수정하기(이미 저장됨) 버튼
   const handleMasterSubmit = async () => {
     const current = masters.find((m) => m.id === selectedMasterId);
-    if (!current || savingMaster) return;
+    if (!current || savingMaster || deletingMaster) return;
 
     // 수정된 부분: dto에 mindMapId 추가
     // 이유: 백엔드 CoverLetterRequestDto의 @NotNull mindMapId가 null이면 400 에러가 나서,
@@ -212,9 +227,55 @@ function CoverLetterPage({ onBackToMindMap }) {
     }
   };
 
+
+  // 2026-07-14 추가된 부분: 현재 선택된 자소서 마스터 하나만 삭제
+  // 이유: 마스터 화면의 케밥 메뉴는 선택된 마스터만 대상으로 하며, 편집 중인 문항 삭제와 분리해야 함
+  const handleDeleteSelectedMaster = async () => {
+    const target = masters.find((master) => master.id === selectedMasterId);
+    if (!target || deletingMaster || savingMaster || deletingSection) return;
+
+    const targetIndex = masters.findIndex((master) => master.id === target.id);
+    const remainingAtStart = masters.filter((master) => master.id !== target.id);
+    const nextMaster =
+      remainingAtStart[
+        Math.min(targetIndex, Math.max(remainingAtStart.length - 1, 0))
+      ];
+
+    setDeletingMaster(true);
+
+    try {
+      // 저장 전 임시 마스터는 서버에 존재하지 않으므로 프론트 목록에서만 제거함
+      if (target.saved) {
+        await deleteCoverLetter(target.id);
+      }
+
+      // 함수형 업데이트를 사용해 삭제 요청 중 다른 항목의 입력값이 바뀌어도 덮어쓰지 않음
+      setMasters((currentMasters) =>
+        currentMasters.filter((master) => master.id !== target.id)
+      );
+      setSelectedMasterId((currentId) =>
+        currentId === target.id ? (nextMaster?.id ?? null) : currentId
+      );
+
+      // 이전에 편집하던 마스터와 같은 항목을 삭제한 경우에만 편집 상태를 비움
+      if (editingId === target.id) {
+        setEditingId(null);
+        setSections([]);
+        setSelectedId(null);
+        setUserName('자기소개서');
+      }
+    } catch (error) {
+      console.error('자소서 마스터 삭제 실패:', error.response?.data || error);
+      await alert('자소서 마스터 삭제 중 오류가 발생했습니다.');
+    } finally {
+      setDeletingMaster(false);
+    }
+  };
+
   // 추가된 부분: 툴바의 "→ 자소서 편집으로 이동" — 저장된 마스터만 편집 화면으로 전환 가능
   const selectedMaster = masters.find((m) => m.id === selectedMasterId);
   const handleGoToEdit = async () => {
+    if (deletingMaster) return;
     if (!selectedMaster?.saved) {
       await alert('먼저 자소서 마스터를 저장해주세요.');
       return;
@@ -225,6 +286,7 @@ function CoverLetterPage({ onBackToMindMap }) {
 
   // 추가된 부분: 툴바의 "← 자소서 마스터로 돌아가기"
   const handleBackToMasterList = () => {
+    if (deletingSection) return;
     setView('list');
   };
 
@@ -262,12 +324,17 @@ function CoverLetterPage({ onBackToMindMap }) {
   const toggleSettings = () => setSettingsOpen((p) => !p);
 
   const addSection = () => {
+    if (generating || deletingSection) return;
+
     const customCount = sections.filter((s) => s.id >= 100).length;
     const newSection = {
       id: nextId,
       title: `직접 입력 문항 ${customCount + 1}`,
       content: '',
       sourceNodes: [],
+      // 2026-07-14 추가된 부분: 아직 서버에 저장되지 않은 임시 문항 표시
+      // 이유: 임시 문항 삭제 시 존재하지 않는 sectionId로 DELETE API를 호출하지 않도록 구분함
+      saved: false,
     };
     setSections((prev) => [...prev, newSection]);
     setSelectedId(nextId);
@@ -280,6 +347,8 @@ function CoverLetterPage({ onBackToMindMap }) {
   };
 
   const handleGenerate = async (settings) => {
+    if (deletingSection) return;
+
     const current = sections.find((s) => s.id === selectedId);
     if (!current) {
       await alert('생성할 문항을 선택해주세요.');
@@ -313,6 +382,47 @@ function CoverLetterPage({ onBackToMindMap }) {
       await alert('생성 중 오류가 발생했습니다.');
     } finally {
       setGenerating(false);
+    }
+  };
+
+
+  // 2026-07-14 추가된 부분: 현재 선택된 자소서 항목 하나만 삭제
+  // 이유: 편집 화면의 케밥 메뉴에서 자소서 전체가 아니라 지금 보고 있는 문항만 삭제해야 함
+  const handleDeleteSelectedSection = async () => {
+    const target = sections.find((section) => section.id === selectedId);
+    if (!target || !editingId || deletingSection || generating || deletingMaster) {
+      return;
+    }
+
+    const targetIndex = sections.findIndex((section) => section.id === target.id);
+    const remainingAtStart = sections.filter(
+      (section) => section.id !== target.id
+    );
+    const nextSection =
+      remainingAtStart[
+        Math.min(targetIndex, Math.max(remainingAtStart.length - 1, 0))
+      ];
+
+    setDeletingSection(true);
+
+    try {
+      // 서버에서 조회하거나 생성된 문항만 기존 문항 삭제 API를 호출함
+      if (target.saved !== false) {
+        await deleteSection(editingId, target.id);
+      }
+
+      // 함수형 업데이트를 사용해 삭제 요청 중 다른 문항 상태가 바뀌어도 덮어쓰지 않음
+      setSections((currentSections) =>
+        currentSections.filter((section) => section.id !== target.id)
+      );
+      setSelectedId((currentId) =>
+        currentId === target.id ? (nextSection?.id ?? null) : currentId
+      );
+    } catch (error) {
+      console.error('자소서 항목 삭제 실패:', error.response?.data || error);
+      await alert('자소서 항목 삭제 중 오류가 발생했습니다.');
+    } finally {
+      setDeletingSection(false);
     }
   };
 
@@ -385,6 +495,8 @@ function CoverLetterPage({ onBackToMindMap }) {
                 onSubmit={handleMasterSubmit}
                 saving={savingMaster}
                 onGoToEdit={handleGoToEdit}
+                onDeleteMaster={handleDeleteSelectedMaster}
+                deletingMaster={deletingMaster}
               />
             )}
           </div>
@@ -401,6 +513,9 @@ function CoverLetterPage({ onBackToMindMap }) {
                   onUpdateTitle={updateSectionTitle}
                   draftTitle={userName}
                   onBackToMasterList={handleBackToMasterList}
+                  onDeleteSection={handleDeleteSelectedSection}
+                  deletingSection={deletingSection}
+                  deleteBlocked={generating}
                 />
                 <CLSettings
                   open={settingsOpen}
@@ -413,6 +528,16 @@ function CoverLetterPage({ onBackToMindMap }) {
           </div>
         </div>
       </div>
+
+      {/* 추가된 부분 [2026-07-15]: [ 생성하기 ] 클릭 후 AI가 생성 중일 때 뜨는 오버레이
+          이유: 요청대로 생성 중에는 주변을 어둡게 하고, 화면 중앙에 "Crafting" 웨이브
+          반짝임 애니메이션을 보여줘서 로딩 상태를 명확히 알려주기 위함.
+          generating은 [ 생성하기 ] 버튼(CLSettings)을 누르면 true가 되는 기존 state를 그대로 사용 */}
+      {generating && (
+        <div className="cl-generating-overlay">
+          <TextShimmerWave>자소서 생성중...</TextShimmerWave>
+        </div>
+      )}
     </div>
   );
 }
