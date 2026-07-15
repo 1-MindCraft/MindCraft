@@ -5,17 +5,17 @@ import com.mindcraft.backend.user.dto.UserSecurityDto;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 import java.io.IOException;
 import java.util.Map;
 
+@RequiredArgsConstructor
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
-    @Value("${frontend.url}")
-    private String FRONTEND_URL;
+    private final String frontendUrl;
 
     @Override
     public void onAuthenticationSuccess(
@@ -29,7 +29,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String accessToken = JWTUtil.generateToken(claims, 10);
         String refreshToken = JWTUtil.generateToken(claims, 24 * 60);
 
-        String redirectUrl = FRONTEND_URL
+        String redirectUrl = frontendUrl
                 + "?accessToken=" + accessToken
                 + "&refreshToken=" + refreshToken;
 

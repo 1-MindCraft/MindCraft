@@ -6,6 +6,7 @@ import com.mindcraft.backend.global.security.repository.HttpCookieOAuth2Authoriz
 import com.mindcraft.backend.global.security.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -33,6 +34,9 @@ import java.util.Map;
 public class CustomSecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
+
+    @Value("${frontend.url}")
+    private String frontendUrl;
 
     // security filter chain - 인증/인가 설정
     @Bean
@@ -82,7 +86,7 @@ public class CustomSecurityConfig {
                 .authorizationEndpoint(endpoint -> endpoint
                         .authorizationRequestRepository(new HttpCookieOAuth2AuthorizationRequestRepository()))
                 .userInfoEndpoint(endpoint -> endpoint.userService(customOAuth2UserService))
-                .successHandler(new OAuth2SuccessHandler())
+                .successHandler(new OAuth2SuccessHandler(frontendUrl))
                 .failureHandler(new OAuth2FailHandler())
         );
 
