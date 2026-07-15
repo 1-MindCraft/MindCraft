@@ -12,6 +12,16 @@ import useMindMapStore from '../../zustand/mindMapStore';
 import { useModal } from '../common/ModalProvider';
 import { useTheme } from '../../context/ThemeContext';
 import { TextShimmerWave } from '../loading-ui/text-shimmer-wave';
+// 추가된 부분 [2026-07-15]: 선택 노드의 하위(자손) 노드까지 색을 함께 바꾸기 위해
+// 이유: 부모 노드 선택 시 자식 노드 색까지 같이 변경(서브트리 색칠). 자손 id 수집에 사용
+import { getDescendantIds } from '../../utils/mindmapTree';
+
+// 노드 색상 프리셋
+// 이유: 팔레트 버튼 색. 어두운~중간 톤 위주 → 명도 올려도 글자 대비 유지
+const COLOR_PRESETS = [
+  '#2563eb', '#7c3aed', '#0d9488', '#dc2626',
+  '#ea580c', '#16a34a', '#db2777', '#4b5563',
+];
 
 function MindMapToolbar({
   isSaving,
@@ -33,8 +43,12 @@ function MindMapToolbar({
   const [extracting, setExtracting] = useState(false);
   const nodes = useMindMapStore((state) => state.nodes);
   const extractKeywords = useMindMapStore((state) => state.extractKeywords);
-  // 추가된 부분 [2026-07-15]: 전체 삭제 액션
+
+  // 전체 삭제 액션
   const clearNodes = useMindMapStore((state) => state.clearNodes);
+
+  // 노드 색깔
+  const setNodesColor = useMindMapStore((state) => state.setNodesColor);
 
   // 실제 캔버스 확대/축소를 제어 (ReactFlowProvider 하위에서만 동작)
   const { zoomIn, zoomOut, fitView } = useReactFlow();
@@ -86,6 +100,25 @@ function MindMapToolbar({
     );
     if (!ok) return;
     clearNodes();
+  };
+
+  // 수정된 부분 [2026-07-15]: 팔레트에서 색 클릭 → 선택된 노드 + 그 하위(자손) 전체에 적용
+  // 이유: 부모 노드 하나만 골라도 자식 노드 색까지 함께 바뀌게 하려는 요청(서브트리 색칠).
+  //       getDescendantIds로 각 선택 노드의 자손 id를 모으고, Set으로 중복 제거해서 한 번에 적용.
+  //       색은 동일하게 심고 명도는 각 노드의 depth에 따라 자동 계산되므로 부모 진하고 자식 연한 그라데이션이 됨
+  const handleColorPick = async (color) => {
+    const selected = nodes.filter((n) => n.selected);
+    if (selected.length === 0) {
+      await alert('색을 바꿀 노드를 먼저 선택해주세요.\n(선택 도구로 노드를 클릭/드래그)');
+      return;
+    }
+    // 선택된 노드 + 각 노드의 모든 자손 id를 합침 (중복은 Set으로 제거)
+    const targetIds = new Set();
+    selected.forEach((n) => {
+      targetIds.add(n.id);
+      getDescendantIds(n.id, nodes).forEach((cid) => targetIds.add(cid));
+    });
+    setNodesColor([...targetIds], color);
   };
 
   return (
@@ -197,6 +230,19 @@ function MindMapToolbar({
           이유: 기존 MindMapHeader.jsx 헤더에 있던 두 버튼을 툴바 오른쪽으로 옮김.
           전체 삭제는 파괴적 동작이라 divider로 주요 액션과 분리 */}
       <div className="mm-toolbar-right">
+        {/* 색상 팔레트 - 선택 노드 + 하위 노드에 색 적용 */}
+        <div className="mm-color-palette">
+          {COLOR_PRESETS.map((c) => (
+            <button
+              key={c}
+              className="mm-color-swatch"
+              style={{ background: c }}
+              onClick={() => handleColorPick(c)}
+              title="이 색으로 변경"
+            />
+          ))}
+        </div>
+        <div className="mm-toolbar-divider" />
         <button className="mm-btn-clear" onClick={handleClearAll} title="루트 제외 전체 삭제">
           🗑 전체 삭제
         </button>

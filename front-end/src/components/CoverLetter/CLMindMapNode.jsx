@@ -4,6 +4,9 @@
 // 별도의 읽기 전용 노드 컴포넌트가 필요했습니다.
 import React from 'react';
 import { Handle, Position } from '@xyflow/react';
+
+//   유틸을 공유하므로 편집/자소서 두 화면의 색 규칙이 항상 일치함
+import { nodeBackground, nodeTextColor } from '../../utils/nodeColor';
 import '../MindMap/MindMapNode.css';
 
 
@@ -30,16 +33,31 @@ function CLMindMapNode({ data }) {
     // 추가: RAG 하이라이트 (selected → 네온, context → 보통, dimmed → 흐리게)
   const highlightClass = data.highlight ? `hl-${data.highlight}` : '';
 
+  const customStyle = data.color
+    ? {
+        background: nodeBackground(data.color, data.depth),
+        color: nodeTextColor(data.color, data.depth),
+      }
+    : undefined;
+
   return (
     // className 조합은 편집 화면의 MindMapNode.jsx와 동일하게 맞춰서,
     // 같은 MindMapNode.css를 그대로 재사용해도 스타일이 어긋나지 않게 함
-    <div className={`mm-map-node ${depthClass} ${isRoot ? 'is-root' : ''} ${highlightClass}`}>
+    <div
+      className={`mm-map-node ${depthClass} ${isRoot ? 'is-root' : ''} ${highlightClass}`}
+      style={customStyle ? { background: customStyle.background } : undefined}
+    >
       {/* Handle: React Flow가 엣지(부모-자식 연결선)를 그리기 위한 연결점.
           opacity: 0으로 화면엔 안 보이게 하되, 엣지 계산 자체는 정상 동작하게 둠 */}
       <Handle type="target" position={Position.Top} style={{ opacity: 0 }} />
 
       {/* 라벨만 표시 — 클릭/더블클릭 핸들러 자체가 없어서 눌러도 아무 일도 안 일어남 */}
-      <div className="mm-node-label">{data.label}</div>
+      <div
+        className="mm-node-label"
+        style={customStyle ? { color: customStyle.color } : undefined}
+      >
+        {data.label}
+      </div>
 
       <Handle type="source" position={Position.Bottom} style={{ opacity: 0 }} />
     </div>

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { useNodeActions } from '../../hooks/useNodeActions';
+import { nodeBackground, nodeTextColor } from '../../utils/nodeColor';
 import './MindMapNode.css';
 
 const MindMapNode = (props) => {
@@ -9,6 +10,12 @@ const MindMapNode = (props) => {
   const [isEditing, setIsEditing] = useState(false);
   const [labelDraft, setLabelDraft] = useState(data.label);
   const inputRef = useRef(null);
+  const customStyle = data.color
+  ? {
+      background: nodeBackground(data.color, data.depth),
+      color: nodeTextColor(data.color, data.depth),
+    }
+  : undefined;
 
   // 편집 모드로 들어가는 순간(더블클릭) input에 실제로 포커스를 줌
   // (이게 없으면 input은 화면에 보이기만 하고, 실제 키보드 입력은 다른 곳으로 감)
@@ -42,6 +49,7 @@ const MindMapNode = (props) => {
   return (
     <div
       className={`mm-map-node ${depthClass} ${isRoot ? 'is-root' : ''} ${selected ? 'selected' : ''}`}
+      style={customStyle ? { background: customStyle.background } : undefined}
     >
       <Handle
         type="target"
@@ -61,7 +69,11 @@ const MindMapNode = (props) => {
           className="mm-node-input nodrag"
         />
       ) : (
-        <div onDoubleClick={startEditing} className="mm-node-label">
+        <div
+          onDoubleClick={startEditing}
+          className="mm-node-label"
+          style={customStyle ? { color: customStyle.color } : undefined}
+        >
           {data.label}
         </div>
       )}
@@ -93,5 +105,7 @@ const MindMapNode = (props) => {
     </div>
   );
 };
+
+
 
 export default MindMapNode;

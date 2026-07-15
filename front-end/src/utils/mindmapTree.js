@@ -1,3 +1,5 @@
+import { nodeBackground } from './nodeColor';
+
 // 마인드맵 노드 트리 순회 함수
 // 자손 id 배열 구하기
 export const getDescendantIds = (id, nodes) => {
@@ -15,11 +17,21 @@ export const getDescendantIds = (id, nodes) => {
 export const buildEdgesFromNodes = (nodes) => {
   return nodes
     .filter((node) => node.data?.parentId)
-    .map((node) => ({
-      id: `${node.data.parentId}-${node.id}`,
-      source: node.data.parentId,
-      target: node.id,
-    }));
+    .map((node) => {
+      // 엣지 색 = 자식(타겟) 노드의 색
+      // 이유: 노드와 그 노드로 들어오는 연결선을 같은 색으로 -> 색 바꿔도 연결 파악 쉬움
+      // 노드 배경색과 똑같은 규칙으로 계산해서 색을 맞춤
+      const color = node.data?.color;
+      const stroke = color ? nodeBackground(color, node.data?.depth ?? 0) : null;
+
+      return {
+        id: `${node.data.parentId}-${node.id}`,
+        source: node.data.parentId,
+        target: node.id,
+        // color 있을 때만 style 추가, 없으면 React Flow 기본 회색 선 유지
+        ...(stroke ? { style: { stroke, strokeWidth: 2 } } : {}),
+      };
+    });
 };
 
 // flat 노드 배열(parentId 기반)을 사이드바에서 쓰는 부모-자식 중첩 트리
