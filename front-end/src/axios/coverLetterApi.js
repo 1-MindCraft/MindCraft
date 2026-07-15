@@ -46,3 +46,10 @@ export const exportCoverLetterAsDocx = async (coverLetterId) => {
     });
     return res;
 };
+
+// 2026-07-14 추가된 부분: 선택된 자소서 마스터 삭제 API 호출
+// 이유: 자소서 마스터 화면에서 현재 선택된 마스터만 삭제하기 위해 기존 DELETE /coverletters/{id}를 호출함
+export const deleteCoverLetter = async (coverLetterId) => {
+    const res = await jwtAxios.delete(`${ApiURL}/coverletters/${coverLetterId}`);
+    return res.data;
+};

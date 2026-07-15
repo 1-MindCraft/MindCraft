@@ -290,11 +290,64 @@
   color: #aaa;
   line-height: 1.5;
 }
-.cl-draft-total {
-  font-size: 0.75rem;
-  color: #888;
-  white-space: nowrap;
+/* 2026-07-14 수정된 부분: 기존 총 글자 수 스타일을 공통 케밥 삭제 메뉴 스타일로 교체
+   이유: 마스터 화면과 문항 편집 화면에서 현재 선택된 항목만 삭제하는 동일한 UI를 사용하기 위해 필요함 */
+.cl-item-menu {
+  position: relative;
   flex-shrink: 0;
+}
+.cl-item-kebab-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #666;
+  font-family: inherit;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.cl-item-kebab-btn:hover {
+  background: #f5f3ff;
+  color: #4f46d8;
+}
+.cl-item-kebab-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+.cl-item-menu-popover {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 50;
+  min-width: 150px;
+  padding: 0.35rem;
+  border: 1px solid #e8e4f8;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(25, 20, 60, 0.14);
+}
+.cl-item-delete-btn {
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #d64545;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.cl-item-delete-btn:hover {
+  background: #fff1f1;
+}
+.cl-item-delete-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .cl-draft-body {
@@ -425,6 +478,18 @@
   gap: 0.4rem;
   max-width: 100%;
   margin: 0 auto;
+}
+/* 2026-07-15 추가된 부분: 자소서 마스터 폼의 제목 라벨과 케밥 메뉴를 한 줄에 배치
+   이유: 케밥 메뉴를 폼 내부의 "제목" 바로 옆에 위치시키기 위함 */
+.cl-master-title-field-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: fit-content;
+  margin-top: 0.6rem;
+}
+.cl-master-title-field-row .cl-master-label {
+  margin-top: 0;
 }
 .cl-master-label {
   font-size: 0.9rem;
@@ -1031,10 +1096,29 @@
   color: #e8e6f5;
 }
 [data-theme='dark'] .cl-draft-hint,
-[data-theme='dark'] .cl-draft-total,
 [data-theme='dark'] .cl-settings-sub,
 [data-theme='dark'] .cl-setting-desc {
   color: #9694ac;
+}
+
+/* 2026-07-14 추가된 부분: 케밥 삭제 메뉴 다크 모드 호환 */
+[data-theme='dark'] .cl-item-kebab-btn {
+  color: #c8c5d8;
+}
+[data-theme='dark'] .cl-item-kebab-btn:hover {
+  background: #2c2a4d;
+  color: #b8b1ff;
+}
+[data-theme='dark'] .cl-item-menu-popover {
+  border-color: #3a3a55;
+  background: #242435;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+[data-theme='dark'] .cl-item-delete-btn {
+  color: #ff8d8d;
+}
+[data-theme='dark'] .cl-item-delete-btn:hover {
+  background: #3a252d;
 }
 [data-theme='dark'] .cl-section-list {
   border-color: #2f2f45;
@@ -1252,4 +1336,9 @@
 }
 .cl-master-goedit:hover {
   background: #ede9ff;
+}
+
+.cl-master-goedit:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }

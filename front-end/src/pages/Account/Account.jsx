@@ -79,12 +79,20 @@ function AccountPage() {
   //   const handleNameEditSubmit = async () => { ... await updateMyInfo({ name: trimmed }); ... };
   //   const handlePasswordChangeSubmit = async () => { ... await updateMyInfo({ password: newPassword, currentPassword }); ... };
   // after:
-  // 추가된 부분: 정보 수정 모달 열림 여부
-  const [infoModalOpen, setInfoModalOpen] = useState(false);
+  // 수정된 부분 [2026-07-14]: 정보 수정 모달(하나로 통합) 대신 이름 변경 모달 / 비밀번호 변경 모달을 각각 분리
+  // before:
+  //   const [infoModalOpen, setInfoModalOpen] = useState(false);
+  //   const openInfoModal = () => setInfoModalOpen(true);
+  //   const closeInfoModal = () => setInfoModalOpen(false);
+  // after:
+  // 추가된 부분 [2026-07-14]: 이름 변경 모달 / 비밀번호 변경 모달을 각각 따로 열고 닫음
+  const [nameModalOpen, setNameModalOpen] = useState(false);
+  const openNameModal = () => setNameModalOpen(true);
+  const closeNameModal = () => setNameModalOpen(false);
 
-  // 추가된 부분: 정보 수정 모달 열기/닫기 (지금은 빈 모달이라 입력값 초기화할 게 없음)
-  const openInfoModal = () => setInfoModalOpen(true);
-  const closeInfoModal = () => setInfoModalOpen(false);
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const openPasswordModal = () => setPasswordModalOpen(true);
+  const closePasswordModal = () => setPasswordModalOpen(false);
 
   // 추가된 부분: 이름 변경 섹션 입력값
   const [nameEditValue, setNameEditValue] = useState('');
@@ -103,7 +111,10 @@ function AccountPage() {
     }
 
     try {
-      const rdata = await updateMyInfo({ name: trimmed });
+      const rdata = await updateMyInfo({
+        name: trimmed,
+        currentPassword: nameEditPassword,
+      });
       setMyInfo((prev) => ({ ...prev, name: rdata.name }));
       updateLoginName?.(rdata.name);
       setNameEditValue('');
@@ -245,6 +256,12 @@ function AccountPage() {
                 <div className="account-field-label">이름</div>
                 <div className="account-field-row">
                   <span className="account-field-value">{myInfo.name}</span>
+                  {/* 수정된 부분 [2026-07-14]: [ 이름 변경 ] 버튼 재배치 — 이름 필드 옆
+                      before: <span>{myInfo.name}</span> (버튼 없음, 정보 수정 버튼이 비밀번호 밑에 있었음)
+                      after: */}
+                  <button className="account-field-btn" onClick={openNameModal}>
+                    이름 변경
+                  </button>
                 </div>
               </div>
 
@@ -276,14 +293,11 @@ function AccountPage() {
                       <span className="account-field-value account-field-value--muted">
                         ••••••••
                       </span>
-                    </div>
-                  </div>
-
-                  {/* 추가된 부분: [ 정보 수정 ] 버튼 — 비밀번호 항목 바로 아래 신설 */}
-                  <div className="account-field">
-                    <div className="account-field-row">
-                      <button className="account-field-btn" onClick={openInfoModal}>
-                        정보 수정
+                      {/* 수정된 부분 [2026-07-14]: [ 정보 수정 ] 버튼을 [ 비밀번호 변경 ] 버튼으로 교체하고 비밀번호 필드 옆으로 재배치
+                          before: <span>••••••••</span> (버튼 없음, [정보 수정]은 이 필드 아래 별도 블록에 있었음)
+                          after: */}
+                      <button className="account-field-btn" onClick={openPasswordModal}>
+                        비밀번호 변경
                       </button>
                     </div>
                   </div>
@@ -346,21 +360,16 @@ function AccountPage() {
         </div>
       </div>
 
-      {/* 추가된 부분: 정보 수정 모달 (로그인 모달과 같은 Modal 컴포넌트 재사용) */}
-      {/* 수정된 부분: 모달 안 내용(이름 변경/비밀번호 변경 두 섹션)을 전부 제거하고 빈 모달만 남김
-          이유: 버튼 + 빈 모달이 열리는 것까지만 부탁하신 거라, 입력창/제출 버튼은 아직 안 넣음
+      {/* 수정된 부분 [2026-07-14]: 정보 수정 모달(하나, 안에 두 섹션) → 이름 변경 모달 / 비밀번호 변경 모달(각각 독립)로 분리
           before:
-            <Modal ...>
-              이름 변경 섹션 — input(이름), input(비밀번호 확인), button
-              비밀번호 변경 섹션 — input(새 비밀번호), input(현재 비밀번호), input(비밀번호 확인), button
-              공통 [ 취소 ] 버튼
+            <Modal open={infoModalOpen} title="정보 수정">
+              이름 변경 섹션...
+              구분선
+              비밀번호 변경 섹션...
             </Modal>
           after: */}
-      <Modal open={infoModalOpen} onClose={closeInfoModal} title="정보 수정">
-        {/* 이름 변경 섹션 */}
-        <div className="account-field-label" style={{ marginBottom: '0.4rem' }}>
-          이름 변경
-        </div>
+      {/* 추가된 부분 [2026-07-14]: 이름 변경 모달 (기존 정보 수정 모달에서 이름 변경 섹션만 분리) */}
+      <Modal open={nameModalOpen} onClose={closeNameModal} title="이름 변경">
         <input
           className="modal-input"
           style={{ marginTop: 0 }}
@@ -383,13 +392,10 @@ function AccountPage() {
         >
           이름 변경
         </button>
+      </Modal>
 
-        <div className="account-field-divider" style={{ margin: '1.2rem 0' }} />
-
-        {/* 비밀번호 변경 섹션 */}
-        <div className="account-field-label" style={{ marginBottom: '0.4rem' }}>
-          비밀번호 변경
-        </div>
+      {/* 추가된 부분 [2026-07-14]: 비밀번호 변경 모달 (기존 정보 수정 모달에서 비밀번호 변경 섹션만 분리) */}
+      <Modal open={passwordModalOpen} onClose={closePasswordModal} title="비밀번호 변경">
         <input
           type="password"
           className="modal-input"

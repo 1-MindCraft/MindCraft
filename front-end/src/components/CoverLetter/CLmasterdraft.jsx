@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 // masters: [{ id, title, companyName, companyIdeal, jobDescription, saved }]
 //   - id > 0 이면 이미 백엔드에 저장된 실제 자소서 마스터 (saved: true)
@@ -18,9 +18,48 @@ function CLMasterDraft({
   onSubmit,
   saving,
   onGoToEdit,
+  // 2026-07-14 추가된 부분: 현재 선택된 자소서 마스터 삭제 관련 prop
+  // 이유: 마스터 화면의 케밥 메뉴는 현재 보고 있는 마스터 하나만 삭제해야 함
+  onDeleteMaster,
+  deletingMaster = false,
 }) {
   const selectedIndex = masters.findIndex((m) => m.id === selectedId);
   const selected = masters[selectedIndex];
+
+  // 2026-07-14 추가된 부분: 자소서 마스터 삭제 케밥 메뉴 상태
+  // 이유: 현재 선택된 마스터를 삭제하는 작은 메뉴를 헤더 오른쪽에 표시하기 위해 필요함
+  const [isMasterMenuOpen, setIsMasterMenuOpen] = useState(false);
+  const masterMenuRef = useRef(null);
+
+  useEffect(() => {
+    if (!isMasterMenuOpen) return;
+
+    const handlePointerDown = (event) => {
+      if (!masterMenuRef.current?.contains(event.target)) {
+        setIsMasterMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setIsMasterMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isMasterMenuOpen]);
+
+  const handleDeleteMasterClick = () => {
+    if (!selected || deletingMaster || saving) return;
+    setIsMasterMenuOpen(false);
+    onDeleteMaster?.();
+  };
 
   return (
     <div className="cl-draft">
@@ -31,6 +70,36 @@ function CLMasterDraft({
           <div className="cl-draft-hint">
             지원할 회사마다 자소서 마스터를 하나씩 만들어서 관리할 수 있어요.
           </div>
+        </div>
+
+        {/* 2026-07-14 추가된 부분: 현재 선택된 자소서 마스터 삭제 케밥 메뉴
+            이유: 마스터 화면에서는 선택된 마스터 하나만 삭제하고 문항 삭제와 구분하기 위해 추가함 */}
+        <div className="cl-item-menu" ref={masterMenuRef}>
+          <button
+            type="button"
+            className="cl-item-kebab-btn"
+            onClick={() => setIsMasterMenuOpen((prev) => !prev)}
+            disabled={!selected || deletingMaster || saving}
+            aria-label="자소서 마스터 메뉴 열기"
+            aria-haspopup="menu"
+            aria-expanded={isMasterMenuOpen}
+          >
+            ⋮
+          </button>
+
+          {isMasterMenuOpen && selected && (
+            <div className="cl-item-menu-popover" role="menu">
+              <button
+                type="button"
+                className="cl-item-delete-btn"
+                onClick={handleDeleteMasterClick}
+                disabled={deletingMaster || saving}
+                role="menuitem"
+              >
+                {deletingMaster ? '삭제 중...' : '자소서 마스터 삭제'}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -123,7 +192,7 @@ function CLMasterDraft({
                 <button
                   className="cl-master-submit"
                   onClick={onSubmit}
-                  disabled={saving}
+                  disabled={saving || deletingMaster}
                 >
                   {saving
                     ? '저장 중...'
@@ -132,7 +201,11 @@ function CLMasterDraft({
                       : '생성하기'}
                 </button>
                 {selected.saved && (
-                  <button className="cl-master-goedit" onClick={onGoToEdit}>
+                  <button
+                    className="cl-master-goedit"
+                    onClick={onGoToEdit}
+                    disabled={deletingMaster}
+                  >
                     문항 편집하기 →
                   </button>
                 )}
