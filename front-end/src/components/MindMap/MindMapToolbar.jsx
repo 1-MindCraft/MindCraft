@@ -202,7 +202,7 @@ function MindMapToolbar({
         (기존 MindMapHeader.jsx에 있던 것을 그대로 옮겨옴) */}
     {extracting && (
       <div className="mm-extracting-overlay">
-        <TextShimmerWave>Extracting</TextShimmerWave>
+        <TextShimmerWave>키워드 추출중...</TextShimmerWave>
       </div>
     )}
     </>

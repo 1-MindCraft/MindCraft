@@ -26,7 +26,12 @@ function FeatureSection({
     <section
       className={sectionClassName}
       id={id}
-      style={sectionClassName === 'section' ? { background: '#fff' } : undefined}
+      // 삭제된 부분 [2026-07-15]: sectionClassName === 'section'일 때 style={{ background: '#fff' }} 적용하던 로직 제거
+      // 이유: 인라인 스타일로 흰색이 하드코딩돼 있어서, 다크모드에서 두 번째 FeatureSection(AI 이력서 생성)만
+      // 계속 흰색으로 남아 위아래 어두운 섹션들과 "흑백흑백" 번갈아 보이는 원인이었음.
+      // 제거하면 부모(.mindcraft-page)의 배경을 그대로 물려받아서 라이트/다크 모드 둘 다 자연스럽게 어울림
+      // before: style={sectionClassName === 'section' ? { background: '#fff' } : undefined}
+      // after: (제거됨)
     >
       <div className="section-label">{label}</div>
       <h2 className="section-title">{title}</h2>
