@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { getMindMap, saveMindMap as saveMindMapApi } from '../axios/mindMapApi';
+import { getMindMap, saveMindMap as saveMindMapApi, extractKeywords as extractKeywordsApi } from '../axios/mindMapApi';
 
 const useMindMapStore = create((set, get) => ({
   mindMapId: null,
@@ -43,6 +43,33 @@ const useMindMapStore = create((set, get) => ({
       return true;
     } catch (error) {
       console.log('save MindMap 실패: ', error.response?.data || error);
+      throw error;
+    }
+  },
+
+  // 키워드 추출 (AI) — 전체 노드를 보내고 노드별 keywords를 받아 주입
+  extractKeywords: async () => {
+    const { nodes } = get();
+    try {
+      const rdata = await extractKeywordsApi(nodes);
+
+      // id로 매칭해서 각 노드의 data.keywords에 주입
+      const keywordMap = new Map(
+        (rdata.nodes || []).map((n) => [n.id, n.keywords])
+      );
+
+      set((state) => ({
+        nodes: state.nodes.map((node) => {
+          const keywords = keywordMap.get(node.id);
+          return keywords
+            ? { ...node, data: { ...node.data, keywords } }
+            : node;
+        }),
+      }));
+
+      return true;
+    } catch (error) {
+      console.log('키워드 추출 실패: ', error.response?.data || error);
       throw error;
     }
   },

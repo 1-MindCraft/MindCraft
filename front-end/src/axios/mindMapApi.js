@@ -51,4 +51,10 @@ const saveMindMap = async (mindMapId, title, nodes) => {
   return response.data;
 };
 
+// 추가: 마인드맵 노드 키워드 추출 (AI)
+export const extractKeywords = async (nodes) => {
+    const res = await jwtAxios.post(`${ApiURL}/mindmaps/keywords`, { nodes });
+    return res.data;   
+};
+
 export { getMindMap, saveMindMap };

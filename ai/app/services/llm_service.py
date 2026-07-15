@@ -19,6 +19,7 @@ from openai import (
 
 from app.core.config import settings
 from app.schemas.coverletter import LLMOutput
+from app.schemas.keyword import KeywordExtractResponse
 
 
 class LLMGenerationError(Exception):
@@ -91,4 +92,52 @@ def generate_section(system_prompt: str, user_prompt: str) -> LLMOutput:
         raise LLMGenerationError(f"모델이 응답을 거부했습니다: {message.refusal}")
 
     # message.parsed 는 이미 LLMOutput 인스턴스 (JSON 파싱/검증 완료 상태)
+    return message.parsed
+
+def extract_keywords_llm(system_prompt: str, user_prompt: str) -> KeywordExtractResponse:
+    """
+    마인드맵 노드별 키워드 추출.
+
+    Args:
+        system_prompt: 키워드 추출 규칙 (개수, 성격 등)
+        user_prompt:   마인드맵 노드 트리 텍스트
+
+    Returns:
+        KeywordExtractResponse: { nodes: [{id, keywords}] }
+
+    Raises:
+        LLMGenerationError: 생성 실패 (에러 처리는 generate_section과 동일)
+    """
+    try:
+        completion = client.chat.completions.parse(
+            model=settings.LLM_MODEL,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            response_format=KeywordExtractResponse,
+        )
+    except AuthenticationError as e:
+        raise LLMGenerationError("OpenAI 인증 실패: API 키를 확인하세요.") from e
+
+    except NotFoundError as e:
+        raise LLMGenerationError(f"모델을 찾을 수 없습니다: {settings.LLM_MODEL}") from e
+
+    except LengthFinishReasonError as e:
+        raise LLMGenerationError("생성 길이 초과로 응답이 잘렸습니다.") from e
+
+    except RateLimitError as e:
+        raise LLMGenerationError("요청 한도를 초과했습니다. 잠시 후 다시 시도하세요.") from e
+
+    except APIConnectionError as e:
+        raise LLMGenerationError("OpenAI 서버 연결에 실패했습니다.") from e
+
+    except APIError as e:
+        raise LLMGenerationError(f"OpenAI API 오류: {e}") from e
+
+    message = completion.choices[0].message
+
+    if message.refusal:
+        raise LLMGenerationError(f"모델이 응답을 거부했습니다: {message.refusal}")
+
     return message.parsed

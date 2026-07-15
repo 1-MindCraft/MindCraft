@@ -5,17 +5,18 @@ import EXPORT_SRC from '../../assets/export.png';
 import ProfileDropdown from '../common/ProfileDropdown';
 import AppHeader from '../common/AppHeader';
 import useMindMapStore from '../../zustand/mindMapStore';
+import { useModal } from '../common/ModalProvider';
 
-// [수정됨 | 2026-07-10]
-// userName prop을 제거했습니다.
-// 수정 이유: 프로필 이름은 ProfileDropdown이 Zustand loginState에서 직접 조회하므로
-// Header에서 사용자 이름을 전달할 필요가 없습니다.
 function MindMapHeader() {
   const navigate = useNavigate();
+  const { alert } = useModal();
   const [isEditing, setIsEditing] = useState(false);
+  const [extracting, setExtracting] = useState(false);
   const inputRef = useRef(null);
   const title = useMindMapStore((state) => state.title);
   const setTitle = useMindMapStore((state) => state.setTitle);
+  const nodes = useMindMapStore((state) => state.nodes);
+  const extractKeywords = useMindMapStore((state) => state.extractKeywords);
 
   useEffect(() => {
     if (isEditing) {
@@ -34,6 +35,25 @@ function MindMapHeader() {
     if (e.key === 'Escape') {
       setTitle('이름없는 마인드맵');
       setIsEditing(false);
+    }
+  };
+
+    const handleExtractKeywords = async () => {
+    if (extracting) return;
+
+    if (nodes.length === 0) {
+      await alert('마인드맵 노드가 없습니다. 먼저 마인드맵을 작성해주세요.');
+      return;
+    }
+
+    setExtracting(true);
+    try {
+      await extractKeywords();
+      await alert('키워드 추출이 완료되었습니다.\n노드를 클릭하면 키워드를 볼 수 있어요.');
+    } catch {
+      await alert('키워드 추출 중 오류가 발생했습니다.');
+    } finally {
+      setExtracting(false);
     }
   };
 
@@ -75,8 +95,12 @@ function MindMapHeader() {
       }
       right={
         <div className="mm-header-right">
-          <button className="mm-btn-keyword">
-            <span>✦</span> 키워드 추출
+          <button
+            className="mm-btn-keyword"
+            onClick={handleExtractKeywords}
+            disabled={extracting}
+          >
+            <span>✦</span> {extracting ? '추출 중...' : '키워드 추출'}
           </button>
           <button className="mm-btn-export" onClick={() => navigate('/coverletter')}>
             <img src={EXPORT_SRC} alt="생성하기" className="mm-header-btn-icon" />{' '}
