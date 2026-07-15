@@ -254,7 +254,13 @@ function CLDraft({
       {/* 하단: AI 생성 안내 */}
       <div className="cl-ai-notice">
         <span className="cl-ai-icon">✦</span>
-        <div>
+        {/* 수정된 부분 [2026-07-15]: className="cl-ai-notice-text" 추가
+            이유: 이 영역에 min-width가 없어서, .cl-draft 폭이 좁아질수록(마인드맵 패널 divider를
+            끌어서 넓힐 때 등) "AI가 생성한 초안입니다" 문구가 글자 단위로 뭉그러져 보이는 문제가 있었음.
+            className을 줘서 CoverLetter.css에서 min-width를 지정할 수 있게 함
+            before: <div>
+            after: */}
+        <div className="cl-ai-notice-text">
           <div className="cl-ai-notice-title">AI가 생성한 초안입니다</div>
           <div className="cl-ai-notice-sub">
             마인드맵의 구조와 내용을 기반으로 AI가 자기소개서 초안을 생성합니다.

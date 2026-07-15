@@ -648,16 +648,30 @@
   flex-shrink: 0;
   margin-top: 0.1rem;
 }
+/* 추가된 부분 [2026-07-15]: .cl-ai-notice-text
+   이유: 아이콘/시간 사이에 낀 가운데 영역이라 min-width가 없으면 .cl-draft 폭이
+   좁아질 때 이 영역부터 계속 줄어들어 텍스트가 글자 단위로 뭉그러졌음.
+   flex: 1로 남는 공간을 채우되, min-width로 최소 폭을 지정해서 그 이하로는
+   줄어들지 않게(대신 필요하면 줄바꿈만 되게) 함 */
+.cl-ai-notice-text {
+  flex: 1;
+  min-width: 220px;
+}
 .cl-ai-notice-title {
   font-size: 0.78rem;
   font-weight: 700;
   color: #1a1a2e;
   margin-bottom: 0.1rem;
+  /* 추가된 부분 [2026-07-15]: word-break: keep-all (이유: 다른 사이드바 텍스트와 동일하게
+     한글이 글자 단위로 줄바꿈되지 않고 어절 단위로만 줄바꿈되게 함) */
+  word-break: keep-all;
 }
 .cl-ai-notice-sub {
   font-size: 0.72rem;
   color: #888;
   line-height: 1.5;
+  /* 추가된 부분 [2026-07-15]: word-break: keep-all (이유는 .cl-ai-notice-title과 동일) */
+  word-break: keep-all;
 }
 .cl-ai-notice-time {
   font-size: 0.7rem;
