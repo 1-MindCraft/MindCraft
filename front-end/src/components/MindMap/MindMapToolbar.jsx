@@ -27,11 +27,14 @@ function MindMapToolbar({
   // 추가된 부분 [2026-07-15]: [ 키워드 추출 ] / [ 생성하기 ] 버튼에 필요한 훅/상태
   // 이유: 기존 MindMapHeader.jsx에 있던 것을 그대로 옮겨옴
   const navigate = useNavigate();
-  const { alert } = useModal();
+  // 수정된 부분 [2026-07-15]: confirm 추가 (전체 삭제 확인 모달용)
+  const { alert, confirm } = useModal();
   const { theme } = useTheme();
   const [extracting, setExtracting] = useState(false);
   const nodes = useMindMapStore((state) => state.nodes);
   const extractKeywords = useMindMapStore((state) => state.extractKeywords);
+  // 추가된 부분 [2026-07-15]: 전체 삭제 액션
+  const clearNodes = useMindMapStore((state) => state.clearNodes);
 
   // 실제 캔버스 확대/축소를 제어 (ReactFlowProvider 하위에서만 동작)
   const { zoomIn, zoomOut, fitView } = useReactFlow();
@@ -69,6 +72,20 @@ function MindMapToolbar({
       setExtracting(false);
       await alert('키워드 추출 중 오류가 발생했습니다.');
     }
+  };
+
+  // 추가된 부분 [2026-07-15]: [ 전체 삭제 ] 클릭 핸들러
+  // 이유: 루트를 제외한 모든 노드를 한 번에 삭제. 파괴적 동작이라 confirm으로 재확인
+  const handleClearAll = async () => {
+    if (nodes.length <= 1) {
+      await alert('삭제할 노드가 없습니다.');
+      return;
+    }
+    const ok = await confirm(
+      `루트를 제외한 모든 노드가 삭제됩니다.\n(총 ${nodes.length - 1}개)\n계속하시겠습니까?`
+    );
+    if (!ok) return;
+    clearNodes();
   };
 
   return (
@@ -176,9 +193,14 @@ function MindMapToolbar({
             이유: 아직 미완성 기능이라 보류 중이었는데, 나중에 추가하는 방식으로 논의를 결정해서 삭제 */}
       </div>
 
-      {/* 추가된 부분 [2026-07-15]: 오른쪽 고정 — [ 키워드 추출 ] / [ 생성하기 ]
-          이유: 기존 MindMapHeader.jsx 헤더에 있던 두 버튼을 툴바 오른쪽으로 옮김 */}
+      {/* 추가된 부분 [2026-07-15]: 오른쪽 고정 — [ 전체 삭제 ] / [ 키워드 추출 ] / [ 생성하기 ]
+          이유: 기존 MindMapHeader.jsx 헤더에 있던 두 버튼을 툴바 오른쪽으로 옮김.
+          전체 삭제는 파괴적 동작이라 divider로 주요 액션과 분리 */}
       <div className="mm-toolbar-right">
+        <button className="mm-btn-clear" onClick={handleClearAll} title="루트 제외 전체 삭제">
+          🗑 전체 삭제
+        </button>
+        <div className="mm-toolbar-divider" />
         <button
           className="mm-btn-keyword"
           onClick={handleExtractKeywords}
@@ -202,7 +224,7 @@ function MindMapToolbar({
         (기존 MindMapHeader.jsx에 있던 것을 그대로 옮겨옴) */}
     {extracting && (
       <div className="mm-extracting-overlay">
-        <TextShimmerWave>키워드 추출중...</TextShimmerWave>
+        <TextShimmerWave>AI가 키워드를 추출하고 있습니다!</TextShimmerWave>
       </div>
     )}
     </>
