@@ -126,7 +126,9 @@ function AccountPage() {
       await alert('이름 수정이 완료되었습니다.');
     } catch (error) {
       console.log('이름 수정 실패:', error.response?.data || error);
-      await alert(error.response?.data?.error || '이름 수정 중 오류가 발생했습니다.');
+      await alert(
+        error.response?.data?.error || '이름 수정 중 오류가 발생했습니다.'
+      );
     }
   };
 
@@ -207,7 +209,9 @@ function AccountPage() {
       navigate('/');
     } catch (error) {
       console.log('deleteMe 실패:', error.response?.data || error);
-      await alert(error.response?.data?.error || '비밀번호가 일치하지 않습니다.');
+      await alert(
+        error.response?.data?.error || '비밀번호가 일치하지 않습니다.'
+      );
     }
   };
 
