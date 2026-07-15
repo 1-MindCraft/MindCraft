@@ -2,6 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PENCIL_SRC from '../../assets/pencil.png';
 import EXPORT_SRC from '../../assets/export.png';
+// 추가된 부분 [2026-07-15]: 다크모드용 흰색 아이콘 import
+// 이유: 기존 pencil.png/export.png가 어두운 색이라 다크모드 배경에서 아이콘이 안 보이는
+// 문제가 있어서, 다크모드일 때는 흰색 버전 아이콘으로 바꿔 보여주기 위해 추가함
+import PENCIL_WHITE_SRC from '../../assets/pencil-white.png';
+import EXPORT_WHITE_SRC from '../../assets/export-white.png';
 import ProfileDropdown from '../common/ProfileDropdown';
 import AppHeader from '../common/AppHeader';
 import useMindMapStore from '../../zustand/mindMapStore';
@@ -10,10 +15,16 @@ import { useModal } from '../common/ModalProvider';
 // 이유: 자소서 편집화면의 [ 생성하기 ]와 동일하게, 키워드 추출 중에도 화면을 어둡게 하고
 // 중앙에 웨이브 반짝임 애니메이션을 보여달라는 요청
 import { TextShimmerWave } from '../loading-ui/text-shimmer-wave';
+// 추가된 부분 [2026-07-15]: 현재 테마(라이트/다크)를 알아내기 위한 useTheme 훅 import
+// 이유: 테마에 따라 아이콘 이미지를 다르게(라이트=어두운 아이콘, 다크=흰색 아이콘) 보여주려면
+// 현재 테마 값이 필요함
+import { useTheme } from '../../context/ThemeContext';
 
 function MindMapHeader() {
   const navigate = useNavigate();
   const { alert } = useModal();
+  // 추가된 부분 [2026-07-15]: 현재 테마 값
+  const { theme } = useTheme();
   const [isEditing, setIsEditing] = useState(false);
   const [extracting, setExtracting] = useState(false);
   const inputRef = useRef(null);
@@ -105,7 +116,15 @@ function MindMapHeader() {
             title="제목 수정"
             onClick={() => setIsEditing((prev) => !prev)}
           >
-            <img src={PENCIL_SRC} alt="편집" className="mm-header-icon" />
+            {/* 수정된 부분 [2026-07-15]: src를 테마에 따라 조건부로 선택
+                이유: 다크모드에서 연필 아이콘이 안 보이는 문제 수정
+                before: <img src={PENCIL_SRC} alt="편집" className="mm-header-icon" />
+                after: */}
+            <img
+              src={theme === 'dark' ? PENCIL_WHITE_SRC : PENCIL_SRC}
+              alt="편집"
+              className="mm-header-icon"
+            />
           </button>
         </div>
       }
@@ -119,7 +138,15 @@ function MindMapHeader() {
             <span>✦</span> {extracting ? '추출 중...' : '키워드 추출'}
           </button>
           <button className="mm-btn-export" onClick={() => navigate('/coverletter')}>
-            <img src={EXPORT_SRC} alt="생성하기" className="mm-header-btn-icon" />{' '}
+            {/* 수정된 부분 [2026-07-15]: src를 테마에 따라 조건부로 선택
+              이유: 다크모드에서 생성하기 버튼의 export 아이콘이 안 보이는 문제 수정
+              before: <img src={EXPORT_SRC} alt="생성하기" className="mm-header-btn-icon" />
+              after: */}
+          <img
+            src={theme === 'dark' ? EXPORT_WHITE_SRC : EXPORT_SRC}
+            alt="생성하기"
+            className="mm-header-btn-icon"
+          />{' '}
             생성하기
           </button>
           <ProfileDropdown />

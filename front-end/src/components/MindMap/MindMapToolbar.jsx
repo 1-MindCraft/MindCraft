@@ -49,7 +49,7 @@ function MindMapToolbar({
 
         {savedTime && !isSaving && (
           <span className="mm-toolbar-saved">
-            <span className="mm-save-icon">✓</span> 저장됨 {savedTime}
+            <span className="mm-save-icon">✓</span> 저장됨
           </span>
         )}
       </div>
