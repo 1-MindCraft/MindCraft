@@ -12,6 +12,25 @@ export const getDescendantIds = (id, nodes) => {
   );
 };
 
+// 새 자식 노드의 위치 계산
+// 부모의 기존 자식 수를 세서, 부모 아래에 좌우로 번갈아 펼쳐 배치함
+// (0번째=부모 바로 아래, 1번째=오른쪽, 2번째=왼쪽, 3번째=더 오른쪽...)
+export const getNewChildPosition = (parentId, parentPosition, nodes) => {
+  const siblingCount = nodes.filter((n) => n.data?.parentId === parentId).length;
+  const SPREAD = 220; // 형제 간 좌우 간격(px)
+  const DOWN = 180;   // 부모로부터 아래 거리(px)
+
+  // 순번을 좌우 번갈아 오프셋으로 변환: 0->0, 1->+1, 2->-1, 3->+2, 4->-2 ...
+  const step = Math.ceil(siblingCount / 2);
+  const dir = siblingCount % 2 === 0 ? 1 : -1;
+  const offsetX = siblingCount === 0 ? 0 : dir * step * SPREAD;
+
+  return {
+    x: parentPosition.x + offsetX,
+    y: parentPosition.y + DOWN,
+  };
+};
+
 // nodes(parentId 기반 flat 배열)로부터 React Flow 엣지를 파생시켜서 만듦
 // (엣지를 별도 state로 관리하지 않고 항상 nodes에서 계산 → nodes와 엣지가 어긋날 일이 없음)
 export const buildEdgesFromNodes = (nodes) => {
@@ -47,6 +66,8 @@ export const buildTreeFromNodes = (nodes) => {
       children: [],
     });
   });
+
+  
 
   const roots = [];
 

@@ -5,8 +5,11 @@
 import React from 'react';
 import { Handle, Position } from '@xyflow/react';
 
-//   유틸을 공유하므로 편집/자소서 두 화면의 색 규칙이 항상 일치함
-import { nodeBackground, nodeTextColor } from '../../utils/nodeColor';
+// 수정된 부분 [2026-07-16]: nodeBackground/nodeTextColor → nodeStyle/chipColors
+// 이유: 편집 화면 노드(MindMapNode.jsx)가 "테두리+틴트" 스타일(nodeStyle)로 바뀌었는데
+//       자소서 화면 노드만 옛날 "배경 꽉 채우기" 방식이라 두 화면 디자인이 달랐음.
+//       유틸을 동일하게 맞춰서 편집/자소서 스타일이 항상 일치하게 함
+import { nodeStyle, chipColors, DEFAULT_NODE_COLOR } from '../../utils/nodeColor';
 import '../MindMap/MindMapNode.css';
 
 
@@ -30,34 +33,41 @@ function CLMindMapNode({ data }) {
   // (MindMapNode.css에 정의된 것과 동일한 규칙 — 편집 화면과 색이 똑같이 보이게 하기 위함)
   const depthClass = data.depth <= 2 ? `depth-${data.depth}` : 'depth-default';
 
-    // 추가: RAG 하이라이트 (selected → 네온, context → 보통, dimmed → 흐리게)
+  // 추가: RAG 하이라이트 (selected → 네온, context → 보통, dimmed → 흐리게)
   const highlightClass = data.highlight ? `hl-${data.highlight}` : '';
 
-  const customStyle = data.color
-    ? {
-        background: nodeBackground(data.color, data.depth),
-        color: nodeTextColor(data.color, data.depth),
-      }
-    : undefined;
+  // 수정된 부분 [2026-07-16]: 편집 화면과 동일한 nodeStyle(테두리+틴트) 적용
+  // color 없으면 기존 depth 클래스 색으로 fallback
+  const customStyle = nodeStyle(data.color || DEFAULT_NODE_COLOR, data.depth);
 
   return (
     // className 조합은 편집 화면의 MindMapNode.jsx와 동일하게 맞춰서,
     // 같은 MindMapNode.css를 그대로 재사용해도 스타일이 어긋나지 않게 함
     <div
       className={`mm-map-node ${depthClass} ${isRoot ? 'is-root' : ''} ${highlightClass}`}
-      style={customStyle ? { background: customStyle.background } : undefined}
+      style={customStyle}
     >
       {/* Handle: React Flow가 엣지(부모-자식 연결선)를 그리기 위한 연결점.
           opacity: 0으로 화면엔 안 보이게 하되, 엣지 계산 자체는 정상 동작하게 둠 */}
       <Handle type="target" position={Position.Top} style={{ opacity: 0 }} />
 
       {/* 라벨만 표시 — 클릭/더블클릭 핸들러 자체가 없어서 눌러도 아무 일도 안 일어남 */}
-      <div
-        className="mm-node-label"
-        style={customStyle ? { color: customStyle.color } : undefined}
-      >
+      <div className="mm-node-label" style={{ color: customStyle.color }}>
         {data.label}
       </div>
+
+      {data.keywords?.length > 0 && (
+        <div className="mm-node-keywords">
+          {data.keywords.map((kw) => {
+            const chipStyle = chipColors(data.color || DEFAULT_NODE_COLOR, data.depth);
+            return (
+              <span key={kw} className="mm-node-keyword-chip" style={chipStyle}>
+                {kw}
+              </span>
+            );
+          })}
+        </div>
+      )}
 
       <Handle type="source" position={Position.Bottom} style={{ opacity: 0 }} />
     </div>

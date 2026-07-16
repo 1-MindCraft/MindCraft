@@ -27,6 +27,40 @@ export function nodeBackground(hex, depth) {
     return `hsl(${h}, ${s}%, ${bgL}%)`;
 }
 
+// 노드 스타일 — 배경은 연한 틴트, 테두리는 진한 색, 글자는 검/흰(모드 따라)
+// depth로 갈수록 배경은 더 하얘지고 테두리는 더 밝아짐 (부모 진하고 자식 연하게)
+// 색으로 꽉 채우지 않고 "연한 배경 + 진한 테두리"라 가독성 좋고 눈이 편함
+export function nodeStyle(hex, depth, isDark = false) {
+    const [h, s, l] = hexToHsl(hex);
+    const borderL = Math.min(l + depth * 11, 72);
+    const bgL = Math.min(89 + depth * 2.5, 97);
+    return {
+        background: isDark
+            ? `hsl(${h}, ${Math.max(s - 30, 12)}%, ${Math.max(20 - depth * 2, 12)}%)`
+            : `hsl(${h}, ${Math.max(s - 22, 15)}%, ${bgL}%)`,
+        border: `1.5px solid hsl(${h}, ${s}%, ${borderL}%)`,
+        color: nodeDefaultTextColor(isDark),  
+    };
+}
+
+export const DEFAULT_NODE_COLOR = '#2563eb';
+
+// 노드 기본 글자색
+// 다크모드 대응도 여기 고치면됨
+export function nodeDefaultTextColor(isDark = false) {
+    return isDark ? '#f1f5f9' : '#1f2937';
+}
+
+// 키워드 칩 색 — 배경은 아주 연하게(거의 흰색), 글자·테두리는 노드 색 계열
+// 이유: 칩이 노드 위에서 밝고 산뜻하게 떠 보이도록. 꽉 찬 색이 아니라 연한 배지 스타일
+export function chipColors(hex, depth) {
+    const [h, s, l] = hexToHsl(hex);
+    return {
+        background: `hsl(${h}, ${Math.max(s - 20, 15)}%, 96%)`,   // 거의 흰색(연한 틴트)
+        color: `hsl(${h}, ${s}%, 32%)`,                            // 글자는 진한 노드 색
+        border: `1px solid hsl(${h}, ${Math.max(s - 15, 20)}%, 85%)`, // 테두리 연하게
+    };
+}
 // 배경 밝기에 맞춘 글자색
 export function nodeTextColor(hex, depth) {
     const [h, s, l] = hexToHsl(hex);
