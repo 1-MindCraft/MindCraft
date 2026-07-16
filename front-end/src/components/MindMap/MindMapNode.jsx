@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { useNodeActions } from '../../hooks/useNodeActions';
+import { nodeStyle, chipColors, nodeDefaultTextColor, DEFAULT_NODE_COLOR } from '../../utils/nodeColor';
+
 import './MindMapNode.css';
 
 const MindMapNode = (props) => {
@@ -9,6 +11,7 @@ const MindMapNode = (props) => {
   const [isEditing, setIsEditing] = useState(false);
   const [labelDraft, setLabelDraft] = useState(data.label);
   const inputRef = useRef(null);
+  const customStyle = nodeStyle(data.color || DEFAULT_NODE_COLOR, data.depth);
 
   // 편집 모드로 들어가는 순간(더블클릭) input에 실제로 포커스를 줌
   // (이게 없으면 input은 화면에 보이기만 하고, 실제 키보드 입력은 다른 곳으로 감)
@@ -42,6 +45,7 @@ const MindMapNode = (props) => {
   return (
     <div
       className={`mm-map-node ${depthClass} ${isRoot ? 'is-root' : ''} ${selected ? 'selected' : ''}`}
+      style={customStyle}   // background + border + color 통째로
     >
       <Handle
         type="target"
@@ -57,11 +61,19 @@ const MindMapNode = (props) => {
           onBlur={finishEditing}
           onKeyDown={(e) => e.key === 'Enter' && finishEditing()}
           onFocus={(e) => e.target.select()}
-          style={{ width: `${Math.max(labelDraft.length * 1.8, 3)}ch` }}
+          maxLength={50}
           className="mm-node-input nodrag"
+          style={{
+            width: `${Math.max(labelDraft.length * 1.8, 3)}ch`,
+            color: customStyle.color,
+          }}
         />
       ) : (
-        <div onDoubleClick={startEditing} className="mm-node-label">
+        <div
+          onDoubleClick={startEditing}
+          className="mm-node-label"
+          style={{ color: customStyle.color }}
+        >
           {data.label}
         </div>
       )}
@@ -74,9 +86,14 @@ const MindMapNode = (props) => {
 
       {data.keywords?.length > 0 && (
         <div className="mm-node-keywords">
-          {data.keywords.map((kw) => (
-            <span key={kw} className="mm-node-keyword-chip">{kw}</span>
-          ))}
+          {data.keywords.map((kw) => {
+            const chipStyle = chipColors(data.color || DEFAULT_NODE_COLOR, data.depth);
+            return (
+              <span key={kw} className="mm-node-keyword-chip" style={chipStyle}>
+                {kw}
+              </span>
+            );
+          })}
         </div>
       )}
 
@@ -93,5 +110,7 @@ const MindMapNode = (props) => {
     </div>
   );
 };
+
+
 
 export default MindMapNode;

@@ -73,12 +73,25 @@ const useMindMapStore = create((set, get) => ({
       throw error;
     }
   },
-  // 전체 삭제 — 루트(parentId 없는 노드)만 남기고 전부 제거
-  // 엣지는 parentId에서 파생되므로 별도 처리 불필요
+  
+// 전체 삭제 — 루트만 남기고 하위 전부 제거
   clearNodes: () =>
     set((state) => {
-      const root = state.nodes.find((n) => n.data?.parentId == null);
+      const root = state.nodes.find((n) => n.data?.depth === 0);
       return { nodes: root ? [root] : [] };
+    }),
+
+  // 노드 색상 변경 — 대상 id들의 data.color 갱신
+  setNodesColor: (nodeIds, color) =>
+    set((state) => {
+      const idSet = new Set(nodeIds);
+      return {
+        nodes: state.nodes.map((node) =>
+          idSet.has(node.id)
+            ? { ...node, data: { ...node.data, color } }
+            : node
+        ),
+      };
     }),
 }));
 

@@ -572,6 +572,24 @@
   opacity: 1;
 }
 
+.mm-color-palette {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.mm-color-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  padding: 0;
+  transition: transform .12s;
+}
+.mm-color-swatch:hover {
+  transform: scale(1.15);
+}
+
 /* ─── 캔버스 우하단 저장 버튼 ─── */
 .mm-canvas-save-btn {
   position: absolute;
