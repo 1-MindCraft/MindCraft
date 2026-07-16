@@ -22,3 +22,14 @@ spring:
 
 jwt:
   secret: ${JWT_SECRET}
+
+
+ai:
+  server:
+    base-url: ${AI_SERVER_URL}
+
+server:
+  forward-headers-strategy: framework
+
+frontend:
+  url: ${FRONTEND_URL}

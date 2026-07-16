@@ -56,6 +56,31 @@ body {
   margin: 0;
 }
 
+/* 추가된 부분 [2026-07-15]: 다크모드 전용 스크롤바 스타일
+   이유: :root의 color-scheme: light dark 설정 때문에 브라우저가 상황에 따라 스크롤바를
+   밝은(흰색에 가까운) 색으로 그려서, 앱 자체 다크모드([data-theme='dark'])일 때 배경과
+   대비되어 튀어 보이는 문제가 있었음. 앱 다크모드일 때는 스크롤바를 어두운 톤으로
+   직접 지정해서 배경과 자연스럽게 어울리게 함 */
+[data-theme='dark'] {
+  /* Firefox용: thumb(막대) 색 / track(배경) 색 순서 */
+  scrollbar-color: #45455f #1c1c2b;
+}
+[data-theme='dark'] ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+[data-theme='dark'] ::-webkit-scrollbar-track {
+  background: #1c1c2b;
+}
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: #45455f;
+  border-radius: 8px;
+  border: 2px solid #1c1c2b;
+}
+[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
+  background: #565676;
+}
+
 #root {
   width: 100%;
   max-width: 100%;

@@ -53,3 +53,6 @@ logging:
 ai:
   server:
     base-url: http://localhost:8000
+
+frontend:
+  url: http://localhost:5173/oauth2/callback
