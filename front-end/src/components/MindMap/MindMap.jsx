@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { ReactFlow, Background, applyNodeChanges } from '@xyflow/react';
 import MindMapNode from './MindMapNode';
-import { getDescendantIds, buildEdgesFromNodes } from '../../utils/mindmapTree';
+import { getDescendantIds, buildEdgesFromNodes, getNewChildPosition } from '../../utils/mindmapTree';
 import { MindMapNodesProvider } from '../../context/MindMapNodesContext';
 import useMindMapStore from '../../zustand/mindMapStore';
 import { useModal } from '../common/ModalProvider';
@@ -19,6 +19,7 @@ export default function MindMap({ tool = 'drag' }) {
   const setNodes = useMindMapStore((state) => state.setNodes);
   const edges = useMemo(() => buildEdgesFromNodes(nodes), [nodes]);
   const fetchMindMap = useMindMapStore((state) => state.fetchMindMap);
+  const clearNodes = useMindMapStore((state) => state.clearNodes);
 
   const onNodesChange = useCallback(
     (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
@@ -33,27 +34,32 @@ export default function MindMap({ tool = 'drag' }) {
       if (!selectedNode) return;
 
       if (e.key === 'Enter') {
-        // 노드 추가
+        // 수정된 부분 [2026-07-16]: 고정 위치 대신 형제 수 기반 배치
         const newNode = {
           id: crypto.randomUUID(),
-          position: {
-            x: selectedNode.position.x + 100,
-            y: selectedNode.position.y + 200,
-          },
+          position: getNewChildPosition(selectedNode.id, selectedNode.position, nodes),
           data: {
             label: '내용을 입력하세요',
             parentId: selectedNode.id,
             depth: selectedNode.data.depth + 1,
+            ...(selectedNode.data.color ? { color: selectedNode.data.color } : {}),
           },
           type: 'mapNode',
         };
         setNodes((nds) => [...nds, newNode]);
       } else if (e.key === 'Delete' || e.key === 'Backspace') {
+        // 추가: 루트(depth 0) 삭제 시도 → 개별삭제 대신 "전체 삭제" 트리거
+        if (selectedNode.data.depth === 0) {
+          const ok = await confirm(
+            `최상위 노드는 삭제할 수 없습니다.\n대신 루트를 제외한 모든 노드를 삭제할까요?\n(총 ${nodes.length - 1}개)`
+          );
+          if (ok) clearNodes();  // 스토어 clearNodes 필요 — 아래 주의
+          return;
+        }
         const idsToDelete = [
           selectedNode.id,
           ...getDescendantIds(selectedNode.id, nodes),
         ];
-        // 수정된 부분: confirm() → await confirm() (커스텀 모달로 교체)
         const ok = await confirm(
           `이 노드를 삭제하시겠습니까?\n(총 ${idsToDelete.length} 개의 노드가 삭제됩니다.)`
         );
@@ -92,6 +98,7 @@ export default function MindMap({ tool = 'drag' }) {
               x: node.position.x + movedX,
               y: node.position.y + movedY,
             },
+
           };
         }
         return node;
@@ -109,7 +116,7 @@ export default function MindMap({ tool = 'drag' }) {
       }}
     >
       <MindMapNodesProvider setNodes={setNodes} nodes={nodes}>
-        <ReactFlow
+<ReactFlow
           nodesConnectable={false}
           nodes={nodes}
           edges={edges}
@@ -122,6 +129,7 @@ export default function MindMap({ tool = 'drag' }) {
           colorMode="light"
           panOnDrag={tool === 'select' ? [1, 2] : true}
           selectionOnDrag={tool === 'select'}
+          deleteKeyCode={null}
           defaultEdgeOptions={{
             style: { strokeWidth: 2 },
           }}

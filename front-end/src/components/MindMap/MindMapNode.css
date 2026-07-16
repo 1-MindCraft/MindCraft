@@ -174,21 +174,16 @@
   filter: grayscale(0.6);
 }
 
-/* ─── AI 키워드 툴팁 (호버 시 표시) ─── */
+/* ─── AI 키워드 칩 (추출하면 노드 안, 라벨 아래 상시 표시) ─── */
+/* 수정: 기존 호버 툴팁(absolute + opacity:0) → 노드 내부 flow에 항상 표시 */
 .mm-node-keywords {
-  position: absolute;
-  top: calc(100% + 8px);      /* 노드 바로 아래 */
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 4px;
-  white-space: nowrap;
-
-  /* 평소엔 숨김 */
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease;
-  z-index: 20;
+  margin-top: 7px;      /* 라벨과 간격 */
+  width: 100%;
+  /* absolute / opacity / hover 관련 전부 제거 */
 }
 
 /* 노드에 마우스 올리면 표시 */
@@ -197,11 +192,17 @@
 }
 
 .mm-node-keyword-chip {
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: #6366f1;
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 500;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  max-width: 100%;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #f8f9fb;          /* fallback: 연한 회색 */
+  color: #475569;               /* fallback: 진한 회색 글자 */
+  border: 1px solid #e5e7eb;    /* fallback 테두리 */
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-shadow: none;
 }
