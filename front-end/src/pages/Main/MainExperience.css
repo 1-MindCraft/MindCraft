@@ -222,13 +222,67 @@
 .mc-scroll-cue i { width: 28px; height: 38px; display: grid; place-items: center; border: 1px solid #ddd7ee; border-radius: 999px; color: var(--mc-violet); animation: mc-scroll-bounce 1.8s ease-in-out infinite; }
 
 .mc-scroll-story { --journey-progress: 0; position: relative; background: linear-gradient(180deg, #fcfcff 0, #faf9ff 36%, #f9fbff 68%, #f9fdfc 100%); isolation: isolate; }
+/* 수정된 부분 [2026-07-17]: mc-journey-line을 svg 자체가 아니라
+   "위치를 잡는 바깥 div"의 클래스로 사용하도록 변경, svg는 그 안을 꽉 채우는
+   자식으로 분리
+   이유(버그 리포트): "원이 다른 컴퓨터에서 타원으로 보임". 물결선(path)은
+   preserveAspectRatio="none"으로 계속 늘어나도 되지만, 원(글로우 점/이정표 점)은
+   HTML 밖으로 빼서 항상 정원으로 렌더링되게 해야 해서 컨테이너 역할을 하는
+   div가 하나 더 필요해짐. 위치/크기 규칙(inset, width, height, transform 등)
+   자체는 기존과 동일하게 유지함.
+   before: .mc-journey-line { ...; overflow: visible; }  (svg 자신에게 직접 적용)
+   after: 아래 .mc-journey-line(바깥 div) + .mc-journey-line > svg(안쪽, 새로 추가) */
 .mc-journey-line { position: absolute; inset: 0 50% auto auto; z-index: 0; width: min(1200px, 100%); height: 100%; transform: translateX(50%); overflow: visible; pointer-events: none; }
+.mc-journey-line > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .mc-path-ghost, .mc-path-progress { fill: none; vector-effect: non-scaling-stroke; }
 .mc-path-ghost { stroke: #e5e0f2; stroke-width: 2; stroke-dasharray: 4 11; }
 .mc-path-progress { stroke: url(#journeyGradient); stroke-width: 3.5; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: calc(1 - var(--journey-progress)); filter: drop-shadow(0 0 6px rgba(104, 83, 230, .35)); }
-.mc-path-glow { fill: #fff; stroke: #7459e8; stroke-width: 4; vector-effect: non-scaling-stroke; filter: url(#journeyGlow); transition: opacity .2s; }
-.mc-path-landmarks circle:nth-child(odd) { fill: #fff; stroke: #cfc6ef; stroke-width: 2; vector-effect: non-scaling-stroke; }
-.mc-path-landmarks circle:nth-child(even) { fill: var(--mc-violet); }
+/* 수정된 부분 [2026-07-17]: mc-path-glow / mc-path-landmarks를 SVG circle
+   스타일에서 일반 HTML 요소(정원 span) 스타일로 교체
+   이유: 위 JourneyLine 컴포넌트 설명과 동일 — preserveAspectRatio="none"에 의한
+   타원 왜곡을 근본적으로 없애기 위해 원은 SVG 좌표계 밖에서 고정 px 크기로 그림.
+   left/top은 JS(useScrollJourney)와 JSX(랜드마크 3개)에서 퍼센트로 지정하고,
+   여기서는 크기/모양/색만 담당함. margin의 음수 절반 값으로 각 점의 중심이
+   left/top 지점에 오도록 함(transform: translate(-50%,-50%) 대신 margin 사용 —
+   둘 다 동일하게 동작하지만 애니메이션 중 transform과 겹치지 않도록 margin 사용).
+   before: .mc-path-glow { fill: #fff; stroke: #7459e8; stroke-width: 4; vector-effect: non-scaling-stroke; filter: url(#journeyGlow); transition: opacity .2s; }
+           .mc-path-landmarks circle:nth-child(odd) { fill: #fff; stroke: #cfc6ef; stroke-width: 2; vector-effect: non-scaling-stroke; }
+           .mc-path-landmarks circle:nth-child(even) { fill: var(--mc-violet); }
+   after: 아래 .mc-path-glow / .mc-path-landmark 규칙으로 교체 */
+/* 수정된 부분 [2026-07-17]: 글로우 점 크기 확대
+   이유(사용자 피드백): HTML span으로 바꾸면서 크기를 14px로 잡았더니 예전
+   SVG 버전보다 작아 보인다는 피드백. 14px → 22px로 키우고 테두리/글로우
+   범위도 비례해서 함께 키움.
+   before: width: 14px; height: 14px; margin: -7px 0 0 -7px; border: 4px solid #7459e8;
+           box-shadow: 0 0 16px 4px rgba(116, 89, 232, .55);
+   after: 아래 값으로 확대 */
+.mc-path-glow {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  background: #fff;
+  border: 6px solid #7459e8;
+  box-shadow: 0 0 22px 6px rgba(116, 89, 232, .55);
+  transition: opacity .2s;
+}
+/* 수정된 부분 [2026-07-17]: 이정표 점 크기 확대
+   이유(사용자 피드백): 글로우 점과 마찬가지로 예전 SVG 버전보다 작아 보인다는
+   피드백. 안쪽 점 10px→14px, 바깥 흰색/보라색 테두리 간격도 함께 키움.
+   before: width: 10px; height: 10px; margin: -5px 0 0 -5px;
+           box-shadow: 0 0 0 7px #fff, 0 0 0 9px #cfc6ef;
+   after: 아래 값으로 확대 */
+.mc-path-landmark {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  background: var(--mc-violet);
+  box-shadow: 0 0 0 10px #fff, 0 0 0 12px #cfc6ef;
+}
 .mc-story-panel { position: relative; z-index: 2; min-height: 100svh; padding: 130px max(5vw, 28px) 100px; display: grid; place-items: center; }
 .mc-panel-inner { width: min(1160px, 100%); margin: auto; }
 /* 수정된 부분 [2026-07-17]: 섹션 헤딩 영역에 박스(반투명 카드) 배경 추가

@@ -150,14 +150,25 @@ const faqs = [
 // 없다고 확인되어 다시 이 버전으로 되돌림.
 function useScrollJourney() {
   const storyRef = useRef(null);
+  // 추가된 부분 [2026-07-17]: 여정 라인 컨테이너(div.mc-journey-line) 참조용 ref
+  // 이유(버그 리포트): "화면 크기를 줄이고 보니 선이 끝에 안 가있음". 원인은
+  // .mc-journey-line이 height: 100%로 되어있는데, 부모인 .mc-scroll-story(<main>)는
+  // 명시적 높이 없이 내용물(3개 패널)에 맞춰 자동으로 늘어나는 요소라서, 퍼센트
+  // 높이가 항상 정확히 계산되지 않을 수 있음(특히 화면 폭이 바뀌어 패널들의
+  // 실제 줄바꿈/높이가 달라지는 시점에 어긋나기 쉬움). CSS 퍼센트에 맡기는 대신
+  // story의 실제 픽셀 높이(story.offsetHeight)를 재서 이 컨테이너의 height를
+  // 인라인 스타일로 직접 못박아, 화면 크기와 무관하게 항상 실제 스토리 전체
+  // 높이와 정확히 일치하도록 함.
+  const lineRef = useRef(null);
   const pathRef = useRef(null);
   const glowRef = useRef(null);
 
   useEffect(() => {
     const story = storyRef.current;
+    const line = lineRef.current;
     const path = pathRef.current;
     const glow = glowRef.current;
-    if (!story || !path || !glow) return undefined;
+    if (!story || !line || !path || !glow) return undefined;
 
     // 추가된 부분 [2026-07-16]: 점이 스크롤보다 아주 조금만 먼저 이동하도록 설정
     // 이유: 1보다 크게 설정하면 점이 스크롤을 살짝 선행하지만 혼자 빠르게 달아나지 않음.
@@ -165,6 +176,9 @@ function useScrollJourney() {
     // 추가된 부분 [2026-07-16]: 시작점이 화면 최상단에 잘리지 않도록 약간 아래에서 시작
     const DOT_START_OFFSET_PX = 100;
     const PATH_VIEWBOX_HEIGHT = 3000;
+    // 추가된 부분 [2026-07-17]: 글로우 점의 x좌표를 퍼센트로 환산할 때 쓸 뷰박스 너비
+    // 이유: glow가 SVG circle → HTML span으로 바뀌면서 cx 대신 left(%)를 계산해야 함
+    const PATH_VIEWBOX_WIDTH = 1200;
     const PATH_SAMPLE_COUNT = 700;
 
     let frame = null;
@@ -202,8 +216,15 @@ function useScrollJourney() {
       return nearest.length / pathLength;
     };
 
+    // 수정된 부분 [2026-07-17]: storyHeight를 재는 김에 line(여정 라인 컨테이너)의
+    // 실제 height도 인라인 스타일로 함께 못박음
+    // 이유: 위 lineRef 설명 참고 — CSS height:100%가 어긋나 선이 끝까지 안
+    // 그려지는 문제를 근본적으로 방지.
+    // before: const measure = () => { storyHeight = Math.max(story.offsetHeight, 1); };
+    // after: 아래처럼 line.style.height도 함께 설정
     const measure = () => {
       storyHeight = Math.max(story.offsetHeight, 1);
+      line.style.height = `${storyHeight}px`;
     };
 
     const animate = () => {
@@ -218,8 +239,13 @@ function useScrollJourney() {
       story.style.setProperty('--journey-progress', displayProgress);
 
       const point = path.getPointAtLength(pathLength * displayProgress);
-      glow.setAttribute('cx', point.x);
-      glow.setAttribute('cy', point.y);
+      // 수정된 부분 [2026-07-17]: glow가 SVG <circle>에서 일반 HTML span으로
+      // 바뀌면서, 위치도 SVG 속성(cx/cy)이 아니라 CSS left/top(퍼센트)으로 설정.
+      // path 좌표(0~1200, 0~3000)를 뷰박스 크기로 나눠 퍼센트로 환산함.
+      // before: glow.setAttribute('cx', point.x); glow.setAttribute('cy', point.y);
+      // after: 아래 2줄
+      glow.style.left = `${(point.x / PATH_VIEWBOX_WIDTH) * 100}%`;
+      glow.style.top = `${(point.y / PATH_VIEWBOX_HEIGHT) * 100}%`;
       glow.style.opacity = String(targetOpacity);
 
       if (Math.abs(targetProgress - displayProgress) > 0.0003) {
@@ -309,7 +335,7 @@ function useScrollJourney() {
     };
   }, []);
 
-  return { storyRef, pathRef, glowRef };
+  return { storyRef, lineRef, pathRef, glowRef };
 }
 
 // 추가된 부분 [2026-07-17]: GithubIcon 컴포넌트 (인라인 SVG)
@@ -567,26 +593,44 @@ function AiFeature() {
 // 추가된 부분 [2026-07-16]: JourneyLine 컴포넌트 (내부 정의)
 // 이유: 스크롤 스토리 구간을 관통하는 여정 라인 SVG.
 // useScrollJourney 훅의 pathRef/glowRef와 연결되어 진행도가 시각화됨.
-function JourneyLine({ pathRef, glowRef }) {
+//
+// 수정된 부분 [2026-07-17]: 글로우 점 + 이정표 점을 SVG <circle>에서
+// 일반 HTML 절대위치 요소(span)로 변경
+// 이유(버그 리포트): "내 컴퓨터에서는 원이 정상인데 다른 사용자 컴퓨터에서는
+// 타원으로 보인다". 원인은 이 SVG가 preserveAspectRatio="none"으로 가로/세로를
+// 서로 다른 비율로 늘려서 화면을 꽉 채우도록 되어있는데(스크롤 진행 매핑을
+// 위해 의도적으로 이렇게 함), <circle>은 반지름(r) 하나만 갖는 도형이라
+// 가로/세로 확대 비율이 조금만 달라져도 타원으로 찌그러짐. 이 비율은
+// "화면 폭 대비 스토리 전체 높이"에 좌우되는데, 폰트 렌더링/브라우저/OS/줌
+// 등에 따라 사람마다 미묘하게 달라서 어떤 컴퓨터에서는 우연히 정원처럼
+// 보이고 다른 컴퓨터에서는 눈에 띄게 타원으로 보였던 것.
+// 해결: 늘어나도 상관없는 물결선(path)만 SVG에 남기고, 정원이어야 하는
+// 점들(글로우 점, 이정표 점)은 SVG 밖으로 빼서 일반 HTML 요소로 만듦.
+// 위치는 원본 뷰박스 좌표(0~1200, 0~3000)를 퍼센트로 환산해 left/top으로
+// 잡으므로 컨테이너 안에서의 위치는 그대로 유지되고, 크기는 고정 px이라
+// 가로/세로 스케일이 달라도 항상 정원으로 그려짐.
+// before: <circle ref={glowRef} className="mc-path-glow" r="9" cx="600" cy="0" />
+//         <g className="mc-path-landmarks"><circle .../>...</g>
+// after: 아래 mc-path-landmark span 3개 + mc-path-glow span 1개로 교체
+function JourneyLine({ lineRef, pathRef, glowRef }) {
   return (
-    <svg className="mc-journey-line" viewBox="0 0 1200 3000" preserveAspectRatio="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="journeyGradient" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#8b5cf6" />
-          <stop offset=".5" stopColor="#4f7cff" />
-          <stop offset="1" stopColor="#28c7aa" />
-        </linearGradient>
-        <filter id="journeyGlow" x="-200%" y="-200%" width="400%" height="400%"><feGaussianBlur stdDeviation="11" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
-      </defs>
-      <path className="mc-path-ghost" d="M600 0 C600 210 315 170 315 460 C315 650 875 580 875 960 C875 1240 360 1170 360 1540 C360 1810 830 1770 830 2110 C830 2410 600 2450 600 3000" />
-      <path ref={pathRef} className="mc-path-progress" pathLength="1" d="M600 0 C600 210 315 170 315 460 C315 650 875 580 875 960 C875 1240 360 1170 360 1540 C360 1810 830 1770 830 2110 C830 2410 600 2450 600 3000" />
-      <circle ref={glowRef} className="mc-path-glow" r="9" cx="600" cy="0" />
-      <g className="mc-path-landmarks">
-        <circle cx="315" cy="460" r="14" /><circle cx="315" cy="460" r="5" />
-        <circle cx="360" cy="1540" r="14" /><circle cx="360" cy="1540" r="5" />
-        <circle cx="830" cy="2110" r="14" /><circle cx="830" cy="2110" r="5" />
-      </g>
-    </svg>
+    <div className="mc-journey-line" ref={lineRef} aria-hidden="true">
+      <svg viewBox="0 0 1200 3000" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="journeyGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#8b5cf6" />
+            <stop offset=".5" stopColor="#4f7cff" />
+            <stop offset="1" stopColor="#28c7aa" />
+          </linearGradient>
+        </defs>
+        <path className="mc-path-ghost" d="M600 0 C600 210 315 170 315 460 C315 650 875 580 875 960 C875 1240 360 1170 360 1540 C360 1810 830 1770 830 2110 C830 2410 600 2450 600 3000" />
+        <path ref={pathRef} className="mc-path-progress" pathLength="1" d="M600 0 C600 210 315 170 315 460 C315 650 875 580 875 960 C875 1240 360 1170 360 1540 C360 1810 830 1770 830 2110 C830 2410 600 2450 600 3000" />
+      </svg>
+      <span className="mc-path-landmark" style={{ left: '26.25%', top: '15.333%' }} />
+      <span className="mc-path-landmark" style={{ left: '30%', top: '51.333%' }} />
+      <span className="mc-path-landmark" style={{ left: '69.167%', top: '70.333%' }} />
+      <span ref={glowRef} className="mc-path-glow" />
+    </div>
   );
 }
 
@@ -683,7 +727,7 @@ function MainPage() {
   const navigate = useNavigate();
   // 추가된 부분 [2026-07-16]: useScrollJourney 훅 연결
   // 이유: 스크롤 스토리 구간(ref)과 여정 라인 SVG(pathRef/glowRef)를 묶어 진행도 표시
-  const { storyRef, pathRef, glowRef } = useScrollJourney();
+  const { storyRef, lineRef, pathRef, glowRef } = useScrollJourney();
   // 수정된 부분 [2026-07-16]: useScrollButtons 파라미터 조정
   // 이유: 새 페이지는 스크롤 길이가 훨씬 길어짐. 플로팅 CTA가 마지막 FinalCta/FAQ/푸터
   // 구역(약 520px)과 겹치지 않도록 bottomOffset을 크게 늘리고, 탑 버튼 노출 시점도 소폭 앞당김.
@@ -722,7 +766,7 @@ function MainPage() {
       <Hero onStartClick={handleCtaClick} ctaLabel={ctaLabel} />
       {/* 추가된 부분 [2026-07-16]: 스크롤 스토리 구역 (여정 라인 + 3개 섹션) */}
       <main ref={storyRef} className="mc-scroll-story">
-        <JourneyLine pathRef={pathRef} glowRef={glowRef} />
+        <JourneyLine lineRef={lineRef} pathRef={pathRef} glowRef={glowRef} />
         <ProcessSection />
         <MindMapFeature />
         <AiFeature />
