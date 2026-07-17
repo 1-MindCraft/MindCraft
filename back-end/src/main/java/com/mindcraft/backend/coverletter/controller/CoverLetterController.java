@@ -27,7 +27,7 @@ import java.util.Map;
 @RequestMapping(value = "/coverletters") // API 엔드포인트를 바탕으로 이름은 coverletters
 @RequiredArgsConstructor
 @Slf4j
-public class CoverLetterController {
+public class CoverLetterController implements CoverLetterApiSpec{
 
     private final CoverLetterService coverLetterService;
     private final CoverLetterMapper mapper;
@@ -54,6 +54,7 @@ public class CoverLetterController {
     // coverletter 자신의 id로 자소서 + 항목 목록을 조회.
     // 200 { id, title, sections: [...] } / 404 { "error": "문서를 찾을 수 없습니다." }
     @GetMapping(value = "/{id}")
+    @Override
     public ResponseEntity getDetail(
             @AuthenticationPrincipal UserSecurityDto userSecurityDto,
             @PathVariable("id") Long coverLetterId) {
@@ -61,12 +62,14 @@ public class CoverLetterController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Override
     @GetMapping
     public ResponseEntity getCoverLetters(@AuthenticationPrincipal UserSecurityDto userSecurityDto) {
         List<CoverLetterSummaryDto> allCoverLetters = coverLetterService.getAllCoverLetters(userSecurityDto.getId());
         return new ResponseEntity<>(allCoverLetters, HttpStatus.OK);
     }
 
+    @Override
     @PostMapping
     public ResponseEntity createCoverLetter(
             @AuthenticationPrincipal UserSecurityDto userSecurityDto,
@@ -78,6 +81,7 @@ public class CoverLetterController {
     }
 
     @DeleteMapping("/{id}")
+    @Override
     public ResponseEntity deleteCoverLetter(
             @AuthenticationPrincipal UserSecurityDto userSecurityDto,
             @PathVariable("id") long coverLetterId) {
@@ -90,6 +94,7 @@ public class CoverLetterController {
     }
 
     @PutMapping("/{id}")
+    @Override
     public ResponseEntity modifyCoverLetter(
             @AuthenticationPrincipal UserSecurityDto userSecurityDto,
             @Valid @RequestBody CoverLetterRequestDto coverLetterRequestDto,
@@ -108,6 +113,7 @@ public class CoverLetterController {
     // 서버에서 실제 텍스트 PDF로 만들어주기 위해 추가. 한글이 이미지가 아니라 진짜 텍스트로
     // 들어가서 복사/검색이 가능해짐.
     @GetMapping(value = "/{id}/export/pdf")
+    @Override
     public ResponseEntity<byte[]> exportPdf(
             @AuthenticationPrincipal UserSecurityDto userSecurityDto,
             @PathVariable("id") Long coverLetterId) {
@@ -124,6 +130,7 @@ public class CoverLetterController {
     // 추가된 부분: DOCX 내보내기 엔드포인트 (GET /coverletters/{id}/export/docx)
     // 이유: 위 PDF와 같은 이유 + 프론트에서 쓰던 docx 라이브러리를 서버로 옮기기 위해 추가
     @GetMapping(value = "/{id}/export/docx")
+    @Override
     public ResponseEntity<byte[]> exportDocx(
             @AuthenticationPrincipal UserSecurityDto userSecurityDto,
             @PathVariable("id") Long coverLetterId) {
