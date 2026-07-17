@@ -25,16 +25,29 @@ import { useNavigate } from 'react-router-dom';
 // 이유: 새 디자인의 섹션/카드/버튼 아이콘을 lucide-react로 통일.
 // ※ 주의: 현재 src 어디에서도 lucide-react를 쓰지 않았음 → package.json에 없다면
 //    `npm install lucide-react` 를 먼저 실행해야 함 (미설치 시 빌드 에러).
+// 수정된 부분 [2026-07-17]: lucide-react import 목록에서 Github 제거
+// 이유(버그 리포트): "does not provide an export named 'Github'" 런타임 에러.
+// lucide-react가 1.0으로 업그레이드되면서 GitHub/Slack/Figma 등 상표가 있는
+// 브랜드 로고 아이콘들이 전부 라이브러리에서 삭제됨(라이선스/일관성 문제로
+// lucide 팀이 공식적으로 브랜드 아이콘 지원을 중단함). 그래서 lucide-react에는
+// 더 이상 Github라는 이름의 export가 존재하지 않음.
+// 해결: lucide-react import에서 Github를 빼고, 파일 하단에 GitHub 마크를
+// 인라인 SVG 컴포넌트(GithubIcon)로 직접 정의해서 대체함.
+// before: Film, Github,
+// after: Film, (Github 삭제)
+// 수정된 부분 [2026-07-17]: lucide-react import에서 Move 삭제
+// 이유: mc-window-tools(이동/커서/추가 아이콘 툴바)를 통째로 지우면서
+// 그 안에서만 쓰이던 Move 아이콘이 더 이상 필요 없어져 함께 제거함.
+// before: MousePointer2, Move, Network,
+// after: MousePointer2, Network, (Move 삭제)
 import {
   ArrowRight,
   BrainCircuit,
   BriefcaseBusiness,
   Check,
   ChevronDown,
-  Download,
-  FileText,
+  Film,
   MousePointer2,
-  Move,
   Network,
   PenLine,
   Play,
@@ -48,6 +61,11 @@ import './Main.css';
 // 같은 특이도(.mc-page ... vs .mindcraft-page ...)에서 새 스타일이 우선 적용됨.
 import './MainExperience.css';
 
+// 추가된 부분 [2026-07-17]: MindCraft 로고 이미지 import
+// 이유(요청 8, 9): Footer와 새로 추가하는 introduction 영역에서 lucide 아이콘 대신
+// 실제 MindCraft 로고 이미지를 쓰기 위해 추가. Nav.jsx와 동일한 자산/경로 재사용.
+import LOGO_SRC from '../../assets/MindCraft-Logo1.png';
+
 import Nav from '../../components/Main/Nav';
 import TopButton from '../../components/Main/TopButton';
 import FloatingCta from '../../components/Main/FloatingCta';
@@ -59,39 +77,57 @@ import useScrollButtons from '../../hooks/useScrollButtons';
 
 // 추가된 부분 [2026-07-16]: 프로세스 3단계 데이터
 // 이유: 기존 data/steps.js(HowItWorks용) 대신 새 디자인 전용 단계 데이터를 파일 내에 정의
+//
+// 수정된 부분 [2026-07-17]: 3개 카드의 title / description 문구 전체 교체
+// 이유(요청 2): 서비스 흐름(마인드맵 → 자소서 마스터 설정 → AI 생성)이 더 명확히
+// 드러나도록 문구를 구체화해달라는 요청.
+// before: title '경험을 꺼내 적어요' / description '프로젝트, 수상, 동아리까지. 떠오르는 경험을 짧은 키워드로 남겨보세요.'
+// after:  title '나만의 경험을 모아보세요' / description '마인드맵에서 프로젝트, 활동, 강점 등 흩어진 경험을 자유롭게 정리하고 연결합니다.'
+// before: title '맥락을 연결해요' / description '경험과 역량을 노드로 이어 나만의 커리어 지도를 완성해요.'
+// after:  title '지원 직무에 맞게 설정하세요' / description '자소서 마스터를 만들고 회사 정보와 직무, 인재상 등을 입력해 AI가 참고할 기준을 설정합니다.'
+// before: title 'AI가 문장으로 만들어요' / description '지원 직무에 꼭 맞는 자기소개서 초안을 단 몇 분 만에 만들어요.'
+// after:  title 'AI가 자기소개서를 작성합니다' / description '항목을 생성한 뒤 버튼 한 번으로 마인드맵과 자소서 마스터를 기반으로 자기소개서 초안을 완성합니다.'
 const processSteps = [
   {
     number: '01',
     icon: PenLine,
     eyebrow: 'CAPTURE',
-    title: '경험을 꺼내 적어요',
-    description: '프로젝트, 수상, 동아리까지. 떠오르는 경험을 짧은 키워드로 남겨보세요.',
+    title: '나만의 경험을 모아보세요',
+    description: '마인드맵에서 프로젝트, 활동, 강점 등 흩어진 경험을 자유롭게 정리하고 연결합니다.',
     color: 'violet',
   },
   {
     number: '02',
     icon: Network,
     eyebrow: 'CONNECT',
-    title: '맥락을 연결해요',
-    description: '경험과 역량을 노드로 이어 나만의 커리어 지도를 완성해요.',
+    title: '지원 직무에 맞게 설정하세요',
+    description: '자소서 마스터를 만들고 회사 정보와 직무, 인재상 등을 입력해 AI가 참고할 기준을 설정합니다.',
     color: 'blue',
   },
   {
     number: '03',
     icon: WandSparkles,
     eyebrow: 'CRAFT',
-    title: 'AI가 문장으로 만들어요',
-    description: '지원 직무에 꼭 맞는 자기소개서 초안을 단 몇 분 만에 만들어요.',
+    title: 'AI가 자기소개서를 작성합니다',
+    description: '항목을 생성한 뒤 버튼 한 번으로 마인드맵과 자소서 마스터를 기반으로 자기소개서 초안을 완성합니다.',
     color: 'mint',
   },
 ];
 
 // 추가된 부분 [2026-07-16]: FAQ 데이터
 // 이유: 기존 data/faqs.js(Faq 컴포넌트용) 대신 새 디자인 전용 FAQ를 파일 내에 정의
+//
+// 수정된 부분 [2026-07-17]: 기존 FAQ 3개 → 요청받은 FAQ 5개로 전면 교체
+// 이유(요청 7): 저장 방식(자동 저장 → 저장 버튼) 등 실제 기능 변경사항을 반영하고,
+// 자소서 마스터 / 자기소개서 생성·재생성 관련 질문을 새로 추가해달라는 요청.
+// before: ['마인드맵은 처음인데 어렵지 않나요?', ...], ['작성한 내용은 자동으로 저장되나요?', ...], ['생성한 자기소개서를 수정할 수 있나요?', ...]
+// after: 아래 5개 문항으로 교체
 const faqs = [
-  ['마인드맵은 처음인데 어렵지 않나요?', '빈 캔버스에서 막막하지 않도록 경험별 질문과 예시 노드를 제공해요. 클릭과 드래그만으로 누구나 쉽게 시작할 수 있습니다.'],
-  ['작성한 내용은 자동으로 저장되나요?', '네. 작성 중인 노드와 문서는 자동 저장되어 언제든 이어서 작업할 수 있습니다.'],
-  ['생성한 자기소개서를 수정할 수 있나요?', '물론이에요. AI 초안을 바탕으로 문장을 직접 다듬고, 원하는 항목만 다시 생성할 수 있습니다.'],
+  ['마인드맵을 처음 사용해도 괜찮나요?', '네. + 버튼으로 새로운 노드를 추가하고 이름을 입력하는 것만으로 쉽게 시작할 수 있습니다. 프로젝트, 활동, 경험 등을 연결하며 자연스럽게 나만의 마인드맵을 완성할 수 있습니다.'],
+  ['작성한 내용은 저장할 수 있나요?', '네. 작업이 완료되면 저장 버튼을 눌러 작성한 내용을 저장할 수 있습니다. 저장된 내용은 언제든 다시 불러와 이어서 작업할 수 있습니다.'],
+  ['자소서 마스터는 무엇인가요?', '자소서 마스터는 지원 기업명, 직무, 인재상 등 자기소개서 생성에 필요한 정보를 저장하는 공간입니다. 한 번 작성해두면 여러 자기소개서를 만들 때 반복 입력할 필요가 없습니다.'],
+  ['자기소개서는 어떻게 생성되나요?', '마인드맵과 자소서 마스터에 입력한 정보를 바탕으로 AI가 자기소개서 초안을 생성합니다. 생성 버튼 한 번으로 지원 직무에 맞는 초안을 빠르게 받아볼 수 있습니다.'],
+  ['생성된 자기소개서를 다시 만들 수 있나요?', '네. 생성 버튼을 다시 눌러 새로운 자기소개서를 생성할 수 있습니다.'],
 ];
 
 // 추가된 부분 [2026-07-16]: useScrollJourney 훅
@@ -108,6 +144,10 @@ const faqs = [
 // - DOT_SCROLL_SPEED(1.5)를 적용해 점이 스크롤보다 약 50% 앞서 이동하도록 조정됨.
 // - 경로 끝에 도착해도 바로 사라지지 않고, 스토리 영역이 화면 위로
 //   빠져나가는 마지막 구간에서만 천천히 사라짐.
+//
+// 참고 [2026-07-17]: 한때 이 로직을 "배속 없이 스크롤 비율 그대로" 방식으로
+// 단순화해봤는데, 재확인 결과 이 아래 버전(배속 1.5 적용)이 실제로는 문제가
+// 없다고 확인되어 다시 이 버전으로 되돌림.
 function useScrollJourney() {
   const storyRef = useRef(null);
   const pathRef = useRef(null);
@@ -272,6 +312,19 @@ function useScrollJourney() {
   return { storyRef, pathRef, glowRef };
 }
 
+// 추가된 부분 [2026-07-17]: GithubIcon 컴포넌트 (인라인 SVG)
+// 이유: lucide-react 1.0에서 브랜드 아이콘(Github 포함)이 전부 제거되어
+// 더 이상 lucide-react에서 import할 수 없음. introduction 섹션의 GitHub 링크에
+// 쓸 마크를 표준적으로 널리 쓰이는 옥토캣 실루엣 SVG path로 직접 구현함.
+// currentColor를 써서 부모 텍스트 색(.mc-intro-github)을 그대로 따라가도록 함.
+function GithubIcon({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 .5C5.73.5.5 5.73.5 12c0 5.08 3.29 9.39 7.86 10.91.57.1.78-.25.78-.55 0-.27-.01-1.16-.02-2.11-3.2.7-3.88-1.36-3.88-1.36-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.23-1.28-5.23-5.68 0-1.25.45-2.28 1.19-3.08-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.08 0 4.41-2.69 5.38-5.25 5.67.41.36.78 1.06.78 2.14 0 1.55-.01 2.79-.01 3.17 0 .3.2.66.79.55A10.52 10.52 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z" />
+    </svg>
+  );
+}
+
 // 추가된 부분 [2026-07-16]: useReveal 훅
 // 이유: [data-reveal] 요소가 뷰포트에 들어오면 is-visible 클래스를 붙여
 // 등장 애니메이션을 트리거 (IntersectionObserver 사용)
@@ -303,10 +356,18 @@ function MiniMindMap({ compact = false }) {
         <path d="M320 190 C410 190 420 300 515 300" />
       </svg>
       <div className="mc-map-node mc-map-node-main"><Sparkles size={16} /> 나의 경험</div>
-      <div className="mc-map-node mc-map-node-a"><BriefcaseBusiness size={15} /> 프로젝트</div>
-      <div className="mc-map-node mc-map-node-b">Java · React</div>
-      <div className="mc-map-node mc-map-node-c">문제 해결</div>
-      <div className="mc-map-node mc-map-node-d">협업 경험</div>
+      {/* 수정된 부분 [2026-07-17]: 마인드맵 노드 텍스트를 실제 사용자가 적을 법한
+          일반적인 경험 키워드로 교체
+          이유(요청 0): "프로젝트/Java·React/문제 해결/협업 경험"은 이미 정리된
+          역량 키워드처럼 보여 실제 사용자가 마인드맵에 처음 적는 원본 항목과는
+          결이 달랐음. 아르바이트/팀 프로젝트/자격증/동아리 활동처럼 사람들이
+          흔히 마인드맵에 적어 넣는 보편적인 경험 항목으로 교체함.
+          before: 프로젝트 / Java / React / 문제 해결 / 협업 경험
+          after: 아르바이트 경험 / 팀 프로젝트 / 자격증 / 동아리 활동 */}
+      <div className="mc-map-node mc-map-node-a"><BriefcaseBusiness size={15} /> 아르바이트 경험</div>
+      <div className="mc-map-node mc-map-node-b">팀 프로젝트</div>
+      <div className="mc-map-node mc-map-node-c">자격증</div>
+      <div className="mc-map-node mc-map-node-d">동아리 활동</div>
       {!compact && <div className="mc-map-cursor"><MousePointer2 size={19} fill="currentColor" /><span>나</span></div>}
     </div>
   );
@@ -318,7 +379,13 @@ function MiniMindMap({ compact = false }) {
 function Hero({ onStartClick, ctaLabel }) {
   return (
     <header className="mc-hero" id="top">
-      <div className="mc-hero-orb mc-orb-one" />
+      {/* 수정된 부분 [2026-07-17]: 좌상단의 작은 원형 장식(mc-orb-one) 삭제
+          이유(사용자 피드백, 스크린샷): 20x20px 크기의 얇은 테두리 원이 배경에
+          뚝 떨어져 혼자 떠있어서 의도된 장식이라기보다 "안 지워진 잔여물"처럼
+          보인다는 지적. 우하단의 크고 부드럽게 블러 처리된 mc-orb-two(의도가
+          분명한 은은한 배경 블롭)는 그대로 유지함.
+          before: <div className="mc-hero-orb mc-orb-one" />
+          after: (삭제됨) */}
       <div className="mc-hero-orb mc-orb-two" />
       <div className="mc-hero-inner">
         <div className="mc-hero-copy" data-reveal>
@@ -343,8 +410,15 @@ function Hero({ onStartClick, ctaLabel }) {
               <span>나의 커리어 마인드맵</span>
               <span className="mc-live"><i /> 저장됨</span>
             </div>
+            {/* 수정된 부분 [2026-07-17]: 히어로 상품 미리보기 창 안의 왼쪽 세로 툴바 제거
+                이유(사용자 피드백, 스크린샷): 이동/커서/추가 아이콘이 담긴 작은 알약 모양
+                툴바(mc-window-tools)를 빼달라는 요청.
+                before: <div className="mc-window-body">
+                          <aside className="mc-window-tools">...</aside>
+                          <MiniMindMap />
+                        </div>
+                after: aside 삭제, MiniMindMap만 남김 */}
             <div className="mc-window-body">
-              <aside className="mc-window-tools"><Move size={17} /><MousePointer2 size={17} /><Plus size={17} /></aside>
               <MiniMindMap />
             </div>
           </div>
@@ -377,10 +451,18 @@ function ProcessSection() {
                 <small>{step.eyebrow}</small>
                 <h3>{step.title}</h3>
                 <p>{step.description}</p>
+                {/* 수정된 부분 [2026-07-17]: 카드 하단의 손그림 스케치(선/점/아이콘 조합) 삭제,
+                    GIF를 넣을 수 있는 자리(placeholder)로 교체
+                    이유(요청 3): "카드 이상한 이미지" — index별로 다르게 그려지던
+                    점선/곡선/아이콘 장식이 실제 서비스와 무관해 보인다는 피드백.
+                    나중에 실제 기능 GIF를 넣을 수 있도록 동일한 자리에 점선 박스 + 안내
+                    문구로 통일함. mc-card-sketch 컨테이너(위치/크기)는 그대로 재사용하고
+                    내부 내용만 교체 — CSS도 함께 placeholder 스타일로 수정함(아래 CSS 파일 참고).
+                    before: index === 0/1/2 별로 다른 <i>/<svg> 장식 3종
+                    after: 아래 Film 아이콘 + 안내 텍스트로 통일 */}
                 <div className="mc-card-sketch" aria-hidden="true">
-                  {index === 0 && <><i className="mc-line-long" /><i className="mc-line-short" /><PenLine size={29} /></>}
-                  {index === 1 && <><i /><i /><i /><svg viewBox="0 0 180 55"><path d="M25 28 C55 2 75 50 95 28 S135 5 158 28" /></svg></>}
-                  {index === 2 && <><Sparkles size={22} /><i className="mc-ai-line" /><Check size={22} /></>}
+                  <Film size={20} />
+                  <span>GIF 추가 예정</span>
                 </div>
               </article>
             );
@@ -401,17 +483,32 @@ function MindMapFeature() {
           <span className="mc-feature-index">01 · MIND MAP</span>
           <h2>머릿속 경험을<br />눈에 보이게 연결해요</h2>
           <p>정해진 양식에 나를 끼워 맞추지 마세요. 자유롭게 노드를 만들고 연결하다 보면 나만의 강점과 이야기가 자연스럽게 드러납니다.</p>
+          {/* 수정된 부분 [2026-07-17]: 리스트 문구 2개 교체 + 1개 항목 삭제
+              이유(요청 4): 자동 저장 안내 문구는 FAQ 쪽 문구(저장 버튼 방식)와
+              내용이 어긋나서 완전히 삭제하고, 나머지 두 문구는 실제 기능(노드
+              추가/편집, 항목별 정리)에 맞게 구체화함.
+              before: <li>드래그 한 번으로 자유로운 노드 연결</li>
+              before: <li>질문 가이드로 막힘없이 경험 정리</li>
+              before: <li>작성하는 순간마다 안전하게 자동 저장</li> (삭제됨)
+              after: 아래 2개 항목으로 교체 */}
           <ul>
-            <li><Check size={16} /> 드래그 한 번으로 자유로운 노드 연결</li>
-            <li><Check size={16} /> 질문 가이드로 막힘없이 경험 정리</li>
-            <li><Check size={16} /> 작성하는 순간마다 안전하게 자동 저장</li>
+            <li><Check size={16} /> 연결된 노드를 빠르게 추가하고 편집</li>
+            <li><Check size={16} /> 프로젝트와 활동 경험을 항목별로 정리</li>
           </ul>
           <a className="mc-inline-btn" href="#features">AI 기능까지 이어보기 <ArrowRight size={17} /></a>
         </div>
         <div className="mc-demo-frame">
-          <div className="mc-demo-caption"><span><i /> LIVE DEMO</span><small>마우스로 노드를 연결해 보세요</small></div>
+          {/* 수정된 부분 [2026-07-17]: "LIVE DEMO" 라벨 제거, 캡션 문구 교체
+              이유(요청 4): "LIVE DEMO" 표기가 실제 데모가 아닌 정적 목업이라 오해를
+              줄 수 있어 제거하고, 안내 문구를 서비스 맥락에 맞게 변경함.
+              before: <span><i /> LIVE DEMO</span><small>마우스로 노드를 연결해 보세요</small>
+              after: <small> 하나만 남기고 문구 교체 (span 전체 삭제) */}
+          <div className="mc-demo-caption"><small>자기소개서에 활용할 경험을 연결해 보세요</small></div>
           <div className="mc-demo-canvas"><MiniMindMap /></div>
-          <div className="mc-demo-toast"><Check size={16} /> 새로운 연결에서 '문제 해결력'을 발견했어요</div>
+          {/* 수정된 부분 [2026-07-17]: "새로운 연결에서 '문제 해결력'을 발견했어요" 토스트 삭제
+              이유(요청 4): 요청대로 해당 문구 전체 제거.
+              before: <div className="mc-demo-toast">...</div>
+              after: (삭제됨) */}
         </div>
       </div>
     </section>
@@ -428,25 +525,39 @@ function AiFeature() {
           <span className="mc-feature-index">02 · AI CRAFTING</span>
           <h2>연결된 경험이<br />설득력 있는 문장이 돼요</h2>
           <p>AI가 단순히 문장을 채우는 것이 아니라, 마인드맵 속 맥락을 읽고 지원 직무에 꼭 맞는 나만의 자기소개서를 만들어요.</p>
+          {/* 수정된 부분 [2026-07-17]: 지표 3개 텍스트 교체
+              이유(요청 5): 실제 기능 흐름(항목 생성 → 자동화 → 마인드맵 기반 초안 →
+              언제든 다시 생성)에 맞게 문구를 구체화함.
+              before: <b>3분</b><span>첫 초안 완성</span>
+              before: <b>맥락 기반</b><span>개인화 문장</span>
+              before: <b>언제든</b><span>수정·재생성</span>
+              after: 아래 3개 쌍으로 교체 */}
           <div className="mc-metric-row">
-            <div><b>3분</b><span>첫 초안 완성</span></div>
-            <div><b>맥락 기반</b><span>개인화 문장</span></div>
-            <div><b>언제든</b><span>수정·재생성</span></div>
+            <div><b>항목 생성</b><span>자동화</span></div>
+            {/* 수정된 부분 [2026-07-17]: "마인드맵을 반영한" 줄바꿈 처리
+                이유(요청 4): mc-metric-row는 3열 그리드라 각 칸 폭이 좁은데,
+                이 문구만 다른 두 문구(항목 생성/언제든)보다 길어서 폭이 부족한
+                지점에서 글자가 어중간하게 끊겨 보였음. word-break로 아무 데서나
+                끊기게 두는 대신, 의미 단위("마인드맵을" / "반영한")로 직접 줄바꿈 위치를
+                지정해 항상 같은 자리에서 자연스럽게 끊기도록 함.
+                before: <b>마인드맵을 반영한</b>
+                after: <b>마인드맵을<br />반영한</b> */}
+            <div><b>마인드맵을<br />반영한</b><span>자소서 초안</span></div>
+            <div><b>언제든</b><span>다시 생성</span></div>
           </div>
           <a className="mc-inline-btn" href="#faq">자주 묻는 질문 보기 <ArrowRight size={17} /></a>
         </div>
-        <div className="mc-document-demo">
-          <div className="mc-document-toolbar">
-            <span><FileText size={16} /> 자기소개서 초안</span>
-            <div><button aria-label="다운로드"><Download size={15} /></button><button>내보내기</button></div>
-          </div>
-          <div className="mc-document-content">
-            <span className="mc-doc-label">지원 동기 및 입사 후 포부</span>
-            <h3>연결을 통해 더 나은 답을 찾는<br />개발자 김민지입니다.</h3>
-            <p>팀 프로젝트에서 사용자의 불편을 발견하고, 데이터를 기반으로 문제의 원인을 좁혀나갔습니다. <mark>서로 다른 의견을 하나의 목표로 연결한 경험</mark>은 협업의 가치를 배우는 계기가 되었습니다.</p>
-            <p className="mc-typing-line">이 경험을 바탕으로, 사용자와 기술을 연결하는...</p>
-            <div className="mc-ai-status"><span><Sparkles size={15} /> MindCraft AI가 작성하고 있어요</span><i><i /></i></div>
-          </div>
+        {/* 수정된 부분 [2026-07-17]: 왼쪽(mc-feature-reverse라 실제로는 좌측에 렌더링되는)
+            자기소개서 미리보기 목업(mc-document-demo) 전체 삭제, GIF/영상을 넣을 수 있는
+            빈 자리로 교체
+            이유(요청 5): 정적 목업 대신 실제 기능을 보여줄 GIF/영상을 나중에 넣을 수
+            있도록 자리만 마련해달라는 요청. 안에 있던 toolbar/문서 내용/타이핑 애니메이션을
+            모두 제거하고 큰 점선 박스 하나로 대체함(CSS: mc-gif-placeholder, 아래 CSS 파일 참고).
+            before: <div className="mc-document-demo"> ... (toolbar + 문서 내용 전체) ... </div>
+            after: 아래 mc-gif-placeholder 박스로 교체 */}
+        <div className="mc-gif-placeholder" aria-hidden="true">
+          <Film size={34} />
+          <span>GIF/영상 추가 예정</span>
         </div>
       </div>
     </section>
@@ -487,9 +598,11 @@ function ClosingSection({ onStartClick, ctaLabel }) {
   return (
     <>
       <section className="mc-closing" data-reveal>
-        <div className="mc-community-strip">
-          {['취업 준비', '프로젝트 정리', '직무 탐색', '자기소개서', '면접 준비'].map((label, index) => <span key={label}><i>{['민', '준', '서', '윤', '하'][index]}</i>{label}</span>)}
-        </div>
+        {/* 수정된 부분 [2026-07-17]: 태그 스트립(취업 준비/프로젝트 정리/직무 탐색/
+            자기소개서/면접 준비) 전체 삭제
+            이유(요청 6): 요청대로 해당 문구들을 화면에서 완전히 제거.
+            before: <div className="mc-community-strip">...</div>
+            after: (삭제됨) */}
         <div className="mc-final-card">
           <span><Sparkles size={15} /> YOUR STORY STARTS HERE</span>
           <h2>당신의 경험은 이미<br />충분히 좋은 이야기예요.</h2>
@@ -511,10 +624,56 @@ function ClosingSection({ onStartClick, ctaLabel }) {
         </div>
       </section>
 
-      <footer className="mc-footer">
-        <a href="#top"><Network size={23} /><b>MIND <span>CRAFT</span></b></a>
-        <p>생각을 연결해, 나만의 가능성을 발견하세요.</p>
-        <span>© 2026 MindCraft Team</span>
+      {/* 수정된 부분 [2026-07-17]: Footer와 introduction을 하나의 검은 footer로 통합
+          이유(사용자 피드백): 흰 배경 Footer(로고+태그라인+저작권)와 검은 배경
+          Introduction(로고+이름+GitHub+만든사람)이 바로 붙어있어 로고가 두 번
+          연속으로 나오고 색이 급하게 끊겨 "겹치는" 느낌을 줌.
+          해결: 두 블록을 <footer className="mc-intro"> 하나로 합치고,
+          - 로고는 하나만 남김: Footer 쪽 로고(mc-footer-logo-img, "#top" 링크)는 삭제,
+            Introduction 쪽 로고(mc-intro-logo-img)만 유지
+          - "생각을 연결해, 나만의 가능성을 발견하세요." 문구는 가운데 정렬 그대로
+            유지한 채 맨 위 줄로 이동(mc-intro-tagline)
+          - "© 2026 MindCraft Team"은 오른쪽 그대로 유지(mc-intro-copyright)
+          - 로고/GitHub/만든사람은 왼쪽에 한 줄로 묶음(mc-intro-left)
+          before: <footer className="mc-footer">...</footer> + <section className="mc-intro">...</section>
+                  (로고 2개, 태그라인은 첫 번째 footer 가운데, 저작권은 첫 번째 footer 오른쪽)
+          after: 아래 <footer className="mc-intro"> 하나로 통합 (mc-footer / mc-footer-logo-img
+                 클래스는 더 이상 쓰이지 않음 — 아래 CSS 파일에서 함께 정리함) */}
+      <footer className="mc-intro">
+        <p className="mc-intro-tagline">생각을 연결해, 나만의 가능성을 발견하세요.</p>
+        <div className="mc-intro-row">
+          <div className="mc-intro-left">
+            <a href="#top" className="mc-intro-brand">
+              <img src={LOGO_SRC} alt="MindCraft" className="mc-intro-logo-img" />
+              <b>MindCraft</b>
+            </a>
+            {/* 수정된 부분 [2026-07-17]: GitHub 링크를 실제 저장소 주소로 교체
+                이유: 이전엔 실제 주소를 몰라서 placeholder(your-org/mindcraft)를
+                써뒀는데, 실제 저장소 주소를 알려주셔서 반영함 (TODO 주석 제거).
+                before: href="https://github.com/your-org/mindcraft"
+                after: href="https://github.com/1-MindCraft/MindCraft" */}
+            <a
+              className="mc-intro-github"
+              href="https://github.com/1-MindCraft/MindCraft"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <GithubIcon size={18} /> GitHub
+            </a>
+            {/* 수정된 부분 [2026-07-17]: 만든 사람 placeholder → 실제 팀원 이름으로 교체
+                before: <li>팀원 1</li> / <li>팀원 2</li> / <li>팀원 3</li>
+                after: 아래 3명 이름으로 교체 */}
+            <div className="mc-intro-credits">
+              <span className="mc-intro-credits-label">만든 사람</span>
+              <ul>
+                <li>김세윤</li>
+                <li>이원호</li>
+                <li>임병서</li>
+              </ul>
+            </div>
+          </div>
+          <span className="mc-intro-copyright">© 2026 MindCraft Team</span>
+        </div>
       </footer>
     </>
   );

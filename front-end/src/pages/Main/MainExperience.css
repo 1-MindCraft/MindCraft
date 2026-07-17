@@ -118,7 +118,16 @@
   letter-spacing: -.055em;
 }
 
-.mc-hero h1 { font-size: clamp(2.8rem, 4.3vw, 5.05rem); line-height: 1.1; font-weight: 800; }
+/* 수정된 부분 [2026-07-17]: Hero 타이틀 폰트 크기 스케일 축소
+   이유(버그 리포트): "Title의 크기가 커서 글자 끊김 현상 발생". vw 계수(4.3vw)와
+   최대값(5.05rem)이 너무 커서, 특정 데스크톱 폭에서 "흩어진 내 경험을" 같은
+   줄이 .mc-hero-copy 컬럼(그리드 .86fr) 너비를 넘어섰고, 루트(.mc-page)에
+   overflow: clip이 걸려 있어 넘친 글자가 그대로 잘려 보였음.
+   해결: vw 계수를 4.3→3.2, 최댓값을 5.05rem→4.3rem으로 낮춰 넓은 화면에서도
+   컬럼 너비 안에 안정적으로 들어오도록 함. 최솟값(2.8rem)은 그대로 유지.
+   before: font-size: clamp(2.8rem, 4.3vw, 5.05rem);
+   after: font-size: clamp(2.8rem, 3.2vw, 4.3rem); */
+.mc-hero h1 { font-size: clamp(2.8rem, 3.2vw, 4.3rem); line-height: 1.15; font-weight: 800; }
 .mc-hero h1 span { color: var(--mc-violet); position: relative; white-space: nowrap; }
 .mc-hero h1 span::after {
   content: '';
@@ -179,8 +188,11 @@
 .mc-live { justify-self: end; display: flex; align-items: center; gap: 5px; color: #8f90a0; font-size: .62rem; }
 .mc-live i { width: 5px; height: 5px; border-radius: 50%; background: #43c6a6; box-shadow: 0 0 0 3px rgba(67, 198, 166, .15); }
 .mc-window-body { position: relative; height: calc(100% - 52px); background: radial-gradient(circle, #dfdaf1 1.1px, transparent 1.1px); background-size: 23px 23px; }
-.mc-window-tools { position: absolute; z-index: 5; left: 16px; top: 50%; display: flex; flex-direction: column; gap: 16px; padding: 14px 10px; border: 1px solid #ebe8f5; border-radius: 11px; background: rgba(255,255,255,.93); color: #9b96ad; transform: translateY(-50%); box-shadow: 0 8px 24px rgba(59, 43, 110, .09); }
-.mc-window-tools svg:nth-child(2) { color: var(--mc-violet); }
+/* 수정된 부분 [2026-07-17]: mc-window-tools 관련 CSS 2개 삭제
+   이유: 히어로 상품 미리보기 창 안의 왼쪽 세로 툴바(이동/커서/추가 아이콘)를
+   JSX에서 이미 삭제했는데 CSS 정리가 안 되고 남아있었음. 어디서도 안 쓰여 삭제.
+   before: .mc-window-tools { ... } / .mc-window-tools svg:nth-child(2) { ... }
+   after: (삭제됨, 모바일 미디어쿼리의 .mc-window-tools { display: none; } 도 함께 삭제) */
 
 .mc-mini-map { position: absolute; inset: 0; }
 .mc-mini-map-lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
@@ -200,7 +212,10 @@
 .mc-note-bottom span { display: flex; flex-direction: column; }
 .mc-note-bottom small { margin-top: 2px; color: #9b98aa; font-size: .54rem; font-weight: 500; }
 .mc-hero-orb { position: absolute; z-index: -1; border-radius: 50%; filter: blur(1px); }
-.mc-orb-one { width: 20px; height: 20px; top: 19%; left: 4%; border: 5px solid rgba(115,87,238,.15); }
+/* 수정된 부분 [2026-07-17]: mc-orb-one 삭제
+   이유: JSX에서 좌상단의 작은 원형 장식을 지워서 더 이상 쓰이지 않음.
+   before: .mc-orb-one { width: 20px; height: 20px; top: 19%; left: 4%; border: 5px solid rgba(115,87,238,.15); }
+   after: (삭제됨) */
 .mc-orb-two { width: 180px; height: 180px; right: -70px; bottom: 12%; background: #e8f9f5; filter: blur(15px); }
 .mc-scroll-cue { position: absolute; left: 50%; bottom: 24px; display: flex; flex-direction: column; align-items: center; gap: 8px; color: #a09dac; text-decoration: none; transform: translateX(-50%); }
 .mc-scroll-cue span { font: 600 .56rem/1 'DM Sans', sans-serif; letter-spacing: .18em; }
@@ -216,9 +231,26 @@
 .mc-path-landmarks circle:nth-child(even) { fill: var(--mc-violet); }
 .mc-story-panel { position: relative; z-index: 2; min-height: 100svh; padding: 130px max(5vw, 28px) 100px; display: grid; place-items: center; }
 .mc-panel-inner { width: min(1160px, 100%); margin: auto; }
-.mc-section-heading { max-width: 690px; margin: 0 auto 54px; text-align: center; }
+/* 수정된 부분 [2026-07-17]: 섹션 헤딩 영역에 박스(반투명 카드) 배경 추가
+   이유(요청 0): mc-story-panel/mc-panel-inner 자체는 배경이 투명해서, 뒤에 깔린
+   mc-journey-line(z-index:0) 여정 라인이 "ONE SIMPLE FLOW" 같은 헤딩 텍스트를
+   그대로 뚫고 지나가 보이는 문제가 있었음(요청 원문: "선이 텍스트를 침범").
+   해결: 카드형 반투명 박스(background + blur + radius)를 씌워 텍스트 영역에서는
+   라인이 보이지 않도록 완전히 가림. position:relative + z-index:3으로
+   여정 라인(z-index:0)보다 확실히 위에 오도록 스태킹도 명시함. */
+.mc-section-heading {
+  position: relative;
+  z-index: 3;
+  max-width: min(920px, 92%);
+  margin: 0 auto 54px;
+  padding: 30px clamp(20px, 4vw, 46px);
+  border-radius: 22px;
+  background: rgba(252, 252, 255, .82);
+  backdrop-filter: blur(10px);
+  text-align: center;
+}
 .mc-section-heading > span, .mc-feature-index, .mc-final-card > span, .mc-faq-heading > span { display: inline-block; margin-bottom: 14px; color: var(--mc-violet); font: 700 .68rem/1 'DM Sans', sans-serif; letter-spacing: .16em; }
-.mc-section-heading h2 { font-size: clamp(2rem, 3.7vw, 3.15rem); line-height: 1.25; font-weight: 800; word-break: keep-all; }
+.mc-section-heading h2 { font-size: clamp(2rem, 3.5vw, 3.15rem); line-height: 1.25; font-weight: 800; word-break: keep-all; }
 .mc-section-heading p { margin-top: 16px; color: var(--mc-muted); font-size: .95rem; }
 .mc-process-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .mc-process-card { position: relative; overflow: hidden; min-height: 355px; padding: 27px 26px 23px; border: 1px solid rgba(110, 90, 179, .13); border-radius: 23px; background: rgba(255,255,255,.86); box-shadow: 0 22px 60px rgba(59, 42, 115, .08); backdrop-filter: blur(12px); transition: transform .3s ease, box-shadow .3s ease; }
@@ -231,23 +263,59 @@
 .mc-process-card > small { color: #9a96a8; font: 700 .6rem/1 'DM Sans', sans-serif; letter-spacing: .15em; }
 .mc-process-card h3 { margin: 10px 0 10px; color: var(--mc-ink); font-size: 1.16rem; letter-spacing: -.035em; }
 .mc-process-card > p { color: #747587; font-size: .78rem; line-height: 1.75; word-break: keep-all; }
-.mc-card-sketch { position: absolute; inset: auto 24px 21px; height: 78px; display: flex; align-items: center; justify-content: center; gap: 9px; border-radius: 15px; background: #f8f6ff; color: #8068df; }
-.mc-card-blue .mc-card-sketch { background: #f5f8ff; color: #5580de; }
-.mc-card-mint .mc-card-sketch { background: #f2fbf8; color: #38a78f; }
-.mc-card-sketch > i { display: block; width: 12px; height: 12px; border: 3px solid currentColor; border-radius: 50%; background: #fff; }
-.mc-card-sketch svg:not(:only-child) { position: absolute; width: 75%; height: 70%; }
-.mc-card-sketch svg path { fill: none; stroke: currentColor; stroke-width: 2; stroke-dasharray: 4 4; }
-.mc-card-sketch .mc-line-long, .mc-card-sketch .mc-line-short { width: 45%; height: 6px; border: 0; border-radius: 4px; background: #ddd6f8; }
-.mc-card-sketch .mc-line-short { width: 19%; background: #e9e5f8; }
-.mc-card-sketch > svg:last-child { position: static; width: 29px; height: 29px; }
-.mc-card-sketch .mc-ai-line { width: 44%; height: 2px; border: 0; border-radius: 0; background: repeating-linear-gradient(90deg, currentColor 0 5px, transparent 5px 9px); }
+/* 수정된 부분 [2026-07-17]: mc-card-sketch를 "손그림 장식" 스타일에서
+   "GIF 자리 placeholder" 스타일로 전면 교체
+   이유(요청 3): JSX에서 index별 점선/곡선/아이콘 장식(before 참고)을 모두 지우고
+   Film 아이콘 + 안내 텍스트로 통일했으므로, 그 하위 셀렉터들(mc-line-long 등)도
+   더 이상 쓰이지 않아 함께 정리하고 점선 박스 스타일로 바꿈.
+   before: 배경색 실선 박스 + i(점)/svg(곡선)/mc-line-long/mc-line-short/mc-ai-line 등
+   세부 장식 셀렉터 다수
+   after: 아래 점선 박스 + 아이콘 + 텍스트 스타일로 단순화 */
+.mc-card-sketch {
+  position: absolute;
+  inset: auto 24px 21px;
+  height: 78px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 15px;
+  border: 1.5px dashed #cabdf2;
+  background: #f8f6ff;
+  color: #8068df;
+  font-size: .6rem;
+  font-weight: 700;
+}
+.mc-card-blue .mc-card-sketch { border-color: #c3d4f7; background: #f5f8ff; color: #5580de; }
+.mc-card-mint .mc-card-sketch { border-color: #bfe8dd; background: #f2fbf8; color: #38a78f; }
 
 .mc-feature-layout { display: grid; grid-template-columns: .78fr 1.22fr; align-items: center; gap: clamp(58px, 8vw, 115px); }
 .mc-feature-reverse { grid-template-columns: 1.15fr .85fr; }
 .mc-feature-reverse .mc-feature-copy { order: 2; }
-.mc-feature-copy { padding: 20px 0; }
+/* 수정된 부분 [2026-07-17]: mc-feature-copy(MIND MAP / AI CRAFTING 섹션의 텍스트
+   컬럼)에도 동일한 이유(요청 0)로 박스 배경을 추가. 두 섹션 모두 좌우 배치에 따라
+   여정 라인이 텍스트 컬럼 쪽으로 지나가는 경우가 있어 카드형 박스로 감싸 침범을 막음.
+   before: .mc-feature-copy { padding: 20px 0; }
+   after: 아래처럼 배경/여백/스태킹 추가 */
+.mc-feature-copy {
+  position: relative;
+  z-index: 3;
+  padding: 28px clamp(20px, 4vw, 40px);
+  border-radius: 22px;
+  background: rgba(252, 252, 255, .82);
+  backdrop-filter: blur(10px);
+}
 .mc-feature-index { color: var(--mc-blue); }
-.mc-feature-copy h2 { font-size: clamp(2.1rem, 3.7vw, 3.5rem); line-height: 1.2; font-weight: 800; word-break: keep-all; }
+/* 수정된 부분 [2026-07-17]: MIND MAP / AI CRAFTING 섹션 타이틀(mc-feature-copy h2)
+   폰트 크기 스케일 축소
+   이유(버그 리포트): "01 mindmap 의 Title도 글자 끊김 현상 발생". 이 h2는
+   mc-feature-copy 박스(요청 0에서 추가한 반투명 카드) 안에 들어있는데, vw 계수가
+   커서 카드 padding을 뺀 실제 너비보다 텍스트가 넓어지는 폭에서 글자가 잘렸음.
+   해결: vw 계수를 3.7→2.8, 최댓값을 3.5rem→2.9rem으로 낮춤.
+   before: font-size: clamp(2.1rem, 3.7vw, 3.5rem);
+   after: font-size: clamp(2.1rem, 2.8vw, 2.9rem); */
+.mc-feature-copy h2 { font-size: clamp(2.1rem, 2.8vw, 2.9rem); line-height: 1.25; font-weight: 800; word-break: keep-all; }
 .mc-feature-copy > p { margin-top: 23px; color: var(--mc-muted); font-size: .9rem; line-height: 1.85; word-break: keep-all; }
 .mc-feature-copy ul { display: grid; gap: 13px; margin: 27px 0 0; padding: 0; list-style: none; }
 .mc-feature-copy li { display: flex; align-items: center; gap: 9px; color: #525466; font-size: .79rem; font-weight: 600; }
@@ -255,46 +323,73 @@
 .mc-inline-btn { width: fit-content; display: inline-flex; align-items: center; gap: 8px; margin-top: 29px; padding: 0 0 5px; border: 0; border-bottom: 1px solid #bbb1eb; color: var(--mc-violet-deep); background: none; font-size: .8rem; font-weight: 700; text-decoration: none; cursor: pointer; }
 .mc-inline-btn svg { transition: transform .2s ease; }
 .mc-inline-btn:hover svg { transform: translateX(4px); }
-.mc-demo-frame, .mc-document-demo { position: relative; overflow: hidden; aspect-ratio: 1.23; border: 1px solid rgba(88, 68, 158, .13); border-radius: 25px; background: #fff; box-shadow: 0 34px 80px rgba(57, 45, 111, .13); }
-.mc-demo-caption { height: 62px; display: flex; align-items: center; justify-content: space-between; padding: 0 22px; border-bottom: 1px solid #eeebf6; }
+/* 수정된 부분 [2026-07-17]: mc-document-demo를 복합 선택자에서 분리해 삭제
+   이유: AI CRAFTING 좌측 문서 미리보기 목업을 JSX에서 지운 지 오래라
+   mc-document-demo는 이제 어디서도 안 쓰임. 같은 선택자를 공유하던
+   mc-demo-frame(MIND MAP 데모 박스)은 여전히 쓰이므로 그대로 남김.
+   before: .mc-demo-frame, .mc-document-demo { ... }
+   after: .mc-demo-frame { ... } */
+.mc-demo-frame { position: relative; overflow: hidden; aspect-ratio: 1.23; border: 1px solid rgba(88, 68, 158, .13); border-radius: 25px; background: #fff; box-shadow: 0 34px 80px rgba(57, 45, 111, .13); }
+/* 수정된 부분 [2026-07-17]: justify-content: space-between → flex-start
+   이유(요청 4): "LIVE DEMO" span을 JSX에서 삭제해 자식이 small 하나만 남았는데,
+   space-between인 채로 두면 혼자 있는 small이 양 끝으로 벌어져 보이는 대신
+   그냥 가운데로 몰려버리는 문제가 있어 좌측 정렬로 변경. */
+.mc-demo-caption { height: 62px; display: flex; align-items: center; justify-content: flex-start; padding: 0 22px; border-bottom: 1px solid #eeebf6; }
 .mc-demo-caption span { display: flex; align-items: center; gap: 8px; color: #6a6480; font: 700 .59rem/1 'DM Sans', sans-serif; letter-spacing: .12em; }
 .mc-demo-caption span i { width: 7px; height: 7px; border-radius: 50%; background: #2ec5a6; box-shadow: 0 0 0 4px rgba(46,197,166,.15); }
 .mc-demo-caption small { color: #aba8b6; font-size: .6rem; }
 .mc-demo-canvas { position: relative; height: calc(100% - 62px); background: radial-gradient(circle, #ded9ee 1px, transparent 1px); background-size: 22px 22px; }
-.mc-demo-toast { position: absolute; left: 50%; bottom: 17px; z-index: 5; display: flex; align-items: center; gap: 7px; width: max-content; max-width: calc(100% - 30px); padding: 10px 14px; border: 1px solid #dbf0e9; border-radius: 10px; color: #3a7568; background: rgba(247,255,252,.95); font-size: .62rem; font-weight: 700; box-shadow: 0 10px 30px rgba(37,103,89,.11); transform: translateX(-50%); animation: mc-toast 5s ease-in-out infinite; }
+/* 수정된 부분 [2026-07-17]: mc-demo-toast 삭제
+   이유: "새로운 연결에서 '문제 해결력'을 발견했어요" 토스트를 JSX에서 지운 지
+   오래라 더 이상 쓰이지 않음. 이 규칙이 참조하던 @keyframes mc-toast도 다른
+   곳에서 쓰이지 않아 함께 삭제(아래 keyframes 목록 참고).
+   before: .mc-demo-toast { ... animation: mc-toast 5s ...; }
+   after: (삭제됨) */
 .mc-ai-panel { background: radial-gradient(circle at 25% 50%, rgba(228,239,255,.7), transparent 36%); }
+
+/* 추가된 부분 [2026-07-17]: AI CRAFTING 섹션 좌측 GIF/영상 placeholder 박스
+   이유(요청 5): 정적 문서 목업(mc-document-demo)을 지우고 그 자리에 넣은
+   빈 박스. 기존 mc-document-demo와 비슷한 비율(aspect-ratio)과 카드 톤(radius,
+   shadow)을 맞춰서 레이아웃이 갑자기 어색해지지 않도록 함. */
+.mc-gif-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  aspect-ratio: 1.18;
+  border: 2px dashed #cabdf2;
+  border-radius: 25px;
+  background: linear-gradient(135deg, #f8f6ff, #f2effc);
+  color: #8068df;
+  font-size: .78rem;
+  font-weight: 700;
+}
+.mc-gif-placeholder svg { width: 34px; height: 34px; opacity: .75; }
 .mc-metric-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 27px; }
 .mc-metric-row div { padding: 13px 10px; border: 1px solid #e9e5f3; border-radius: 11px; background: rgba(255,255,255,.65); }
 .mc-metric-row b, .mc-metric-row span { display: block; }
 .mc-metric-row b { color: var(--mc-violet-deep); font-size: .78rem; }
 .mc-metric-row span { margin-top: 3px; color: #9996a5; font-size: .57rem; }
-.mc-document-demo { aspect-ratio: 1.18; transform: rotate(-1deg); }
-.mc-document-toolbar { height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 19px; border-bottom: 1px solid #ebe9f2; background: #fcfcfe; }
-.mc-document-toolbar > span { display: flex; align-items: center; gap: 7px; color: #5d5b6b; font-size: .69rem; font-weight: 700; }
-.mc-document-toolbar > div { display: flex; gap: 6px; }
-.mc-document-toolbar button { height: 29px; padding: 0 10px; border: 1px solid #dfdbe9; border-radius: 7px; color: #6d687c; background: #fff; font-size: .58rem; }
-.mc-document-toolbar button:first-child { width: 29px; padding: 0; }
-.mc-document-content { padding: 34px clamp(26px, 5vw, 50px); }
-.mc-doc-label { display: inline-block; padding: 5px 8px; border-radius: 6px; color: #5b48b0; background: #f0edff; font-size: .55rem; font-weight: 700; }
-.mc-document-content h3 { margin: 17px 0 19px; color: #292a3b; font-size: clamp(1rem, 1.6vw, 1.45rem); line-height: 1.45; letter-spacing: -.035em; }
-.mc-document-content p { color: #747482; font-size: .64rem; line-height: 2; }
-.mc-document-content mark { padding: 2px; color: inherit; background: #e5efff; }
-.mc-typing-line { width: 92%; margin-top: 12px; overflow: hidden; border-right: 2px solid var(--mc-violet); white-space: nowrap; animation: mc-type 6s steps(45) infinite; }
-.mc-ai-status { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 13px 20px; border-top: 1px solid #ebe8f2; color: #6a5bb2; background: #faf9ff; font-size: .6rem; font-weight: 700; }
-.mc-ai-status span { display: flex; align-items: center; gap: 6px; }
-.mc-ai-status > i { position: relative; flex: 1; max-width: 130px; height: 4px; overflow: hidden; border-radius: 5px; background: #e6e2f3; }
-.mc-ai-status > i > i { position: absolute; inset: 0 35% 0 0; border-radius: inherit; background: linear-gradient(90deg, var(--mc-violet), var(--mc-blue)); animation: mc-progress 3s ease-in-out infinite; }
+/* 수정된 부분 [2026-07-17]: mc-document-demo/toolbar/content/doc-label/typing-line/
+   ai-status 전부 삭제
+   이유: AI CRAFTING 좌측에 있던 자기소개서 문서 미리보기 목업 전체가 JSX에서
+   이미 삭제됐는데, 그 안에서만 쓰이던 이 CSS 규칙들은 그동안 정리가 안 되고
+   남아있었음. JSX 어디에도 이 클래스들을 쓰는 곳이 없어 안전하게 삭제.
+   before: .mc-document-demo, .mc-document-toolbar(+하위 4개), .mc-document-content(+하위 4개),
+   .mc-typing-line, .mc-ai-status(+하위 3개) 총 13개 규칙
+   after: (삭제됨) */
 
 .mc-closing { padding: 105px max(5vw, 28px) 70px; background: #fcfcff; }
-.mc-community-strip { width: min(940px, 100%); margin: 0 auto 45px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; }
-.mc-community-strip span { display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border: 1px solid #e8e5f0; border-radius: 999px; color: #777587; background: #fff; font-size: .65rem; }
-.mc-community-strip i { width: 27px; height: 27px; display: grid; place-items: center; border-radius: 50%; color: #fff; background: #8066e2; font-size: .58rem; font-style: normal; font-weight: 700; }
-.mc-community-strip span:nth-child(2n) i { background: #5681d7; }
-.mc-community-strip span:nth-child(3n) i { background: #3eaa94; }
+/* 수정된 부분 [2026-07-17]: mc-community-strip 관련 규칙 5개 삭제
+   이유: "취업 준비/프로젝트 정리/직무 탐색/자기소개서/면접 준비" 태그 스트립을
+   JSX에서 삭제한 지 오래라 더 이상 쓰이지 않음.
+   before: .mc-community-strip(+ span/i/nth-child 하위 4개) 총 5개 규칙
+   after: (삭제됨) */
 .mc-final-card { position: relative; overflow: hidden; width: min(1100px, 100%); min-height: 455px; margin: auto; padding: 78px 80px; border-radius: 31px; color: #fff; background: linear-gradient(125deg, #5c42c7 0%, #7655e8 48%, #507bd5 100%); box-shadow: 0 35px 90px rgba(78, 55, 176, .24); }
 .mc-final-card::before { content: ''; position: absolute; width: 360px; height: 360px; right: -70px; top: -130px; border: 1px solid rgba(255,255,255,.16); border-radius: 50%; box-shadow: 0 0 0 55px rgba(255,255,255,.035), 0 0 0 110px rgba(255,255,255,.025); }
 .mc-final-card > span { position: relative; z-index: 2; display: flex; align-items: center; gap: 7px; color: #dcd5ff; }
-.mc-final-card h2 { position: relative; z-index: 2; color: #fff; font-size: clamp(2.15rem, 4vw, 3.8rem); line-height: 1.2; }
+.mc-final-card h2 { position: relative; z-index: 2; color: #fff; font-size: clamp(2.15rem, 3vw, 3.8rem); line-height: 1.2; }
 .mc-final-card > p { position: relative; z-index: 2; margin: 19px 0 27px; color: rgba(255,255,255,.75); font-size: .88rem; }
 .mc-primary-light { position: relative; z-index: 4; color: var(--mc-violet-deep); background: #fff; box-shadow: 0 12px 30px rgba(32,22,77,.2); }
 .mc-final-map { position: absolute; z-index: 1; width: 47%; height: 100%; right: 0; top: 0; opacity: .65; }
@@ -302,7 +397,7 @@
 .mc-final-map .mc-map-node { border-color: rgba(255,255,255,.28); color: rgba(255,255,255,.9); background: rgba(255,255,255,.12); box-shadow: none; backdrop-filter: blur(5px); }
 .mc-final-map .mc-map-node-main { background: rgba(255,255,255,.9); color: var(--mc-violet-deep); }
 .mc-faq { width: min(920px, calc(100% - 56px)); margin: 0 auto; padding: 95px 0 110px; display: grid; grid-template-columns: .65fr 1.35fr; gap: 70px; }
-.mc-faq-heading h2 { font-size: 2rem; line-height: 1.25; }
+.mc-faq-heading h2 { font-size: 1.9rem; line-height: 1.25; }
 .mc-faq-list article { border-bottom: 1px solid #e7e4ee; }
 .mc-faq-list article:first-child { border-top: 1px solid #e7e4ee; }
 .mc-faq-list button { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 4px; border: 0; color: #3f4051; background: none; font-size: .84rem; font-weight: 700; text-align: left; cursor: pointer; }
@@ -312,12 +407,74 @@
 .mc-faq-list article.is-open > div { grid-template-rows: 1fr; }
 .mc-faq-list article > div > p { min-height: 0; overflow: hidden; color: #777887; font-size: .76rem; line-height: 1.8; }
 .mc-faq-list article.is-open > div > p { padding: 0 30px 22px 4px; }
-.mc-footer { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 30px; padding: 30px max(5vw, 28px); border-top: 1px solid #ece9f2; color: #92909d; font-size: .65rem; }
-.mc-footer a { display: flex; align-items: center; gap: 9px; color: var(--mc-ink); text-decoration: none; }
-.mc-footer a svg { color: var(--mc-violet); }
-.mc-footer a b { font-family: 'Manrope', sans-serif; font-size: .8rem; }
-.mc-footer a b span { color: var(--mc-violet); }
-.mc-footer > span { justify-self: end; }
+/* 수정된 부분 [2026-07-17]: Footer(mc-footer)와 introduction(mc-intro)을
+   하나의 검은 footer로 통합하면서 mc-footer 관련 규칙 전체 삭제
+   이유(사용자 피드백): 로고가 두 번 나오고 흰→검은 배경이 급하게 끊기는 문제.
+   JSX에서 <footer className="mc-footer">를 완전히 지우고 <footer className="mc-intro">
+   하나로 합쳤으므로, mc-footer / mc-footer-logo-img 전용 CSS는 더 이상 어디서도
+   쓰이지 않아 함께 삭제함.
+   before: .mc-footer, .mc-footer a, .mc-footer a svg, .mc-footer a b,
+           .mc-footer a b span, .mc-footer > span, .mc-footer-logo-img 총 7개 규칙
+   after: (삭제됨, 아래 mc-intro 계열 규칙으로 통합) */
+
+/* 수정된 부분 [2026-07-17]: introduction 섹션을 "태그라인(위, 가운데 정렬) +
+   좌측 클러스터(로고/GitHub/만든사람) + 우측 저작권" 2단 구조로 재구성
+   이유(사용자 피드백): 기존 Footer에 있던 태그라인과 저작권을 이 통합 footer
+   안으로 그대로 옮기되, 태그라인은 요청대로 가운데 정렬을 유지한 채 맨 위 줄로,
+   저작권은 오른쪽 그대로 유지해야 해서 flex-wrap 한 줄이던 기존 mc-intro 구조로는
+   안 되어 "위/아래 2줄" 구조로 다시 짬.
+   - mc-intro: 세로로 쌓이는 바깥 컨테이너(검은 배경 유지)
+   - mc-intro-tagline: 태그라인, 가운데 정렬
+   - mc-intro-row: 태그라인 아래 줄. 좌측 클러스터 ↔ 저작권을 양 끝으로 배치
+   - mc-intro-left: 로고 + GitHub + 만든사람을 한 줄로 묶는 좌측 클러스터
+   - mc-intro-copyright: 우측 저작권 텍스트(기존 mc-footer > span 자리를 계승) */
+.mc-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 30px max(5vw, 28px) 34px;
+  background: #0b0b10;
+  color: #b9b6c6;
+  font-size: .68rem;
+}
+.mc-intro-tagline { margin: 0; text-align: center; color: #8f8ca0; font-size: .76rem; }
+/* 수정된 부분 [2026-07-17]: mc-intro-row를 flex(space-between) → 3열 grid로 변경
+   이유(사용자 피드백, 스크린샷): 로고/GitHub/만든사람 클러스터(mc-intro-left)가
+   왼쪽에 붙어있던 걸 가운데 정렬로 바꿔달라는 요청. 저작권(mc-intro-copyright)은
+   "오른쪽 그대로 유지"가 이전 요청이라 그대로 두어야 해서, 단순히
+   justify-content: center로 바꾸면 두 요소가 붙어서 가운데로 몰리며 저작권까지
+   가운데로 끌려와 버림. 그래서 1fr / auto / 1fr 3열 grid로 바꿔 가운데 칸에
+   클러스터를, 3번째 칸 오른쪽 끝에 저작권을 배치해 "클러스터는 줄 전체 기준
+   정가운데, 저작권은 오른쪽 끝"을 동시에 만족시킴.
+   before: display: flex; justify-content: space-between;
+   after: display: grid; grid-template-columns: 1fr auto 1fr; (아래) */
+/* 수정된 부분 [2026-07-17]: 태그라인과 아래 줄 사이 구분선 제거
+   이유(사용자 피드백, 스크린샷): "중간에 있는 선 빼줘" — 태그라인과 클러스터 줄
+   사이를 나누던 옅은 상단 테두리가 불필요하다는 요청.
+   before: border-top: 1px solid #1e1e28;
+   after: (삭제됨, padding-top은 여백 유지를 위해 그대로 둠) */
+.mc-intro-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 20px;
+  padding-top: 18px;
+}
+/* 추가된 부분 [2026-07-17]: mc-intro-left를 grid 가운데 칸에 배치 */
+.mc-intro-left { grid-column: 2; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 26px; }
+.mc-intro-brand { display: flex; align-items: center; gap: 8px; color: #fff; text-decoration: none; }
+.mc-intro-logo-img { height: 20px; width: auto; display: block; }
+.mc-intro-brand b { font-family: 'Manrope', sans-serif; font-size: .76rem; }
+.mc-intro-github { display: flex; align-items: center; gap: 6px; color: #b9b6c6; text-decoration: none; font-weight: 700; }
+.mc-intro-github:hover { color: #fff; }
+.mc-intro-credits { display: flex; align-items: center; gap: 10px; }
+.mc-intro-credits-label { color: #7d7a8c; font-weight: 700; }
+.mc-intro-credits ul { display: flex; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.mc-intro-credits li { padding: 3px 10px; border: 1px solid #2a2a35; border-radius: 999px; background: #17171f; color: #d8d6e2; font-weight: 600; }
+/* 수정된 부분 [2026-07-17]: mc-intro-copyright를 grid 3번째 칸 오른쪽 끝에 배치
+   before: color: #6d6a7c; font-size: .65rem; (flex item, space-between으로 자연히 오른쪽)
+   after: grid-column: 3, justify-self: end 추가로 grid에서도 계속 오른쪽 유지 */
+.mc-intro-copyright { grid-column: 3; justify-self: end; color: #6d6a7c; font-size: .65rem; }
 
 .mc-page .float-cta-btn {
   left: auto;
@@ -346,9 +503,11 @@
 @keyframes mc-cursor { 0%, 100% { transform: translate(20px, 25px); } 45%, 60% { transform: translate(-75px, -80px); } }
 @keyframes mc-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 @keyframes mc-scroll-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(4px); } }
-@keyframes mc-toast { 0%, 20%, 100% { opacity: 0; transform: translate(-50%, 8px); } 30%, 80% { opacity: 1; transform: translate(-50%, 0); } }
-@keyframes mc-type { 0%, 15% { width: 0; } 65%, 85% { width: 92%; } 100% { width: 0; } }
-@keyframes mc-progress { 0%, 100% { transform: translateX(-15%); } 50% { transform: translateX(50%); } }
+/* 수정된 부분 [2026-07-17]: 안 쓰는 keyframe 3개(mc-toast, mc-type, mc-progress) 삭제
+   이유: 각각 mc-demo-toast(문제 해결력 토스트), mc-typing-line, mc-ai-status가
+   쓰던 애니메이션인데 그 요소들을 JSX에서 이미 삭제해서 참조하는 곳이 없어짐.
+   before: @keyframes mc-toast {...} / @keyframes mc-type {...} / @keyframes mc-progress {...}
+   after: (삭제됨) */
 @keyframes mc-float-cta-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
 @media (max-width: 980px) {
@@ -365,7 +524,7 @@
   .mc-process-card { min-height: 330px; padding-inline: 20px; }
   .mc-feature-layout, .mc-feature-reverse { grid-template-columns: 1fr; gap: 48px; }
   .mc-feature-copy, .mc-feature-reverse .mc-feature-copy { order: 0; max-width: 640px; }
-  .mc-demo-frame, .mc-document-demo { width: min(700px, 100%); }
+  .mc-demo-frame { width: min(700px, 100%); }
   .mc-journey-line { opacity: .52; }
   .mc-feature-panel:nth-of-type(2) .mc-feature-copy { margin-left: auto; }
   .mc-final-card { padding: 65px 50px; }
@@ -387,7 +546,6 @@
   .mc-window-top { grid-template-columns: auto 1fr; gap: 12px; }
   .mc-window-top > span:nth-child(2) { text-align: left; }
   .mc-live { display: none; }
-  .mc-window-tools { display: none; }
   .mc-map-node { min-width: 68px; height: 31px; padding-inline: 8px; font-size: .52rem; }
   .mc-map-node-main { min-width: 95px; height: 38px; }
   .mc-note-top { right: -5px; top: 10%; }
@@ -404,23 +562,30 @@
   .mc-feature-copy > p { font-size: .82rem; }
   .mc-feature-copy li { align-items: flex-start; line-height: 1.6; }
   .mc-feature-copy li svg { margin-top: 2px; flex: none; }
-  .mc-demo-frame, .mc-document-demo { aspect-ratio: .96; border-radius: 18px; }
+  .mc-demo-frame { aspect-ratio: .96; border-radius: 18px; }
   .mc-demo-caption small { display: none; }
-  .mc-document-content { padding: 25px 22px; }
-  .mc-document-content h3 { margin-block: 13px; }
-  .mc-document-content p { line-height: 1.75; }
   .mc-metric-row { grid-template-columns: 1fr; }
   .mc-metric-row div { display: flex; justify-content: space-between; align-items: center; }
   .mc-metric-row span { margin-top: 0; }
   .mc-closing { padding: 80px 20px 55px; }
-  .mc-community-strip span:nth-child(n+4) { display: none; }
   .mc-final-card { min-height: 480px; padding: 55px 28px; text-align: center; }
   .mc-final-card > span { justify-content: center; }
   .mc-final-card h2 { font-size: 2.4rem; }
   .mc-final-map { width: 100%; top: 39%; opacity: .2; }
   .mc-faq { width: calc(100% - 40px); padding: 80px 0; grid-template-columns: 1fr; gap: 35px; }
-  .mc-footer { grid-template-columns: 1fr auto; }
-  .mc-footer p { display: none; }
+  /* 수정된 부분 [2026-07-17]: mc-footer 관련 모바일 규칙 삭제
+     이유: Footer가 mc-intro로 통합되면서 mc-footer 클래스 자체가 더 이상 쓰이지 않음.
+     before: .mc-footer { grid-template-columns: 1fr auto; } / .mc-footer p { display: none; }
+     after: (삭제됨) */
+  /* 수정된 부분 [2026-07-17]: introduction(통합 footer) 모바일 대응
+     이유: 좁은 화면에서 좌측 클러스터(로고/GitHub/만든사람)와 저작권이 한 줄에
+     다 안 들어가므로 전부 가운데 정렬로 쌓이게 처리.
+     before: .mc-intro { flex-direction: column; gap: 16px; padding-bottom: 40px; }
+     after: mc-intro-row/mc-intro-left/mc-intro-copyright까지 함께 세로 정렬 */
+  .mc-intro { gap: 16px; padding-bottom: 40px; }
+  .mc-intro-row { grid-template-columns: 1fr; justify-items: center; gap: 16px; text-align: center; }
+  .mc-intro-left { grid-column: 1; justify-content: center; }
+  .mc-intro-copyright { grid-column: 1; justify-self: center; }
   .mc-page .float-cta-btn { right: 18px; bottom: 18px; }
   .mc-page .top-btn { right: 18px; bottom: 73px; }
 }
