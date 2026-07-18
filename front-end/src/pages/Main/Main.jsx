@@ -160,43 +160,74 @@ function useScrollJourney() {
   // 인라인 스타일로 직접 못박아, 화면 크기와 무관하게 항상 실제 스토리 전체
   // 높이와 정확히 일치하도록 함.
   const lineRef = useRef(null);
+  // 추가된 부분 [2026-07-17]: 여정 라인 물결선(ghost path) 참조용 ref
+  // 이유: 아래 설명 참고 — 창 크기가 바뀔 때마다 path의 d 속성을 다시 그려야
+  // 해서, 기존에는 ref가 없던 점선(배경) path에도 ref가 필요해짐.
+  const ghostPathRef = useRef(null);
   const pathRef = useRef(null);
   const glowRef = useRef(null);
 
   useEffect(() => {
     const story = storyRef.current;
     const line = lineRef.current;
+    const ghostPath = ghostPathRef.current;
     const path = pathRef.current;
     const glow = glowRef.current;
-    if (!story || !line || !path || !glow) return undefined;
+    if (!story || !line || !ghostPath || !path || !glow) return undefined;
 
     // 추가된 부분 [2026-07-16]: 점이 스크롤보다 아주 조금만 먼저 이동하도록 설정
     // 이유: 1보다 크게 설정하면 점이 스크롤을 살짝 선행하지만 혼자 빠르게 달아나지 않음.
     const DOT_SCROLL_SPEED = 1.5;
     // 추가된 부분 [2026-07-16]: 시작점이 화면 최상단에 잘리지 않도록 약간 아래에서 시작
     const DOT_START_OFFSET_PX = 100;
-    const PATH_VIEWBOX_HEIGHT = 3000;
-    // 추가된 부분 [2026-07-17]: 글로우 점의 x좌표를 퍼센트로 환산할 때 쓸 뷰박스 너비
-    // 이유: glow가 SVG circle → HTML span으로 바뀌면서 cx 대신 left(%)를 계산해야 함
-    const PATH_VIEWBOX_WIDTH = 1200;
     const PATH_SAMPLE_COUNT = 700;
+
+    // 수정된 부분 [2026-07-17]: path를 고정 1200x3000 좌표가 아니라
+    // "너비/높이에 대한 비율(0~1)"로 정의하고, 실제 렌더링 크기에 맞춰 매번
+    // d 속성을 다시 그리도록 변경
+    // 이유(버그 리포트): "브라우저 사이즈에 따라 선이 다르게 보임 — 100%일 때처럼
+    // 동일하게 보이게 하고 싶다". 원인은 이 SVG가 viewBox="0 0 1200 3000"을
+    // preserveAspectRatio="none"으로 실제 컨테이너 크기에 맞춰 가로/세로를 각각
+    // 다른 비율로 늘려서 그리고 있었기 때문. 창 폭이 바뀌면 가로 확대 비율만
+    // 바뀌고 세로 비율은 그대로라, 곡선의 좌우 폭 대 상하 길이 비율이 창
+        // 크기마다 달라져 모양이 계속 다르게 보였음.
+    // 해결: 고정 좌표 대신 각 점을 "가로/세로 비율(0~1)"로만 저장해두고,
+    // 실제 컨테이너 너비(containerWidth)와 실제 스토리 높이(storyHeight)를 잴
+    // 때마다 그 비율 그대로 real px 좌표로 환산해 d 속성을 다시 그림. 이러면
+    // 좌표계가 항상 실제 렌더링 크기와 1:1로 맞아 늘어나거나 눌리는 왜곡 자체가
+    // 생기지 않고, 곡선의 가로 폭 대 세로 길이 비율도 창 크기와 무관하게
+    // 항상 동일하게 유지됨(=100%일 때와 똑같은 비율로 보임).
+    // before: <path d="M600 0 C600 210 315 170 315 460 ..." /> (고정 좌표, JSX에 하드코딩)
+    // after: 아래 PATH_POINTS(비율)로 매번 계산해서 setAttribute('d', ...)
+    const PATH_POINTS = [
+      [0.5, 0],
+      [0.5, 0.07], [0.2625, 0.056667], [0.2625, 0.153333],
+      [0.2625, 0.216667], [0.729167, 0.193333], [0.729167, 0.32],
+      [0.729167, 0.413333], [0.3, 0.39], [0.3, 0.513333],
+      [0.3, 0.603333], [0.691667, 0.59], [0.691667, 0.703333],
+      [0.691667, 0.803333], [0.5, 0.816667], [0.5, 1],
+    ];
+
+    const buildPathD = (width, height) => {
+      const toXY = ([fx, fy]) => `${(fx * width).toFixed(1)} ${(fy * height).toFixed(1)}`;
+      let d = `M${toXY(PATH_POINTS[0])}`;
+      for (let index = 1; index < PATH_POINTS.length; index += 3) {
+        d += ` C${toXY(PATH_POINTS[index])} ${toXY(PATH_POINTS[index + 1])} ${toXY(PATH_POINTS[index + 2])}`;
+      }
+      return d;
+    };
 
     let frame = null;
     let storyHeight = Math.max(story.offsetHeight, 1);
+    let containerWidth = Math.max(line.clientWidth, 1);
     let targetProgress = 0;
     let displayProgress = 0;
     let targetOpacity = 0;
-
-    const pathLength = path.getTotalLength();
-
-    // 추가된 부분 [2026-07-16]: 경로를 미리 여러 지점으로 나눠 저장
-    // 이유: 단순히 경로 길이 비율을 쓰면 곡선이 크게 휘는 부분에서 점의 세로 속도가
-    // 달라질 수 있으므로, 목표 세로 위치와 가장 가까운 경로 지점을 찾아 사용함.
-    const pathSamples = Array.from({ length: PATH_SAMPLE_COUNT + 1 }, (_, index) => {
-      const length = pathLength * (index / PATH_SAMPLE_COUNT);
-      const point = path.getPointAtLength(length);
-      return { length, y: point.y };
-    });
+    // 수정된 부분 [2026-07-17]: pathLength/pathSamples를 상수가 아니라 재계산
+    // 가능한 변수로 변경 (창 크기가 바뀔 때마다 path 자체가 다시 그려지므로
+    // 경로 길이와 샘플도 그때그때 다시 구해야 함)
+    let pathLength = 1;
+    let pathSamples = [];
 
     const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
@@ -216,15 +247,31 @@ function useScrollJourney() {
       return nearest.length / pathLength;
     };
 
-    // 수정된 부분 [2026-07-17]: storyHeight를 재는 김에 line(여정 라인 컨테이너)의
-    // 실제 height도 인라인 스타일로 함께 못박음
-    // 이유: 위 lineRef 설명 참고 — CSS height:100%가 어긋나 선이 끝까지 안
-    // 그려지는 문제를 근본적으로 방지.
-    // before: const measure = () => { storyHeight = Math.max(story.offsetHeight, 1); };
-    // after: 아래처럼 line.style.height도 함께 설정
+    // 추가된 부분 [2026-07-17]: 현재 containerWidth/storyHeight 기준으로
+    // path의 d 속성 + 길이 샘플을 전부 다시 계산
+    // 이유: 창 크기가 바뀌면 path 좌표 자체가 달라지므로, 진행률 계산에 쓰는
+    // pathLength/pathSamples도 새 path 기준으로 다시 뽑아야 정확함.
+    const rebuildPath = () => {
+      const d = buildPathD(containerWidth, storyHeight);
+      ghostPath.setAttribute('d', d);
+      path.setAttribute('d', d);
+      pathLength = path.getTotalLength();
+      pathSamples = Array.from({ length: PATH_SAMPLE_COUNT + 1 }, (_, index) => {
+        const length = pathLength * (index / PATH_SAMPLE_COUNT);
+        const point = path.getPointAtLength(length);
+        return { length, y: point.y };
+      });
+    };
+
+    // 수정된 부분 [2026-07-17]: storyHeight/containerWidth를 재는 김에
+    // line(여정 라인 컨테이너)의 실제 height와 path의 d 속성도 함께 다시 그림
+    // before: const measure = () => { storyHeight = Math.max(story.offsetHeight, 1); line.style.height = `${storyHeight}px`; };
+    // after: containerWidth 측정 + rebuildPath() 호출 추가
     const measure = () => {
       storyHeight = Math.max(story.offsetHeight, 1);
+      containerWidth = Math.max(line.clientWidth, 1);
       line.style.height = `${storyHeight}px`;
+      rebuildPath();
     };
 
     const animate = () => {
@@ -239,13 +286,15 @@ function useScrollJourney() {
       story.style.setProperty('--journey-progress', displayProgress);
 
       const point = path.getPointAtLength(pathLength * displayProgress);
-      // 수정된 부분 [2026-07-17]: glow가 SVG <circle>에서 일반 HTML span으로
-      // 바뀌면서, 위치도 SVG 속성(cx/cy)이 아니라 CSS left/top(퍼센트)으로 설정.
-      // path 좌표(0~1200, 0~3000)를 뷰박스 크기로 나눠 퍼센트로 환산함.
-      // before: glow.setAttribute('cx', point.x); glow.setAttribute('cy', point.y);
+      // 수정된 부분 [2026-07-17]: glow 위치를 퍼센트로 환산할 때 고정
+      // PATH_VIEWBOX_WIDTH/HEIGHT(1200/3000) 대신 실제 containerWidth/storyHeight로 나눔
+      // 이유: path 좌표계가 더 이상 고정 1200x3000이 아니라 실제 렌더링 크기와
+      // 1:1로 맞춰져 있으므로, 그 실제 크기 기준으로 퍼센트를 구해야 함.
+      // before: glow.style.left = `${(point.x / PATH_VIEWBOX_WIDTH) * 100}%`;
+      //         glow.style.top = `${(point.y / PATH_VIEWBOX_HEIGHT) * 100}%`;
       // after: 아래 2줄
-      glow.style.left = `${(point.x / PATH_VIEWBOX_WIDTH) * 100}%`;
-      glow.style.top = `${(point.y / PATH_VIEWBOX_HEIGHT) * 100}%`;
+      glow.style.left = `${(point.x / containerWidth) * 100}%`;
+      glow.style.top = `${(point.y / storyHeight) * 100}%`;
       glow.style.opacity = String(targetOpacity);
 
       if (Math.abs(targetProgress - displayProgress) > 0.0003) {
@@ -303,7 +352,12 @@ function useScrollJourney() {
       }
 
       dotLocalY = clamp(dotLocalY, 0, storyHeight);
-      const targetPathY = (dotLocalY / storyHeight) * PATH_VIEWBOX_HEIGHT;
+      // 수정된 부분 [2026-07-17]: targetPathY 환산 시 더 이상 PATH_VIEWBOX_HEIGHT가
+      // 필요 없음 — path 좌표계가 이미 storyHeight와 1:1로 맞춰져 있으므로
+      // dotLocalY 자체가 곧 path 공간에서의 Y좌표임.
+      // before: const targetPathY = (dotLocalY / storyHeight) * PATH_VIEWBOX_HEIGHT;
+      // after: targetPathY = dotLocalY (변환 불필요)
+      const targetPathY = dotLocalY;
       targetProgress = findProgressByY(targetPathY);
 
       // 수정된 부분 [2026-07-16]: 진행률이 95%를 넘었다는 이유로 점을 지우지 않음
@@ -320,6 +374,14 @@ function useScrollJourney() {
       onScroll();
     };
 
+    // 수정된 부분 [2026-07-17]: 마운트 시 onScroll()만 먼저 부르지 않고
+    // measure()를 먼저 호출해 path의 d/길이/샘플을 만들어둔 뒤 onScroll() 실행
+    // 이유: pathSamples/pathLength가 이제 rebuildPath()(= measure() 안에서 호출)로만
+    // 채워지는데, 이 순서가 바뀌면 onScroll()이 먼저 돌면서 findProgressByY가
+    // 빈 배열(pathSamples[0])을 참조해 에러가 날 수 있음.
+    // before: onScroll();
+    // after: measure(); onScroll();
+    measure();
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', handleResize);
@@ -335,7 +397,9 @@ function useScrollJourney() {
     };
   }, []);
 
-  return { storyRef, lineRef, pathRef, glowRef };
+  return {
+    storyRef, lineRef, ghostPathRef, pathRef, glowRef,
+  };
 }
 
 // 추가된 부분 [2026-07-17]: GithubIcon 컴포넌트 (인라인 SVG)
@@ -612,10 +676,18 @@ function AiFeature() {
 // before: <circle ref={glowRef} className="mc-path-glow" r="9" cx="600" cy="0" />
 //         <g className="mc-path-landmarks"><circle .../>...</g>
 // after: 아래 mc-path-landmark span 3개 + mc-path-glow span 1개로 교체
-function JourneyLine({ lineRef, pathRef, glowRef }) {
+function JourneyLine({
+  lineRef, ghostPathRef, pathRef, glowRef,
+}) {
   return (
     <div className="mc-journey-line" ref={lineRef} aria-hidden="true">
-      <svg viewBox="0 0 1200 3000" preserveAspectRatio="none">
+      {/* 수정된 부분 [2026-07-17]: viewBox/preserveAspectRatio 제거
+          이유: path의 d 속성을 이제 실제 렌더링 크기(containerWidth/storyHeight)
+          기준으로 JS가 직접 계산해서 넣어주므로, svg 좌표계가 항상 실제 픽셀
+          크기와 1:1로 맞음 — 뷰박스를 늘려서 맞추는 방식 자체가 필요 없어짐.
+          before: <svg viewBox="0 0 1200 3000" preserveAspectRatio="none">
+          after: <svg> (뷰박스 없음) */}
+      <svg>
         <defs>
           <linearGradient id="journeyGradient" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0" stopColor="#8b5cf6" />
@@ -623,7 +695,12 @@ function JourneyLine({ lineRef, pathRef, glowRef }) {
             <stop offset="1" stopColor="#28c7aa" />
           </linearGradient>
         </defs>
-        <path className="mc-path-ghost" d="M600 0 C600 210 315 170 315 460 C315 650 875 580 875 960 C875 1240 360 1170 360 1540 C360 1810 830 1770 830 2110 C830 2410 600 2450 600 3000" />
+        {/* 수정된 부분 [2026-07-17]: 고정 d 좌표는 JS가 마운트 직후 바로 덮어쓰므로
+            여기 적힌 d 값은 JS 실행 전 아주 잠깐 보일 수 있는 폴백일 뿐이고,
+            ghost path에도 ref를 추가해 JS에서 d를 갱신할 수 있게 함.
+            before: <path className="mc-path-ghost" d="M600 0 ..." /> (ref 없음)
+            after: ref={ghostPathRef} 추가 */}
+        <path ref={ghostPathRef} className="mc-path-ghost" d="M600 0 C600 210 315 170 315 460 C315 650 875 580 875 960 C875 1240 360 1170 360 1540 C360 1810 830 1770 830 2110 C830 2410 600 2450 600 3000" />
         <path ref={pathRef} className="mc-path-progress" pathLength="1" d="M600 0 C600 210 315 170 315 460 C315 650 875 580 875 960 C875 1240 360 1170 360 1540 C360 1810 830 1770 830 2110 C830 2410 600 2450 600 3000" />
       </svg>
       <span className="mc-path-landmark" style={{ left: '26.25%', top: '15.333%' }} />
@@ -727,7 +804,9 @@ function MainPage() {
   const navigate = useNavigate();
   // 추가된 부분 [2026-07-16]: useScrollJourney 훅 연결
   // 이유: 스크롤 스토리 구간(ref)과 여정 라인 SVG(pathRef/glowRef)를 묶어 진행도 표시
-  const { storyRef, lineRef, pathRef, glowRef } = useScrollJourney();
+  const {
+    storyRef, lineRef, ghostPathRef, pathRef, glowRef,
+  } = useScrollJourney();
   // 수정된 부분 [2026-07-16]: useScrollButtons 파라미터 조정
   // 이유: 새 페이지는 스크롤 길이가 훨씬 길어짐. 플로팅 CTA가 마지막 FinalCta/FAQ/푸터
   // 구역(약 520px)과 겹치지 않도록 bottomOffset을 크게 늘리고, 탑 버튼 노출 시점도 소폭 앞당김.
@@ -766,7 +845,7 @@ function MainPage() {
       <Hero onStartClick={handleCtaClick} ctaLabel={ctaLabel} />
       {/* 추가된 부분 [2026-07-16]: 스크롤 스토리 구역 (여정 라인 + 3개 섹션) */}
       <main ref={storyRef} className="mc-scroll-story">
-        <JourneyLine lineRef={lineRef} pathRef={pathRef} glowRef={glowRef} />
+        <JourneyLine lineRef={lineRef} ghostPathRef={ghostPathRef} pathRef={pathRef} glowRef={glowRef} />
         <ProcessSection />
         <MindMapFeature />
         <AiFeature />
