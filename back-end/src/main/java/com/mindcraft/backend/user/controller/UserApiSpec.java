@@ -1,5 +1,6 @@
 package com.mindcraft.backend.user.controller;
 
+import com.mindcraft.backend.global.exception.ErrorResponse;
 import com.mindcraft.backend.user.dto.UserJoinDto;
 import com.mindcraft.backend.user.dto.UserResponseDto;
 import com.mindcraft.backend.user.dto.UserSecurityDto;
@@ -30,8 +31,16 @@ public interface UserApiSpec {
                     description = "조회 성공",
                     content = @Content(schema = @Schema(implementation = UserResponseDto.class))
             ),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 요청(토큰 없음/만료)"),
-            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증되지 않은 요청(토큰 없음/만료)",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "사용자를 찾을 수 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
     })
     ResponseEntity getMyInfo(@Parameter(hidden = true) UserSecurityDto userSecurityDto);
 
@@ -46,7 +55,11 @@ public interface UserApiSpec {
                     description = "가입 성공",
                     content = @Content(schema = @Schema(implementation = UserResponseDto.class))
             ),
-            @ApiResponse(responseCode = "400", description = "이미 가입된 이메일")
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "이미 가입된 이메일",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
     })
     ResponseEntity createUser(@RequestBody @Valid UserJoinDto userJoinDto);
 
@@ -61,8 +74,16 @@ public interface UserApiSpec {
                     description = "수정 성공",
                     content = @Content(schema = @Schema(implementation = UserResponseDto.class))
             ),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 요청(토큰 없음/만료) 또는 현재 비밀번호가 일치하지 않음"),
-            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증되지 않은 요청(토큰 없음/만료) 또는 현재 비밀번호가 일치하지 않음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "사용자를 찾을 수 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
     })
     ResponseEntity updateMyInfo(
             UserSecurityDto userSecurityDto,
@@ -78,8 +99,16 @@ public interface UserApiSpec {
                     responseCode = "200",
                     description = "탈퇴 성공"
             ),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 요청(토큰 없음/만료) 또는 비밀번호가 일치하지 않음"),
-            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증되지 않은 요청(토큰 없음/만료) 또는 비밀번호가 일치하지 않음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "사용자를 찾을 수 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
     })
     ResponseEntity deleteUser(
             UserSecurityDto userSecurityDto,

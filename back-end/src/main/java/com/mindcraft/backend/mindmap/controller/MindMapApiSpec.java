@@ -1,5 +1,6 @@
 package com.mindcraft.backend.mindmap.controller;
 
+import com.mindcraft.backend.global.exception.ErrorResponse;
 import com.mindcraft.backend.mindmap.dto.AiKeywordResponse;
 import com.mindcraft.backend.mindmap.dto.KeywordExtractRequestDto;
 import com.mindcraft.backend.mindmap.dto.MindMapResponseDto;
@@ -27,8 +28,16 @@ public interface MindMapApiSpec {
                     description = "조회(혹은 생성) 성공",
                     content = @Content(schema = @Schema(implementation = MindMapResponseDto.class))
             ),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 요청(토큰 없음/만료)"),
-            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증되지 않은 요청(토큰 없음/만료)",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "사용자를 찾을 수 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
     })
     ResponseEntity getMindMap(UserSecurityDto userSecurityDto);
 
@@ -43,8 +52,16 @@ public interface MindMapApiSpec {
                     description = "추출 성공",
                     content = @Content(schema = @Schema(implementation = AiKeywordResponse.class))
             ),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 요청(토큰 없음/만료)"),
-            @ApiResponse(responseCode = "422", description = "AI 키워드 추출 실패(AI 서버 오류/통신 오류/응답 파싱 실패)")
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증되지 않은 요청(토큰 없음/만료)",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "422",
+                    description = "AI 키워드 추출 실패(AI 서버 오류/통신 오류/응답 파싱 실패)",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
     })
     ResponseEntity<AiKeywordResponse> extractKeywords(
             @RequestBody KeywordExtractRequestDto dto
@@ -61,8 +78,16 @@ public interface MindMapApiSpec {
                     description = "저장 성공",
                     content = @Content(schema = @Schema(implementation = MindMapResponseDto.class))
             ),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 요청(토큰 없음/만료)"),
-            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음, 유효하지 않은 마인드맵, 또는 본인의 마인드맵이 아님")
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증되지 않은 요청(토큰 없음/만료)",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "사용자를 찾을 수 없음, 유효하지 않은 마인드맵, 또는 본인의 마인드맵이 아님",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
     })
     ResponseEntity saveMindMap(
             UserSecurityDto userSecurityDto,

@@ -3,8 +3,10 @@ package com.mindcraft.backend.coverletter.controller;
 import com.mindcraft.backend.coverletter.dto.CoverLetterDetailDto;
 import com.mindcraft.backend.coverletter.dto.CoverLetterRequestDto;
 import com.mindcraft.backend.coverletter.dto.CoverLetterSummaryDto;
+import com.mindcraft.backend.global.exception.ErrorResponse;
 import com.mindcraft.backend.user.dto.UserSecurityDto;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -20,7 +22,7 @@ public interface CoverLetterApiSpec {
 
     @Operation(
             summary = "자소서 마스터 상세 조회",
-            description = "로그인한 사용자 본인의 정보를 조회한다."
+            description = "자소서 마스터 id로 해당 자소서의 상세 정보(회사 정보, 문항 목록 등)를 조회한다."
     )
     @ApiResponses({
             @ApiResponse(
@@ -28,9 +30,21 @@ public interface CoverLetterApiSpec {
                     description = "조회 성공",
                     content = @Content(schema = @Schema(implementation = CoverLetterDetailDto.class))
             ),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 요청(토큰 없음/만료)"),
-            @ApiResponse(responseCode = "403", description = "본인의 자소서 마스터가 아님"),
-            @ApiResponse(responseCode = "404", description = "자소서 마스터 id를 찾을 수 없음")
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증되지 않은 요청(토큰 없음/만료)",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "본인의 자소서 마스터가 아님",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "자소서 마스터 id를 찾을 수 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
     })
     public ResponseEntity getDetail(
             UserSecurityDto userSecurityDto,
@@ -45,9 +59,13 @@ public interface CoverLetterApiSpec {
             @ApiResponse(
                     responseCode = "200",
                     description = "조회 성공",
-                    content = @Content(schema = @Schema(implementation = CoverLetterSummaryDto.class))
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = CoverLetterSummaryDto.class)))
             ),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 요청(토큰 없음/만료)")
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증되지 않은 요청(토큰 없음/만료)",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
     })
     public ResponseEntity getCoverLetters(UserSecurityDto userSecurityDto);
 
@@ -62,8 +80,16 @@ public interface CoverLetterApiSpec {
                     description = "생성 성공",
                     content = @Content(schema = @Schema(implementation = CoverLetterSummaryDto.class))
             ),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 요청(토큰 없음/만료)"),
-            @ApiResponse(responseCode = "404", description = "유효하지 않은 마인드")
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증되지 않은 요청(토큰 없음/만료)",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "사용자를 찾을 수 없음 또는 유효하지 않은 마인드맵",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
     })
     public ResponseEntity createCoverLetter(
             UserSecurityDto userSecurityDto,
@@ -79,9 +105,21 @@ public interface CoverLetterApiSpec {
                     responseCode = "200",
                     description = "삭제 성공"
             ),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 요청(토큰 없음/만료)"),
-            @ApiResponse(responseCode = "403", description = "본인의 자소서 마스터가 아님"),
-            @ApiResponse(responseCode = "404", description = "자소서 마스터 id를 찾을 수 없음")
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증되지 않은 요청(토큰 없음/만료)",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "본인의 자소서 마스터가 아님",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "자소서 마스터 id를 찾을 수 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
     })
     public ResponseEntity deleteCoverLetter(
             UserSecurityDto userSecurityDto,
@@ -90,16 +128,28 @@ public interface CoverLetterApiSpec {
 
     @Operation(
             summary = "자소서 마스터 수정",
-            description = "자소서 마스터 id를 통해 자소서 마스터의 정보(회사 이름, 인재상, 직무 설명)를 삭제한다."
+            description = "자소서 마스터 id를 통해 자소서 마스터의 정보(회사 이름, 인재상, 직무 설명)를 수정한다."
     )
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
                     description = "수정 성공"
             ),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 요청(토큰 없음/만료)"),
-            @ApiResponse(responseCode = "403", description = "본인의 자소서 마스터가 아님"),
-            @ApiResponse(responseCode = "404", description = "자소서 마스터 id를 찾을 수 없음")
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증되지 않은 요청(토큰 없음/만료)",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "본인의 자소서 마스터가 아님",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "자소서 마스터 id를 찾을 수 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
     })
     public ResponseEntity modifyCoverLetter(
             UserSecurityDto userSecurityDto,
@@ -117,9 +167,21 @@ public interface CoverLetterApiSpec {
                     responseCode = "200",
                     description = "PDF 제작 성공"
             ),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 요청(토큰 없음/만료)"),
-            @ApiResponse(responseCode = "403", description = "본인의 자소서 마스터가 아님"),
-            @ApiResponse(responseCode = "404", description = "자소서 마스터 id를 찾을 수 없음")
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증되지 않은 요청(토큰 없음/만료)",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "본인의 자소서 마스터가 아님",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "자소서 마스터 id를 찾을 수 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
     })
     public ResponseEntity<byte[]> exportPdf(
             UserSecurityDto userSecurityDto,
@@ -135,9 +197,21 @@ public interface CoverLetterApiSpec {
                     responseCode = "200",
                     description = "DOCX 제작 성공"
             ),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 요청(토큰 없음/만료)"),
-            @ApiResponse(responseCode = "403", description = "본인의 자소서 마스터가 아님"),
-            @ApiResponse(responseCode = "404", description = "자소서 마스터 id를 찾을 수 없음")
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증되지 않은 요청(토큰 없음/만료)",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "본인의 자소서 마스터가 아님",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "자소서 마스터 id를 찾을 수 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
     })
     public ResponseEntity<byte[]> exportDocx(
             UserSecurityDto userSecurityDto,
