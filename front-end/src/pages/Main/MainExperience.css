@@ -526,7 +526,18 @@
 .mc-process-expand { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 56px; margin-top: 22px; padding: 52px 54px; border: 1px solid rgba(110, 90, 179, .13); border-radius: 25px; background: rgba(255,255,255,.7); box-shadow: none; backdrop-filter: blur(12px); animation: mc-expand-in .35s ease; }
 .mc-process-expand-text h3 { margin: 0 0 14px; color: var(--mc-ink); font-size: 1.55rem; letter-spacing: -.03em; }
 .mc-process-expand-text p { margin: 0; color: #747587; font-size: .95rem; line-height: 1.9; word-break: keep-all; }
-.mc-process-expand-media { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; aspect-ratio: 1.3; min-height: 220px; border-radius: 18px; border: 1.5px dashed #cabdf2; background: #f8f6ff; color: #8068df; font-size: .74rem; font-weight: 700; }
+/* 수정된 부분 [2026-07-20]: placeholder(점선 박스 + 아이콘/텍스트) 스타일 →
+   실제 GIF(<img>)를 담는 프레임 스타일로 변경
+   이유(요청): 실제 GIF가 들어오면서 "이미지 추가 예정" 안내 텍스트/아이콘이
+   더 이상 필요 없어짐. 점선 테두리를 실선으로 바꾸고 overflow:hidden으로
+   모서리를 둥글게 잘라내며, 내부 img가 프레임을 꽉 채우도록 함. 실제 GIF
+   비율(800×430 ≈ 1.86)에 맞춰 aspect-ratio도 조정.
+   before: .mc-process-expand-media { ...; aspect-ratio: 1.3; ...; border: 1.5px dashed #cabdf2;
+             background: #f8f6ff; color: #8068df; font-size: .74rem; font-weight: 700; }
+   after: 아래로 교체 (dashed→solid, aspect-ratio 1.3→1.86, overflow:hidden 추가,
+   색/폰트 관련 속성 삭제, img 규칙 추가) */
+.mc-process-expand-media { overflow: hidden; aspect-ratio: 1.86; min-height: 220px; border-radius: 18px; border: 1px solid rgba(110, 90, 179, .13); background: #f8f6ff; }
+.mc-process-expand-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
 @keyframes mc-expand-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
 
 .mc-feature-layout { display: grid; grid-template-columns: .78fr 1.22fr; align-items: center; gap: clamp(58px, 8vw, 115px); }
@@ -728,7 +739,6 @@
   padding: 1rem 1.9rem;
   border-radius: 14px;
   color: #fff;
-<<<<<<< HEAD
   background: linear-gradient(135deg, #7a5ff2, #5a3bdb);
   box-shadow: none;
   font-size: .85rem;
@@ -737,14 +747,6 @@
   animation: mc-float-cta-in .25s ease;
 }
 .mc-page .float-cta-btn:hover { transform: translate(-50%, -3px); box-shadow: none; }
-=======
-  background: var(--mc-ink);
-  box-shadow: none;
-  font-size: .75rem;
-  transform: none;
-  animation: mc-float-cta-in .25s ease;
-}
-.mc-page .float-cta-btn:hover { transform: translateY(-3px); box-shadow: none; }
 .mc-page .top-btn { right: 28px; bottom: 84px; width: 40px; height: 40px; border: 1px solid #e1ddec; background: rgba(255,255,255,.94); box-shadow: none; }
 .mc-page .top-btn img { width: 20px; height: 20px; object-fit: contain; }
 
@@ -990,7 +992,11 @@
 /* 카드 펼침 영역(설명 + 이미지 자리) */
 [data-theme='dark'] .mc-process-expand { border-color: rgba(148, 124, 255, .16); background: rgba(255, 255, 255, .03); }
 [data-theme='dark'] .mc-process-expand-text p { color: #a7a3c2; }
-[data-theme='dark'] .mc-process-expand-media { border-color: #493f78; background: #1c1830; color: #b3a4f2; }
+/* 수정된 부분 [2026-07-20]: 실제 GIF 프레임으로 바뀌면서 텍스트 색(color)이
+   더 이상 필요 없어짐 - 배경/테두리만 유지
+   before: [data-theme='dark'] .mc-process-expand-media { border-color: #493f78; background: #1c1830; color: #b3a4f2; }
+   after: 아래로 교체 (color 삭제) */
+[data-theme='dark'] .mc-process-expand-media { border-color: #493f78; background: #1c1830; }
 
 /* 쉬는 구간(IntroBreak) */
 [data-theme='dark'] .mc-intro-break .mc-panel-inner { background: linear-gradient(135deg, #1c1730, #14111f); }
