@@ -15,17 +15,19 @@ import java.util.Map;
 @RequestMapping(value = "/coverletters/{coverletterId}/sections")
 @RequiredArgsConstructor
 @Slf4j
-public class CoverLetterSectionController {
+public class CoverLetterSectionController implements CoverLetterSectionApiSpec{
 
     private final CoverLetterSectionService coverLetterSectionService;
 
     @GetMapping(value = "")
+    @Override
     public List<CoverLetterSectionDto> getList(@PathVariable("coverletterId") Long coverletterId) {
         log.info("coverletterId......" + coverletterId);
         return coverLetterSectionService.getList(coverletterId);
     }
 
     @PostMapping(value = "")
+    @Override
     public ResponseEntity<CoverLetterSectionDto> create(
             @PathVariable("coverletterId") Long coverletterId,
             @RequestBody CoverLetterSectionDto coverLetterSectionDto) {
@@ -36,6 +38,7 @@ public class CoverLetterSectionController {
     }
 
     @PutMapping(value = "/{sectionId}")
+    @Override
     public Map<String, String> update(
             @PathVariable("coverletterId") Long coverletterId,
             @PathVariable("sectionId") Long sectionId,
@@ -52,6 +55,7 @@ public class CoverLetterSectionController {
     }
 
     @DeleteMapping(value = "/{sectionId}")
+    @Override
     public Map<String, String> delete(
             @PathVariable("coverletterId") Long coverletterId,
             @PathVariable("sectionId") Long sectionId) {

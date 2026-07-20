@@ -17,12 +17,13 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-public class UserController {
+public class UserController implements UserApiSpec{
 
     private final UserMapper userMapper;
     private final UserService userService;
 
     @PostMapping("/auth/register")
+    @Override
     public ResponseEntity createUser(@RequestBody @Valid UserJoinDto userJoinDto) {
         User user = userMapper.userJoinDtoToUser(userJoinDto);
         User createdMember = userService.createUser(user);
@@ -33,6 +34,7 @@ public class UserController {
     }
 
     @GetMapping("/users/me")
+    @Override
     public ResponseEntity getMyInfo(
             @AuthenticationPrincipal UserSecurityDto userSecurityDto) {
         long userId = userSecurityDto.getId();
@@ -44,6 +46,7 @@ public class UserController {
     }
 
     @PatchMapping("/users/me")
+    @Override
     public ResponseEntity updateMyInfo(
             @AuthenticationPrincipal UserSecurityDto userSecurityDto,
             @RequestBody UserUpdateDto userUpdateDto) {
@@ -60,6 +63,7 @@ public class UserController {
     }
 
     @DeleteMapping("/users/me")
+    @Override
     public ResponseEntity deleteUser(
             @AuthenticationPrincipal UserSecurityDto userSecurityDto,
             @RequestBody Map<String, String> body) {

@@ -17,13 +17,14 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/mindmaps")
 @RequiredArgsConstructor
-public class MindMapController {
+public class MindMapController implements MindMapApiSpec{
 
     private final MindMapService mindMapService;
     private final MindMapMapper mindMapMapper;
     private final AiKeywordService aiKeywordService;
 
     @GetMapping
+    @Override
     public ResponseEntity getMindMap(
             @AuthenticationPrincipal UserSecurityDto userSecurityDto) {
         long userId = userSecurityDto.getId();
@@ -36,6 +37,7 @@ public class MindMapController {
     }
 
     @PostMapping("/keywords")
+    @Override
     public ResponseEntity<AiKeywordResponse> extractKeywords(
             @RequestBody KeywordExtractRequestDto dto
     ){
@@ -46,6 +48,7 @@ public class MindMapController {
     }
 
     @PutMapping
+    @Override
     public ResponseEntity saveMindMap(
             @AuthenticationPrincipal UserSecurityDto userSecurityDto,
             @RequestBody MindMapSaveDto mindMapSaveDto
@@ -57,6 +60,5 @@ public class MindMapController {
         return new ResponseEntity<>(
                 mindMapMapper.mindMapToMindMapResponseDto(savedMindMap),
                 HttpStatus.OK
-        );
-    }
+        );    }
 }
