@@ -110,4 +110,28 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.FORBIDDEN)
                 .body(Map.of("error", e.getMessage()));
     }
+
+    @ExceptionHandler(MailSendException.class)
+    public ResponseEntity<Map<String, String>> handleMailSendException(MailSendException e) {
+        log.error("Mail Send Exception : {}", e.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", e.getMessage()));
+    }
+    @ExceptionHandler(InvalidVerificationCodeException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidVerificationCode(InvalidVerificationCodeException e) {
+        log.error("Invalid Verification Code : {}", e.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", e.getMessage()));
+    }
+
+    @ExceptionHandler(VerificationCodeExpiredException.class)
+    public ResponseEntity<Map<String, String>> handleVerificationCodeExpired(VerificationCodeExpiredException e) {
+        log.error("Verification Code Expired : {}", e.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", e.getMessage()));
+    }
 }

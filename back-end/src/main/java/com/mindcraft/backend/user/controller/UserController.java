@@ -72,4 +72,16 @@ public class UserController {
                 HttpStatus.OK
         );
     }
+
+    @PostMapping("/auth/verify-email")
+    public ResponseEntity<Map<String, String>> verifyEmail(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        String code = body.get("code");
+
+        userService.verifyEmail(email, code);
+        return new ResponseEntity<>(
+                Map.of("message", "이메일 인증이 완료되었습니다."),
+                HttpStatus.OK
+        );
+    }
 }

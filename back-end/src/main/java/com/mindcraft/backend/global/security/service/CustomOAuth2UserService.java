@@ -67,6 +67,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 .password(null)
                 .provider(provider)
                 .providerId(providerId)
+                .isVerified(true)
                 .build();
 
         userRepository.save(newUser);

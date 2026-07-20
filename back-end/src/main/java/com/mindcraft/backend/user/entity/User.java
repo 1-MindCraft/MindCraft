@@ -39,6 +39,11 @@ public class User {
     @Column(name = "provider_id")
     private String providerId;
 
+    // 이메일 인증 여부 (소셜 로그인 -> true, 이메일 가입은 false로 시작)
+    @Builder.Default
+    @Column(name = "is_verified", nullable = false)
+    private boolean isVerified = false;
+
     // 최초 1회 생성 후 수정되면 안됨
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

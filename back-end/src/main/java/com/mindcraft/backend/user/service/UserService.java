@@ -15,4 +15,7 @@ public interface UserService {
 
     // 회원 탈퇴
     public void deleteUser(long userId, String password);
+
+    // 이메일 인증
+    public void verifyEmail(String email, String code);
 }

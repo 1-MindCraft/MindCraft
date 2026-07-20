@@ -19,6 +19,9 @@ spring:
           naver:
             client-id: <발급받은 값>
             client-secret: <발급받은 값>
+  mail:
+    username: <이메일>
+    password: <앱 비밀번호>
 
 jwt:
   secret: <비밀키>

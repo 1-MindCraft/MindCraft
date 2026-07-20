@@ -1,16 +1,17 @@
 package com.mindcraft.backend.user.service;
 
-import com.mindcraft.backend.global.exception.DuplicateEmailException;
-import com.mindcraft.backend.global.exception.InvalidPasswordException;
-import com.mindcraft.backend.global.exception.UserNotFoundException;
+import com.mindcraft.backend.global.exception.*;
+import com.mindcraft.backend.user.entity.EmailVerification;
 import com.mindcraft.backend.user.entity.Provider;
 import com.mindcraft.backend.user.entity.User;
+import com.mindcraft.backend.user.repository.EmailVerificationRepository;
 import com.mindcraft.backend.user.repository.UserRepository;
+import com.mindcraft.backend.user.util.VerificationCodeGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -19,21 +20,44 @@ public class UserServiceImpl implements UserService{
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailVerificationRepository emailVerificationRepository;
+    private final MailService mailService;
 
     @Override
+    @Transactional
     public User createUser(User user) {
 
         // 이메일 중복 체크
-        boolean exists = userRepository.existsByEmail(user.getEmail());
-        if (exists) {
-            throw new DuplicateEmailException("이미 존재하는 이메일입니다.");
+            // isVerified = true : 회원가입이 완료되고 이미 존재하는 이메일
+            // isVerified = false : 들어온 값으로 회원가입 다시 시도
+        Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
+        User targetUser;
+        if (existingUser.isPresent()) {
+            User found = existingUser.get();
+
+            // isVerified = true
+            if(found.isVerified()) {
+                throw new DuplicateEmailException("이미 존재하는 이메일입니다.");
+            }
+
+            // isVerified = false
+            found.setPassword(passwordEncoder.encode(user.getPassword()));
+            targetUser = userRepository.save(found);
+        } else {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            targetUser = userRepository.save(user);
         }
 
-        // createdAt 설정, updatedAt 설정, password 암호화
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        User createdUser = userRepository.save(user);
-        return createdUser;
+        String code = VerificationCodeGenerator.generate();
+        EmailVerification emailVerification = emailVerificationRepository.findByUserId(targetUser.getId())
+                .map(ev -> {
+                    ev.renew(code);
+                    return ev;
+                })
+                .orElseGet(() -> new EmailVerification(targetUser, code));
+        emailVerificationRepository.save(emailVerification);
+        mailService.sendVerificationCode(targetUser.getEmail(), code);
+        return targetUser;
     }
 
     @Override
@@ -82,5 +106,27 @@ public class UserServiceImpl implements UserService{
         Optional<User> optionalUser = userRepository.findById(userId);
         User user = optionalUser.orElseThrow(() -> new UserNotFoundException("일치하는 회원이 없습니다."));
         return user;
+    }
+
+    @Override
+    @Transactional
+    public void verifyEmail(String email, String code) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("일치하는 회원이 없습니다."));
+
+        EmailVerification emailVerification = emailVerificationRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new InvalidVerificationCodeException("인증 요청 내역이 없습니다. 인증코드를 재발송해주세요."));
+
+        if (emailVerification.isExpired()) {
+            throw new VerificationCodeExpiredException("인증 코드가 만료되었습니다. 재발송해주세요.");
+        }
+
+        if (!emailVerification.getCode().equals(code)) {
+            throw new InvalidVerificationCodeException("인증 코드가 일치하지 않습니다.");
+        }
+
+        user.setVerified(true);
+        userRepository.save(user);
+        emailVerificationRepository.delete(emailVerification);
     }
 }
