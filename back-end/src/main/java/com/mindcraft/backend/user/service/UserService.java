@@ -18,4 +18,7 @@ public interface UserService {
 
     // 이메일 인증
     public void verifyEmail(String email, String code);
+
+    // 이메일 재발송
+    public void resendVerificationCode(String email);
 }

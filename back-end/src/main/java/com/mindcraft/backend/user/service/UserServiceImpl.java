@@ -129,4 +129,26 @@ public class UserServiceImpl implements UserService{
         userRepository.save(user);
         emailVerificationRepository.delete(emailVerification);
     }
+
+    @Override
+    @Transactional
+    public void resendVerificationCode(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("일치하는 회원이 없습니다."));
+
+        if(user.isVerified()) {
+            throw new DuplicateEmailException("이미 인증이 완료된 이메일입니다.");
+        }
+
+        String code = VerificationCodeGenerator.generate();
+        EmailVerification emailVerification = emailVerificationRepository.findByUserId(user.getId())
+                .map(ev -> {
+                    ev.renew(code);
+                    return ev;
+                })
+                .orElseGet(() -> new EmailVerification(user, code));
+        emailVerificationRepository.save(emailVerification);
+
+        mailService.sendVerificationCode(user.getEmail(), code);
+    }
 }

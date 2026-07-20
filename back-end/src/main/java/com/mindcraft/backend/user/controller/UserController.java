@@ -84,4 +84,15 @@ public class UserController {
                 HttpStatus.OK
         );
     }
+
+    @PostMapping("/auth/resend-code")
+    public ResponseEntity<Map<String, String>> resendVerificationCode(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+
+        userService.resendVerificationCode(email);
+        return new ResponseEntity<>(
+                Map.of("message", "인증 코드가 재발송 되었습니다."),
+                HttpStatus.OK
+        );
+    }
 }
