@@ -13,7 +13,7 @@ export function useNodeActions(id, data, position) {
   const { setNodes, getNodes } = useMindMapNodes();
   const { confirm } = useModal(); // 수정된 부분: 브라우저 기본 confirm() 대신 커스텀 모달 사용
   const clearNodes = useMindMapStore((state) => state.clearNodes);
-  
+
   const handleLabelChange = useCallback(
     (label) => {
       setNodes((nodes) =>
@@ -22,6 +22,27 @@ export function useNodeActions(id, data, position) {
             ? { ...node, data: { ...node.data, label } }
             : node
         )
+      );
+    },
+    [id, setNodes]
+  );
+
+  // 개별 노드 색상 변경 (팝오버 색 스와치용)
+  // 이유: 팝오버는 "이 노드 하나만" 색을 바꿈 (툴바 팔레트=서브트리 색칠과 역할 분리).
+  //       color가 null이면 data.color를 지워 기본색(파랑)으로 되돌림
+  const handleColorChange = useCallback(
+    (color) => {
+      setNodes((nodes) =>
+        nodes.map((node) => {
+          if (node.id !== id) return node;
+          const nextData = { ...node.data };
+          if (color) {
+            nextData.color = color;
+          } else {
+            delete nextData.color; // 기본색으로 리셋
+          }
+          return { ...node, data: nextData };
+        })
       );
     },
     [id, setNodes]
@@ -65,5 +86,5 @@ export function useNodeActions(id, data, position) {
     setNodes((nodes) => nodes.filter((node) => !idsToDelete.includes(node.id)));
   }, [id, data.depth, setNodes, getNodes, confirm, clearNodes]);
 
-  return { handleLabelChange, handleAddNode, handleDeleteNode };
+  return { handleLabelChange, handleColorChange, handleAddNode, handleDeleteNode };
 }
