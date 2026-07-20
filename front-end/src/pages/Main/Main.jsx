@@ -74,6 +74,16 @@ import './MainExperience.css';
 // 실제 MindCraft 로고 이미지를 쓰기 위해 추가. Nav.jsx와 동일한 자산/경로 재사용.
 import LOGO_SRC from '../../assets/MindCraft-Logo1.png';
 
+// 추가된 부분 [2026-07-20]: ONE SIMPLE FLOW 카드 펼침 영역에 넣을 GIF 4개 import
+// 이유(요청): "이제 카드 부분에 GIF 넣자, 순서대로 넣는거야" — 4단계(마인드맵 노드
+// 연결/키워드 추출/자소서 마스터/AI로 자소서 생성) 순서에 맞춰 GIF 파일을 매칭.
+// 업로드된 원본 파일명(1-.gif, 2-.gif, 3-.gif, 4-.gif)은 내용을 알 수 없어
+// 각 단계를 알아볼 수 있는 이름으로 바꿔 assets에 저장함.
+import ProcessGifMindmap from '../../assets/process-mindmap.gif';
+import ProcessGifKeyword from '../../assets/process-keyword.gif';
+import ProcessGifMaster from '../../assets/process-master.gif';
+import ProcessGifAi from '../../assets/process-ai.gif';
+
 import Nav from '../../components/Main/Nav';
 import TopButton from '../../components/Main/TopButton';
 import FloatingCta from '../../components/Main/FloatingCta';
@@ -116,6 +126,13 @@ import useScrollButtons from '../../hooks/useScrollButtons';
 //   (CSS: mc-card-amber, 아래 CSS 파일 참고).
 // before: 3개 항목(번호 01~03, eyebrow CAPTURE/CONNECT/CRAFT, PenLine/Network/WandSparkles)
 // after: 아래 4개 항목으로 교체
+// 수정된 부분 [2026-07-20]: 각 항목에 gif 필드 추가
+// 이유(요청): "이제 카드 부분에 GIF 넣자, 순서대로 넣는거야 / 마인드맵 노드 연결
+// 1-.gif / 키워드추출 2-.gif / 자소서 마스터 3-.gif / AI로 자소서 생성 4-.gif" —
+// 카드 클릭 시 펼쳐지는 mc-process-expand-media 자리에 "이미지 추가 예정"
+// placeholder 대신 실제 GIF를 순서대로 표시하기 위해 데이터에 매핑.
+// before: 각 항목에 gif 필드 없음
+// after: 4개 항목 전부에 gif: <import한 파일> 추가
 const processSteps = [
   {
     number: '01',
@@ -124,6 +141,7 @@ const processSteps = [
     title: '나만의 경험을 모아보세요',
     description: '마인드맵에서 프로젝트, 활동, 강점 등 흩어진 경험을 자유롭게 정리하고 연결합니다.',
     color: 'violet',
+    gif: ProcessGifMindmap,
   },
   {
     number: '02',
@@ -132,16 +150,28 @@ const processSteps = [
     title: '경험 속에서 핵심 키워드를 뽑아내요',
     description: '마인드맵에 쌓아둔 경험을 AI가 분석해서, 자기소개서에 바로 쓸 수 있는 핵심 키워드와 역량을 자동으로 정리해요.',
     color: 'blue',
+    gif: ProcessGifKeyword,
   },
   {
     number: '03',
     icon: Settings,
-    eyebrow: '자소서 마스터',
-
+    // 수정된 부분 [2026-07-20]: eyebrow '자소서 마스터' → '직무 맞춤 설정'으로 변경
+    // 이유(git 머지 충돌 해결): GitHub Desktop에서 확인된 충돌 — 다른 브랜치
+    // (69c3d73)에서 이미 이 카드 라벨을 '직무 맞춤 설정'으로 바꿔둔 상태였는데,
+    // 이 대화의 로컬 파일은 그 변경 이전 이름('자소서 마스터')을 그대로 갖고 있어
+    // 충돌이 남. 다른 브랜치의 최신 이름으로 맞춤(다른 필드는 변경 없음).
+    // ※ 참고: 카드 라벨만 바뀌었고, 이 카드와 연결된 03 · PERSONAL STATEMENT
+    // MASTER 기능 패널(id="master")의 제목/설명/FAQ 문구는 여전히 "자소서
+    // 마스터"라는 이름을 쓰고 있어서 라벨과 내용이 살짝 어긋나 보일 수 있습니다.
+    // 카드 라벨 하나만 콕 집어 바뀐 충돌이라 이번엔 그 부분만 맞췄어요 —
+    // 전체적으로 이름을 통일하고 싶으시면 말씀해주세요.
+    // before: eyebrow: '자소서 마스터',
+    // after: eyebrow: '직무 맞춤 설정',
     eyebrow: '직무 맞춤 설정',
     title: '지원 직무에 맞게 설정하세요',
     description: '자소서 마스터를 만들고 회사 정보와 직무, 인재상 등을 입력해 AI가 참고할 기준을 설정합니다.',
     color: 'mint',
+    gif: ProcessGifMaster,
   },
   {
     number: '04',
@@ -150,6 +180,7 @@ const processSteps = [
     title: 'AI가 자기소개서를 작성합니다',
     description: '항목을 생성한 뒤 버튼 한 번으로 마인드맵과 자소서 마스터를 기반으로 자기소개서 초안을 완성합니다.',
     color: 'amber',
+    gif: ProcessGifAi,
   },
 ];
 
@@ -667,14 +698,17 @@ function ProcessSection() {
             <h3>{activeData.title}</h3>
             <p>{activeData.description}</p>
           </div>
-          <div className="mc-process-expand-media" aria-hidden="true">
-            {/* 수정된 부분 [2026-07-20]: Film 아이콘 크기 28 → 34
-                이유(사용자 피드백): "설명하는 부분과 그림 넣는 부분이 너무 작은데
-                여유있는 공간이 있었으면 좋겠어" — 이미지 자리 자체를 키우면서
-                (CSS: mc-process-expand-media 참고) 안의 아이콘도 다른 GIF
-                placeholder(mc-gif-placeholder, size 34)와 같은 크기로 맞춤. */}
-            <Film size={34} />
-            <span>이미지 추가 예정</span>
+          {/* 수정된 부분 [2026-07-20]: Film 아이콘 + "이미지 추가 예정" placeholder →
+              실제 GIF(<img>)로 교체
+              이유(요청): "이제 카드 부분에 GIF 넣자, 순서대로 넣는거야" — 각 단계의
+              실제 사용 화면 GIF가 준비되어, activeData.gif를 그대로 렌더링함.
+              alt 텍스트는 접근성을 위해 eyebrow(단계 이름)를 사용.
+              before: <div className="mc-process-expand-media" aria-hidden="true">
+                        <Film size={34} /><span>이미지 추가 예정</span>
+                      </div>
+              after: 아래 <img>로 교체 (aria-hidden 삭제, alt로 대체) */}
+          <div className="mc-process-expand-media">
+            <img src={activeData.gif} alt={`${activeData.eyebrow} 사용 화면`} />
           </div>
         </div>
       </div>
