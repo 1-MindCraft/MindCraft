@@ -49,10 +49,18 @@ import {
   Film,
   MousePointer2,
   Network,
-  PenLine,
   Play,
   Plus,
+  // 수정된 부분 [2026-07-20]: PenLine 제거, Settings/Tags 추가
+  // 이유(요청 - ONE SIMPLE FLOW 카드 수정): "1번째 버튼 - CAPTURE 아이콘 제거" —
+  // PenLine은 processSteps 1번 카드에서만 쓰였는데, 그 아이콘 자리를 CONNECT의
+  // Network로 교체하면서 PenLine을 쓰는 곳이 없어짐. 대신 2번째(키워드 추출)
+  // 카드에 Tags, 3번째(자소서 마스터) 카드에 톱니바퀴 아이콘(Settings)이 필요해짐.
+  // before: PenLine,
+  // after: Settings, Tags, (PenLine 삭제, 알파벳 순서에 맞춰 재배치)
+  Settings,
   Sparkles,
+  Tags,
   WandSparkles,
 } from 'lucide-react';
 import './Main.css';
@@ -87,30 +95,59 @@ import useScrollButtons from '../../hooks/useScrollButtons';
 // after:  title '지원 직무에 맞게 설정하세요' / description '자소서 마스터를 만들고 회사 정보와 직무, 인재상 등을 입력해 AI가 참고할 기준을 설정합니다.'
 // before: title 'AI가 문장으로 만들어요' / description '지원 직무에 꼭 맞는 자기소개서 초안을 단 몇 분 만에 만들어요.'
 // after:  title 'AI가 자기소개서를 작성합니다' / description '항목을 생성한 뒤 버튼 한 번으로 마인드맵과 자소서 마스터를 기반으로 자기소개서 초안을 완성합니다.'
+//
+// 수정된 부분 [2026-07-20]: 3개 카드(CAPTURE/CONNECT/CRAFT) → 4개 카드로 재구성,
+// 영어 eyebrow 문구를 한글로 교체
+// 이유(요청 - ONE SIMPLE FLOW 카드 수정): Main.jsx에 새로 추가된 4단계 흐름
+// (마인드맵 → 키워드 추출 → 자소서 마스터 → AI 생성)과 카드 개수/순서를 맞추기
+// 위해 카드 하나(키워드 추출)를 새로 끼워 넣고, "CAPTURE 아이콘 제거 + CONNECT
+// 아이콘을 1번으로 이동 + 한글 텍스트로 교체"를 그대로 반영함.
+// - 1번(구 CAPTURE): 아이콘을 PenLine → Network(구 CONNECT 아이콘)로 교체,
+//   eyebrow를 'CAPTURE' → '마인드맵 노드 연결'로 교체. title/description은
+//   이미 마인드맵 내용이라 그대로 재사용.
+// - 2번(신규): 키워드 추출 카드. 아이콘 Tags, eyebrow '키워드 추출'.
+//   title/description은 아래 KeywordFeature 컴포넌트와 같은 문구로 통일.
+// - 3번(구 CONNECT 자리, 내용은 재사용): 아이콘을 톱니바퀴(Settings)로,
+//   eyebrow를 'CONNECT' → '자소서 마스터'로 교체. title/description('지원
+//   직무에 맞게 설정하세요...')은 원래도 자소서 마스터 설명이라 그대로 재사용.
+// - 4번(구 CRAFT): 아이콘 WandSparkles 그대로, eyebrow만 'CRAFT' → 'AI로
+//   자소서 생성'으로 교체.
+// - color는 4개를 구분하기 위해 violet/blue/mint에 새 색상 amber를 추가함
+//   (CSS: mc-card-amber, 아래 CSS 파일 참고).
+// before: 3개 항목(번호 01~03, eyebrow CAPTURE/CONNECT/CRAFT, PenLine/Network/WandSparkles)
+// after: 아래 4개 항목으로 교체
 const processSteps = [
   {
     number: '01',
-    icon: PenLine,
-    eyebrow: 'CAPTURE',
+    icon: Network,
+    eyebrow: '마인드맵 노드 연결',
     title: '나만의 경험을 모아보세요',
     description: '마인드맵에서 프로젝트, 활동, 강점 등 흩어진 경험을 자유롭게 정리하고 연결합니다.',
     color: 'violet',
   },
   {
     number: '02',
-    icon: Network,
-    eyebrow: 'CONNECT',
-    title: '지원 직무에 맞게 설정하세요',
-    description: '자소서 마스터를 만들고 회사 정보와 직무, 인재상 등을 입력해 AI가 참고할 기준을 설정합니다.',
+    icon: Tags,
+    eyebrow: '키워드 추출',
+    title: '경험 속에서 핵심 키워드를 뽑아내요',
+    description: '마인드맵에 쌓아둔 경험을 AI가 분석해서, 자기소개서에 바로 쓸 수 있는 핵심 키워드와 역량을 자동으로 정리해요.',
     color: 'blue',
   },
   {
     number: '03',
+    icon: Settings,
+    eyebrow: '직무 맞춤 설정',
+    title: '지원 직무에 맞게 설정하세요',
+    description: '자소서 마스터를 만들고 회사 정보와 직무, 인재상 등을 입력해 AI가 참고할 기준을 설정합니다.',
+    color: 'mint',
+  },
+  {
+    number: '04',
     icon: WandSparkles,
-    eyebrow: 'CRAFT',
+    eyebrow: 'AI로 자소서 생성',
     title: 'AI가 자기소개서를 작성합니다',
     description: '항목을 생성한 뒤 버튼 한 번으로 마인드맵과 자소서 마스터를 기반으로 자기소개서 초안을 완성합니다.',
-    color: 'mint',
+    color: 'amber',
   },
 ];
 
@@ -436,7 +473,55 @@ function useReveal() {
 
 // 추가된 부분 [2026-07-16]: MiniMindMap 컴포넌트
 // 이유: 히어로/데모/클로징 섹션에서 재사용되는 장식용 미니 마인드맵 목업
-function MiniMindMap({ compact = false }) {
+//
+// 수정된 부분 [2026-07-20]: variant prop 추가('hero' | 'editing' | 'complete')
+// 이유: 히어로, 01 MIND MAP, YOUR STORY STARTS HERE 세 군데에서 완전히 동일한
+// 정지 화면(같은 노드 4개, 같은 배치)이 반복 노출되어 "같은 그림을 또 보여준다"는
+// 인상을 준다는 피드백. "경험을 적는다(hero) → 확장하고 편집한다(01 MIND MAP =
+// editing) → 이야기가 된다(클로징 = complete)"라는 하나의 서사로 이어지도록
+// variant별로 다른 상태를 렌더링하게 분기함. 기본값 'hero'는 기존 마크업을
+// 그대로 유지해 히어로 화면 자체는 변경 없음.
+// before: function MiniMindMap({ compact = false }) { return (<div className={...}>...고정 마크업 1종...</div>); }
+// after: variant에 따라 세 마크업(hero/editing/complete) 중 하나를 렌더링(아래)
+function MiniMindMap({ compact = false, variant = 'hero' }) {
+  // 수정된 부분 [2026-07-20]: 'editing' variant 분기 전체 삭제
+  // 이유(요청 3-2): "MINDMAP 기존 가짜 마인드맵 삭제, GIF 추가 공간 추가" — 01 MIND MAP
+  // 섹션(MindMapFeature)에서 이 variant를 쓰던 <MiniMindMap variant="editing" />를
+  // mc-gif-placeholder로 교체하면서, 'editing' variant를 쓰는 곳이 이제 하나도
+  // 남지 않아 죽은 코드가 됨. 관련 CSS(mc-map-node-editing-*, mc-map-node-sub*,
+  // mc-map-node-ghost, mc-mini-map-line-sub-*/ghost, mc-node-pulse 등 keyframes)도
+  // MainExperience.css에서 함께 삭제함.
+  // before: if (variant === 'editing') { return (<div className="mc-mini-map mc-mini-map-editing">
+  //           ...노드 8개(main/a/c/b/sub-1/2/3/ghost) + 곡선 7개 + 커서... </div>); }
+  //         (전체 57줄 삭제)
+  // after: (분기 삭제, 'complete'/'hero' 분기만 남음 — 아래)
+
+  // 추가된 부분 [2026-07-20]: 'complete' variant — YOUR STORY STARTS HERE(클로징) 전용
+  // 이유: 클로징 카피("당신의 경험은 이미 충분히 좋은 이야기예요")에 맞춰 중앙 노드를
+  // '나의 경험' → '나의 이야기'로 바꾸고, 선의 시작/끝 좌표를 서로 뒤바꿔 안쪽(중앙)으로
+  // 모여드는 방향으로 흐르게 해 "흩어진 경험이 하나의 이야기로 모인다"는 완성 상태를 표현.
+  // 노드 배치(mc-map-node-a/b/c/d/main)는 hero와 동일한 클래스를 그대로 재사용하므로,
+  // .mc-final-map 안에서 적용되는 흰색 톤 오버라이드(아래 CSS mc-final-map 규칙)도
+  // 별도 수정 없이 그대로 적용됨.
+  if (variant === 'complete') {
+    return (
+      <div className={`mc-mini-map mc-mini-map-complete${compact ? ' is-compact' : ''}`} aria-hidden="true">
+        <svg className="mc-mini-map-lines" viewBox="0 0 640 380" preserveAspectRatio="none">
+          <path d="M155 82 C240 82 245 190 320 190" />
+          <path d="M500 82 C405 82 410 190 320 190" />
+          <path d="M145 300 C235 300 245 190 320 190" />
+          <path d="M515 300 C420 300 410 190 320 190" />
+        </svg>
+        <div className="mc-map-node mc-map-node-main"><Sparkles size={16} /> 나의 이야기</div>
+        <div className="mc-map-node mc-map-node-a"><BriefcaseBusiness size={15} /> 아르바이트 경험</div>
+        <div className="mc-map-node mc-map-node-b">팀 프로젝트</div>
+        <div className="mc-map-node mc-map-node-c">자격증</div>
+        <div className="mc-map-node mc-map-node-d">동아리 활동</div>
+      </div>
+    );
+  }
+
+  // 'hero' variant(기본값) — 기존 마크업 그대로 유지 (변경 없음)
   return (
     <div className={`mc-mini-map${compact ? ' is-compact' : ''}`} aria-hidden="true">
       <svg className="mc-mini-map-lines" viewBox="0 0 640 380" preserveAspectRatio="none">
@@ -523,7 +608,26 @@ function Hero({ onStartClick, ctaLabel }) {
 
 // 추가된 부분 [2026-07-16]: ProcessSection 컴포넌트 (내부 정의)
 // 이유: 기존 HowItWorks 섹션 대체. Nav의 "#journey" 앵커가 이 섹션의 id와 연결됨.
+//
+// 수정된 부분 [2026-07-20]: 카드 내용을 아이콘 + 영어 문구만 남기고, 카드를 누르면
+// 아래에 설명 글(왼쪽)/이미지 자리(오른쪽) 펼쳐지는 형태로 변경
+// 이유(요청 1, 1-1, 손그림 스케치): "번호, 한글 텍스트, 문구, GIF 추가 예정 텍스트
+// 삭제" + "아이콘 중간 가운데 정렬, 크기 증가" + "영어 텍스트 아이콘 아래에 재
+// 위치" + "카드를 누르면 아래에 새로운 빈 공간이 생기면서 왼쪽에는 설명하는 글
+// 오른쪽에는 사진을 넣을 수 있는 공간이 생기는 형식. 1번째 것은 무조건 Active
+// 상태로 열려있고, 다른 카드를 클릭하면 그 카드로 Active가 옮겨감".
+// before: <article ...><div className="mc-card-top"><span>{step.number}</span><Icon /></div>
+//           <small>{eyebrow}</small><h3>{title}</h3><p>{description}</p>
+//           <div className="mc-card-sketch">Film 아이콘 + "GIF 추가 예정"</div></article>
+//         (클릭 동작 없음, 펼침 영역 없음)
+// after: 카드는 아이콘 + eyebrow만 표시하는 button으로 변경, 그리드 아래에
+// activeStep 상태를 공유하는 펼침 영역(mc-process-expand)을 추가
 function ProcessSection() {
+  // 추가된 부분 [2026-07-20]: 현재 펼쳐진 카드의 인덱스. 기본값 0(첫 번째 카드)이
+  // 항상 Active 상태로 시작하도록 함.
+  const [activeStep, setActiveStep] = useState(0);
+  const activeData = processSteps[activeStep];
+
   return (
     <section className="mc-story-panel mc-process" id="journey">
       <div className="mc-panel-inner" data-reveal>
@@ -536,27 +640,40 @@ function ProcessSection() {
           {processSteps.map((step, index) => {
             const Icon = step.icon;
             return (
-              <article className={`mc-process-card mc-card-${step.color}`} key={step.number} style={{ '--card-delay': `${index * 120}ms` }}>
-                <div className="mc-card-top"><span>{step.number}</span><Icon size={23} /></div>
+              // 수정된 부분 [2026-07-20]: <article> → 클릭 가능한 <button>으로 변경
+              // 이유: 카드를 눌러 아래 펼침 영역의 내용을 바꾸는 상호작용이 생겨서,
+              // 시맨틱하게도 접근성 측면에서도 button이 적절함.
+              <button
+                type="button"
+                key={step.number}
+                className={`mc-process-card mc-card-${step.color}${index === activeStep ? ' is-active' : ''}`}
+                style={{ '--card-delay': `${index * 120}ms` }}
+                onClick={() => setActiveStep(index)}
+                aria-pressed={index === activeStep}
+              >
+                <div className="mc-card-icon"><Icon size={30} /></div>
                 <small>{step.eyebrow}</small>
-                <h3>{step.title}</h3>
-                <p>{step.description}</p>
-                {/* 수정된 부분 [2026-07-17]: 카드 하단의 손그림 스케치(선/점/아이콘 조합) 삭제,
-                    GIF를 넣을 수 있는 자리(placeholder)로 교체
-                    이유(요청 3): "카드 이상한 이미지" — index별로 다르게 그려지던
-                    점선/곡선/아이콘 장식이 실제 서비스와 무관해 보인다는 피드백.
-                    나중에 실제 기능 GIF를 넣을 수 있도록 동일한 자리에 점선 박스 + 안내
-                    문구로 통일함. mc-card-sketch 컨테이너(위치/크기)는 그대로 재사용하고
-                    내부 내용만 교체 — CSS도 함께 placeholder 스타일로 수정함(아래 CSS 파일 참고).
-                    before: index === 0/1/2 별로 다른 <i>/<svg> 장식 3종
-                    after: 아래 Film 아이콘 + 안내 텍스트로 통일 */}
-                <div className="mc-card-sketch" aria-hidden="true">
-                  <Film size={20} />
-                  <span>GIF 추가 예정</span>
-                </div>
-              </article>
+              </button>
             );
           })}
+        </div>
+        {/* 추가된 부분 [2026-07-20]: 카드 클릭 시 아래에 펼쳐지는 설명(왼쪽) + 이미지
+            자리(오른쪽) 영역. activeStep이 가리키는 카드의 title/description을
+            그대로 재사용함(카드 자체에서는 삭제됐지만 데이터는 processSteps에 남아있음). */}
+        <div className="mc-process-expand" data-reveal>
+          <div className="mc-process-expand-text">
+            <h3>{activeData.title}</h3>
+            <p>{activeData.description}</p>
+          </div>
+          <div className="mc-process-expand-media" aria-hidden="true">
+            {/* 수정된 부분 [2026-07-20]: Film 아이콘 크기 28 → 34
+                이유(사용자 피드백): "설명하는 부분과 그림 넣는 부분이 너무 작은데
+                여유있는 공간이 있었으면 좋겠어" — 이미지 자리 자체를 키우면서
+                (CSS: mc-process-expand-media 참고) 안의 아이콘도 다른 GIF
+                placeholder(mc-gif-placeholder, size 34)와 같은 크기로 맞춤. */}
+            <Film size={34} />
+            <span>이미지 추가 예정</span>
+          </div>
         </div>
       </div>
     </section>
@@ -572,7 +689,7 @@ function MindMapFeature() {
         <div className="mc-feature-copy">
           <span className="mc-feature-index">01 · MIND MAP</span>
           <h2>머릿속 경험을<br />눈에 보이게 연결해요</h2>
-          <p>정해진 양식에 나를 끼워 맞추지 마세요. 자유롭게 노드를 만들고 연결하다 보면 나만의 강점과 이야기가 자연스럽게 드러납니다.</p>
+          <p>정해진 양식에 나를 끼워 맞추지 마세요. 자유롭게 노드를 만들고 연결하다 보면 <br /> 나만의 강점과 이야기가 자연스럽게 드러납니다.</p>
           {/* 수정된 부분 [2026-07-17]: 리스트 문구 2개 교체 + 1개 항목 삭제
               이유(요청 4): 자동 저장 안내 문구는 FAQ 쪽 문구(저장 버튼 방식)와
               내용이 어긋나서 완전히 삭제하고, 나머지 두 문구는 실제 기능(노드
@@ -585,20 +702,86 @@ function MindMapFeature() {
             <li><Check size={16} /> 연결된 노드를 빠르게 추가하고 편집</li>
             <li><Check size={16} /> 프로젝트와 활동 경험을 항목별로 정리</li>
           </ul>
-          <a className="mc-inline-btn" href="#features">AI 기능까지 이어보기 <ArrowRight size={17} /></a>
+          {/* 수정된 부분 [2026-07-20]: 링크 타깃/문구 변경 (#features → #keyword)
+              이유(요청 3): 마인드맵과 AI 크래프팅 사이에 "키워드 추출"/"자소서 마스터"
+              단계가 새로 추가되면서, 이 링크는 (한 단계 건너뛴) AI CRAFTING이 아니라
+              바로 다음 단계인 키워드 추출로 이어지는 게 흐름상 자연스러움.
+              before: <a className="mc-inline-btn" href="#features">AI 기능까지 이어보기 <ArrowRight size={17} /></a>
+              after: 아래로 교체 */}
+          <a className="mc-inline-btn" href="#keyword">키워드 추출 살펴보기 <ArrowRight size={17} /></a>
         </div>
-        <div className="mc-demo-frame">
-          {/* 수정된 부분 [2026-07-17]: "LIVE DEMO" 라벨 제거, 캡션 문구 교체
-              이유(요청 4): "LIVE DEMO" 표기가 실제 데모가 아닌 정적 목업이라 오해를
-              줄 수 있어 제거하고, 안내 문구를 서비스 맥락에 맞게 변경함.
-              before: <span><i /> LIVE DEMO</span><small>마우스로 노드를 연결해 보세요</small>
-              after: <small> 하나만 남기고 문구 교체 (span 전체 삭제) */}
-          <div className="mc-demo-caption"><small>자기소개서에 활용할 경험을 연결해 보세요</small></div>
-          <div className="mc-demo-canvas"><MiniMindMap /></div>
-          {/* 수정된 부분 [2026-07-17]: "새로운 연결에서 '문제 해결력'을 발견했어요" 토스트 삭제
-              이유(요청 4): 요청대로 해당 문구 전체 제거.
-              before: <div className="mc-demo-toast">...</div>
-              after: (삭제됨) */}
+        <div className="mc-gif-placeholder" aria-hidden="true">
+          {/* 수정된 부분 [2026-07-20]: mc-demo-frame(캡션 + 가짜 마인드맵 데모) 전체 삭제,
+              AiFeature와 동일한 GIF 추가 자리(mc-gif-placeholder)로 교체
+              이유(요청 3-2): "MINDMAP 기존 가짜 마인드맵 삭제, GIF 추가 공간 추가" —
+              히어로/편집 상태를 예시로 보여주려 만든 정지 화면 목업 대신, 실제 기능을
+              보여줄 GIF/영상을 나중에 넣을 수 있도록 자리만 마련. AiFeature 섹션에서
+              이미 쓰고 있는 것과 같은 자리(디자인 통일)로 맞춤.
+              before: <div className="mc-demo-frame">
+                        <div className="mc-demo-caption"><small>자기소개서에 활용할 경험을 연결해 보세요</small></div>
+                        <div className="mc-demo-canvas"><MiniMindMap variant="editing" /></div>
+                      </div>
+              after: 아래 Film 아이콘 + 안내 텍스트로 통일 (AiFeature와 동일 패턴) */}
+          <Film size={34} />
+          <span>GIF/영상 추가 예정</span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// 추가된 부분 [2026-07-20]: KeywordFeature 컴포넌트 (내부 정의)
+// 이유(요청 3): "단계 추가 - 02 · Keyword Extraction (키워드 추출)". 기존
+// MindMapFeature/AiFeature와 같은 mc-feature-panel 구조를 그대로 따르는 새 단계.
+// 실제 데모 화면이 아직 없어 AiFeature와 동일하게 mc-gif-placeholder를 씀.
+// ※ 참고: title/description/list 문구는 요청에 없던 부분이라 기존 톤에 맞춰
+// 초안으로 작성함 — 검수 후 문구를 다듬어주세요.
+function KeywordFeature() {
+  return (
+    <section className="mc-story-panel mc-feature-panel" id="keyword">
+      <div className="mc-panel-inner mc-feature-layout mc-feature-reverse" data-reveal>
+        <div className="mc-feature-copy">
+          <span className="mc-feature-index">02 · KEYWORD EXTRACTION</span>
+          <h2>경험 속에서<br />핵심 키워드를 뽑아내요</h2>
+          <p>마인드맵에 쌓아둔 경험을 AI가 분석해서, 자기소개서에 바로 쓸 수 있는 핵심 키워드와 역량을 자동으로 정리해요.</p>
+          <ul>
+            <li><Check size={16} /> 노드에 담긴 경험을 키워드 단위로 요약</li>
+            <li><Check size={16} /> 지원 직무와 관련 있는 키워드부터 우선 정리</li>
+          </ul>
+          <a className="mc-inline-btn" href="#master">자소서 마스터 설정하러 가기 <ArrowRight size={17} /></a>
+        </div>
+        <div className="mc-gif-placeholder" aria-hidden="true">
+          <Film size={34} />
+          <span>GIF/영상 추가 예정</span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// 추가된 부분 [2026-07-20]: MasterFeature 컴포넌트 (내부 정의)
+// 이유(요청 3): "단계 추가 - 03 · Personal Statement Master (자소서 마스터)".
+// FAQ에서만 언급되던 "자소서 마스터" 개념(회사/직무/인재상 정보 저장)에
+// 전용 소개 섹션을 만들어달라는 요청. 구조는 위 KeywordFeature와 동일.
+// ※ 참고: title/description/list 문구는 요청에 없던 부분이라 기존 톤에 맞춰
+// 초안으로 작성함 — 검수 후 문구를 다듬어주세요.
+function MasterFeature() {
+  return (
+    <section className="mc-story-panel mc-feature-panel" id="master">
+      <div className="mc-panel-inner mc-feature-layout" data-reveal>
+        <div className="mc-feature-copy">
+          <span className="mc-feature-index">03 · PERSONAL STATEMENT MASTER</span>
+          <h2>회사와 직무 정보를 한 곳에 정리해요</h2>
+          <p>지원할 회사명, 직무, 인재상 같은 정보를 <br /> 자소서 마스터에 저장해두면, AI가 그 기준에 맞춰 자기소개서를 작성해요.</p>
+          <ul>
+            <li><Check size={16} /> 회사·직무·인재상 정보를 한 번만 입력</li>
+            <li><Check size={16} /> 여러 자기소개서에서 반복 재사용</li>
+          </ul>
+          <a className="mc-inline-btn" href="#features">AI 자기소개서 생성 보기 <ArrowRight size={17} /></a>
+        </div>
+        <div className="mc-gif-placeholder" aria-hidden="true">
+          <Film size={34} />
+          <span>GIF/영상 추가 예정</span>
         </div>
       </div>
     </section>
@@ -612,7 +795,12 @@ function AiFeature() {
     <section className="mc-story-panel mc-feature-panel mc-ai-panel" id="features">
       <div className="mc-panel-inner mc-feature-layout mc-feature-reverse" data-reveal>
         <div className="mc-feature-copy">
-          <span className="mc-feature-index">02 · AI CRAFTING</span>
+          {/* 수정된 부분 [2026-07-20]: 인덱스 번호 02 → 04
+              이유(요청 3): 마인드맵(01)과 AI CRAFTING 사이에 키워드 추출(02)/자소서
+              마스터(03) 단계가 새로 끼어들면서, AI CRAFTING은 네 번째 단계가 됨.
+              before: <span className="mc-feature-index">02 · AI CRAFTING</span>
+              after: 아래로 교체 */}
+          <span className="mc-feature-index">04 · AI CRAFTING</span>
           <h2>연결된 경험이<br />설득력 있는 문장이 돼요</h2>
           <p>AI가 단순히 문장을 채우는 것이 아니라, 마인드맵 속 맥락을 읽고 지원 직무에 꼭 맞는 나만의 자기소개서를 만들어요.</p>
           {/* 수정된 부분 [2026-07-17]: 지표 3개 텍스트 교체
@@ -649,6 +837,23 @@ function AiFeature() {
           <Film size={34} />
           <span>GIF/영상 추가 예정</span>
         </div>
+      </div>
+    </section>
+  );
+}
+
+// 추가된 부분 [2026-07-20]: IntroBreak 컴포넌트 (내부 정의)
+// 이유(요청 2): "쉬는 구간인 빈 공간에 문구 생성" — ProcessSection(3단계 요약)과
+// MindMapFeature(01 · MIND MAP) 사이, 지금까지 여정 라인만 지나가고 텍스트가
+// 없던 빈 구간에 안내 문구 2줄을 넣어달라는 요청. mc-story-panel(전체 화면
+// 높이)을 쓰면 다른 기능 섹션만큼 커져버려 "쉬는 구간"의 느낌이 사라지므로,
+// 높이가 작은 전용 클래스(mc-intro-break)를 새로 만들어 가볍게 처리함.
+function IntroBreak() {
+  return (
+    <section className="mc-intro-break" data-reveal>
+      <div className="mc-panel-inner">
+        <p>마인드맵과 자기소개서의 핵심 기능을 모두 가지고 있습니다</p>
+        <span>MindCraft에서 편리하게 사용해보세요</span>
       </div>
     </section>
   );
@@ -729,7 +934,15 @@ function ClosingSection({ onStartClick, ctaLabel }) {
           <h2>당신의 경험은 이미<br />충분히 좋은 이야기예요.</h2>
           <p>MindCraft와 함께 흩어진 조각을 연결해 보세요.</p>
           <button className="mc-primary-btn mc-primary-light" onClick={onStartClick}>{ctaLabel}<ArrowRight size={18} /></button>
-          <div className="mc-final-map" aria-hidden="true"><MiniMindMap compact /></div>
+          {/* 수정된 부분 [2026-07-20]: 히어로/01 MIND MAP과 동일했던 정적 마인드맵 대신
+              variant="complete"를 전달해, 중앙 노드가 '나의 이야기'로 바뀌고 선이
+              안쪽으로 모이는 완성 상태 화면으로 교체
+              이유(사용자 피드백): "YOUR STORY STARTS HERE의 마인드맵도 위와 중복된다".
+              "당신의 경험은 이미 충분히 좋은 이야기"라는 이 카드의 카피에 맞춰
+              흩어진 경험이 하나의 이야기로 모이는 모습으로 마무리되도록 함.
+              before: <MiniMindMap compact />
+              after: <MiniMindMap compact variant="complete" /> */}
+          <div className="mc-final-map" aria-hidden="true"><MiniMindMap compact variant="complete" /></div>
         </div>
       </section>
 
@@ -847,7 +1060,15 @@ function MainPage() {
       <main ref={storyRef} className="mc-scroll-story">
         <JourneyLine lineRef={lineRef} ghostPathRef={ghostPathRef} pathRef={pathRef} glowRef={glowRef} />
         <ProcessSection />
+        {/* 추가된 부분 [2026-07-20]: 쉬는 구간 문구(IntroBreak) + 신규 단계 2개
+            (KeywordFeature/MasterFeature) 삽입
+            이유(요청 2, 3): "쉬는 구간인 빈 공간에 문구 생성" + "단계 추가(02 키워드
+            추출, 03 자소서 마스터)". 순서는 01 마인드맵 → 02 키워드 추출 →
+            03 자소서 마스터 → 04 AI 크래프팅(기존 AiFeature, 인덱스만 04로 변경). */}
+        <IntroBreak />
         <MindMapFeature />
+        <KeywordFeature />
+        <MasterFeature />
         <AiFeature />
       </main>
       <ClosingSection onStartClick={handleCtaClick} ctaLabel={ctaLabel} />
