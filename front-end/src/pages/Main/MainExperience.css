@@ -10,6 +10,26 @@
      같은 특이도(0,2,0)에서 이 파일이 나중에 로드되어 우선 적용됨.
    ═══════════════════════════════════════════════════════════════ */
 
+/* 수정된 부분 [2026-07-20]: 메인화면 전체의 box-shadow를 일괄로 none 처리
+   이유(사용자 피드백): "이제 메인화면에 있는 전체 그림자 제거해" — 카드마다
+   제각각인 그림자가 통일감 없이 튀어 보인다는 지적이 이어지다, 이번엔 화면
+   전체의 그림자를 아예 없애달라는 요청. 아래 21개 셀렉터의 box-shadow 값을
+   전부 none으로 바꿈(각 규칙마다 개별 before/after를 달지 않고 여기 한 번에
+   정리): .mc-page(전역 카드 그림자 변수 사용처), .mc-page .nav-btn(+hover),
+   .mc-primary-btn(+hover), .mc-hero-visual, .mc-live i, .mc-map-node,
+   .mc-map-node-main, .mc-floating-note, .mc-path-glow, .mc-path-landmark,
+   .mc-process-card(+hover, +is-active), .mc-process-expand, .mc-final-card,
+   .mc-final-card::before, .mc-primary-light, .mc-final-map .mc-map-node,
+   .mc-page .float-cta-btn, .mc-page .top-btn.
+   참고: .mc-path-glow / .mc-path-landmark의 box-shadow는 일반적인 "그림자"라기
+   보다 여정 라인 위 글로우 점·이정표 점의 링(원형 테두리) 효과를 만드는 용도였음
+   — 그림자를 없애면서 이 두 점의 링 효과도 함께 사라짐(글로우 점은 border만
+   남고, 이정표 점은 테두리 자체가 없어 완전히 밋밋한 원이 됨). 눈으로 보고
+   이상하면 알려주세요, 그 부분만 별도로 되돌릴 수 있습니다.
+   transition 속성에 남아있는 "box-shadow .3s ease" 등은 그대로 뒀는데, 값이
+   항상 none이라 실질적으로 전환될 게 없어 무해합니다(호버 시 다른 속성
+   transform 등은 여전히 정상 동작). */
+
 .mc-page {
   --mc-ink: #16182b;
   --mc-muted: #686b80;
@@ -37,12 +57,23 @@
   padding: 0 max(5vw, 28px);
   border-bottom: 1px solid rgba(109, 88, 190, .1);
   background: rgba(252, 252, 255, .82);
-  box-shadow: 0 8px 30px rgba(62, 46, 111, .04);
+  box-shadow: none;
   backdrop-filter: blur(18px);
 }
 
-.mc-page .nav .logo img { width: 36px !important; height: 36px !important; object-fit: contain; }
-.mc-page .nav .logo-text { font-family: 'Manrope', sans-serif; font-size: 1.08rem; letter-spacing: -.04em; }
+/* 수정된 부분 [2026-07-20]: 헤더 로고 크기 확대 (헤더 높이는 76px 그대로 유지)
+   이유(사용자 피드백): "지금 헤더에 있는 로고 크기가 너무 작은것 같은데 좀 많이
+   크게 해볼래? 헤더 위 아래 길이는 그대로 유지하고" — Nav.jsx의 인라인
+   style={{ height: 52 }}는 실제로 이 !important 규칙(36px)에 눌려 무시되고
+   있었음(인라인 스타일보다 !important가 항상 이김). 로고 이미지 크기를
+   36px → 58px로 크게 키우되(76px 헤더 안에 위아래 여백이 충분히 남는 값),
+   .mc-page .nav의 height: 76px 자체는 건드리지 않음. 아이콘만 커지면 옆의
+   워드마크 텍스트가 상대적으로 작아 보여서 logo-text 폰트도 함께 살짝 키움.
+   before: .mc-page .nav .logo img { width: 36px !important; height: 36px !important; object-fit: contain; }
+           .mc-page .nav .logo-text { font-family: 'Manrope', sans-serif; font-size: 1.08rem; letter-spacing: -.04em; }
+   after: 아래로 교체 (이미지 36→58px, logo-text 1.08rem→1.3rem) */
+.mc-page .nav .logo img { width: 58px !important; height: 58px !important; object-fit: contain; }
+.mc-page .nav .logo-text { font-family: 'Manrope', sans-serif; font-size: 1.3rem; letter-spacing: -.04em; }
 .mc-page .nav-links { gap: clamp(1rem, 2.2vw, 2.4rem); }
 .mc-page .nav-links a { position: relative; color: #5f6072; font-size: .86rem; font-weight: 600; }
 .mc-page .nav-links a::after { content: ''; position: absolute; left: 0; right: 100%; bottom: -8px; height: 2px; border-radius: 2px; background: var(--mc-violet); transition: right .25s ease; }
@@ -55,7 +86,7 @@
   box-shadow: none;
   transition: transform .2s ease, box-shadow .2s ease;
 }
-.mc-page .nav-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(22, 24, 43, .16); }
+.mc-page .nav-btn:hover { transform: translateY(-2px); box-shadow: none; }
 
 .mc-hero {
   position: relative;
@@ -104,7 +135,7 @@
   color: var(--mc-violet-deep);
   font-size: .75rem;
   font-weight: 700;
-  box-shadow: 0 8px 28px rgba(79, 57, 157, .07);
+  box-shadow: none;
 }
 
 .mc-hero h1,
@@ -152,10 +183,10 @@
   font-size: .92rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 12px 30px rgba(101, 72, 225, .28);
+  box-shadow: none;
   transition: transform .24s ease, box-shadow .24s ease;
 }
-.mc-primary-btn:hover { transform: translateY(-3px); box-shadow: 0 16px 36px rgba(101, 72, 225, .36); }
+.mc-primary-btn:hover { transform: translateY(-3px); box-shadow: none; }
 .mc-primary-btn svg { transition: transform .2s ease; }
 .mc-primary-btn:hover svg { transform: translateX(3px); }
 .mc-text-link { display: inline-flex; align-items: center; gap: 8px; color: #4f5061; font-size: .86rem; font-weight: 700; text-decoration: none; }
@@ -177,7 +208,7 @@
   border: 1px solid rgba(106, 84, 196, .18);
   border-radius: 22px;
   background: rgba(255, 255, 255, .92);
-  box-shadow: 0 32px 80px rgba(62, 43, 135, .15), 0 2px 0 #fff inset;
+  box-shadow: none;
   transform: rotateY(-4deg) rotateX(2deg);
 }
 .mc-window-top { height: 52px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 17px; border-bottom: 1px solid #eeeaf9; color: #5c5c70; font-size: .7rem; font-weight: 700; }
@@ -186,7 +217,7 @@
 .mc-window-dots i:first-child { background: #f3a2aa; }
 .mc-window-dots i:nth-child(2) { background: #f3d079; }
 .mc-live { justify-self: end; display: flex; align-items: center; gap: 5px; color: #8f90a0; font-size: .62rem; }
-.mc-live i { width: 5px; height: 5px; border-radius: 50%; background: #43c6a6; box-shadow: 0 0 0 3px rgba(67, 198, 166, .15); }
+.mc-live i { width: 5px; height: 5px; border-radius: 50%; background: #43c6a6; box-shadow: none; }
 .mc-window-body { position: relative; height: calc(100% - 52px); background: radial-gradient(circle, #dfdaf1 1.1px, transparent 1.1px); background-size: 23px 23px; }
 /* 수정된 부분 [2026-07-17]: mc-window-tools 관련 CSS 2개 삭제
    이유: 히어로 상품 미리보기 창 안의 왼쪽 세로 툴바(이동/커서/추가 아이콘)를
@@ -197,15 +228,25 @@
 .mc-mini-map { position: absolute; inset: 0; }
 .mc-mini-map-lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .mc-mini-map-lines path { fill: none; stroke: #9682e9; stroke-width: 2; stroke-linecap: round; stroke-dasharray: 6 7; animation: mc-line-flow 12s linear infinite; }
-.mc-map-node { position: absolute; z-index: 2; display: flex; align-items: center; justify-content: center; gap: 5px; min-width: 86px; height: 36px; padding: 0 12px; border: 1px solid #ded7f6; border-radius: 10px; background: #fff; color: #5e5777; font-size: .62rem; font-weight: 700; box-shadow: 0 7px 18px rgba(73, 52, 136, .1); }
-.mc-map-node-main { left: 50%; top: 50%; min-width: 112px; height: 43px; color: #fff; background: linear-gradient(135deg, #8469ec, #6646dc); border-color: transparent; transform: translate(-50%, -50%); box-shadow: 0 10px 24px rgba(102, 70, 220, .24); }
+.mc-map-node { position: absolute; z-index: 2; display: flex; align-items: center; justify-content: center; gap: 5px; min-width: 86px; height: 36px; padding: 0 12px; border: 1px solid #ded7f6; border-radius: 10px; background: #fff; color: #5e5777; font-size: .62rem; font-weight: 700; box-shadow: none; }
+.mc-map-node-main { left: 50%; top: 50%; min-width: 112px; height: 43px; color: #fff; background: linear-gradient(135deg, #8469ec, #6646dc); border-color: transparent; transform: translate(-50%, -50%); box-shadow: none; }
 .mc-map-node-a { left: 24%; top: 21%; transform: translate(-50%, -50%); }
 .mc-map-node-b { left: 78%; top: 21%; transform: translate(-50%, -50%); color: #417094; border-color: #cfe2f4; background: #f5fbff; }
 .mc-map-node-c { left: 23%; top: 79%; transform: translate(-50%, -50%); color: #26846f; border-color: #ccece4; background: #f5fffc; }
 .mc-map-node-d { left: 80%; top: 79%; transform: translate(-50%, -50%); }
 .mc-map-cursor { position: absolute; z-index: 4; left: 54%; top: 66%; color: #342461; animation: mc-cursor 5s ease-in-out infinite; filter: drop-shadow(0 3px 4px rgba(20,10,55,.15)); }
 .mc-map-cursor span { position: absolute; left: 16px; top: 16px; padding: 3px 7px; border-radius: 6px; background: #342461; color: #fff; font-size: .52rem; }
-.mc-floating-note { position: absolute; z-index: 5; display: flex; align-items: center; gap: 8px; padding: 11px 14px; border: 1px solid #e7e1f8; border-radius: 12px; background: rgba(255,255,255,.94); color: #4f4967; font-size: .68rem; font-weight: 700; box-shadow: 0 16px 34px rgba(66, 47, 127, .15); backdrop-filter: blur(10px); animation: mc-float 4s ease-in-out infinite; }
+/* 수정된 부분 [2026-07-20]: MiniMindMap 'editing' variant 전용 CSS 블록 전체 삭제
+   이유(요청 3-2): "MINDMAP 기존 가짜 마인드맵 삭제, GIF 추가 공간 추가" — Main.jsx에서
+   variant='editing' 분기 자체를 지웠으므로, 여기서 그 분기만 참조하던 노드/선/커서
+   스타일과 keyframes(mc-node-pulse, mc-sub-in, mc-sub-line-in, mc-cursor-editing)가
+   전부 죽은 코드가 되어 함께 삭제함.
+   before: .mc-map-node-editing-main/a/c/b(+is-active) / .mc-map-node-sub(+sub-1/2/3) /
+           .mc-map-node-ghost / .mc-mini-map-lines path.mc-mini-map-line-sub-1/2/3 /
+           .mc-mini-map-lines path.mc-mini-map-line-ghost / .mc-map-cursor-editing /
+           @keyframes mc-node-pulse, mc-sub-in, mc-sub-line-in, mc-cursor-editing (총 4개)
+   after: (전부 삭제됨) */
+.mc-floating-note { position: absolute; z-index: 5; display: flex; align-items: center; gap: 8px; padding: 11px 14px; border: 1px solid #e7e1f8; border-radius: 12px; background: rgba(255,255,255,.94); color: #4f4967; font-size: .68rem; font-weight: 700; box-shadow: none; backdrop-filter: blur(10px); animation: mc-float 4s ease-in-out infinite; }
 .mc-note-top { top: 15%; right: -5%; color: #337964; }
 .mc-note-bottom { left: -7%; bottom: 7%; animation-delay: -2s; }
 .mc-note-bottom svg { color: var(--mc-violet); }
@@ -265,7 +306,7 @@
   box-sizing: border-box;
   background: #fff;
   border: 6px solid #7459e8;
-  box-shadow: 0 0 22px 6px rgba(116, 89, 232, .55);
+  box-shadow: none;
   transition: opacity .2s;
 }
 /* 수정된 부분 [2026-07-17]: 이정표 점 크기 확대
@@ -281,7 +322,7 @@
   margin: -7px 0 0 -7px;
   border-radius: 50%;
   background: var(--mc-violet);
-  box-shadow: 0 0 0 10px #fff, 0 0 0 12px #cfc6ef;
+  box-shadow: none;
 }
 .mc-story-panel { position: relative; z-index: 2; min-height: 100svh; padding: 130px max(5vw, 28px) 100px; display: grid; place-items: center; }
 .mc-panel-inner { width: min(1160px, 100%); margin: auto; }
@@ -306,43 +347,187 @@
 .mc-section-heading > span, .mc-feature-index, .mc-final-card > span, .mc-faq-heading > span { display: inline-block; margin-bottom: 14px; color: var(--mc-violet); font: 700 .68rem/1 'DM Sans', sans-serif; letter-spacing: .16em; }
 .mc-section-heading h2 { font-size: clamp(2rem, 3.5vw, 3.15rem); line-height: 1.25; font-weight: 800; word-break: keep-all; }
 .mc-section-heading p { margin-top: 16px; color: var(--mc-muted); font-size: .95rem; }
-.mc-process-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-.mc-process-card { position: relative; overflow: hidden; min-height: 355px; padding: 27px 26px 23px; border: 1px solid rgba(110, 90, 179, .13); border-radius: 23px; background: rgba(255,255,255,.86); box-shadow: 0 22px 60px rgba(59, 42, 115, .08); backdrop-filter: blur(12px); transition: transform .3s ease, box-shadow .3s ease; }
-.mc-process-card:hover { transform: translateY(-8px); box-shadow: 0 30px 70px rgba(59, 42, 115, .13); }
-.mc-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 35px; }
-.mc-card-top span { color: #c1bccf; font: 600 .75rem/1 'DM Sans', sans-serif; letter-spacing: .08em; }
-.mc-card-top svg { width: 43px; height: 43px; padding: 10px; border-radius: 12px; color: var(--mc-violet); background: var(--mc-lilac); }
-.mc-card-blue .mc-card-top svg { color: #4775dc; background: #edf3ff; }
-.mc-card-mint .mc-card-top svg { color: #27947e; background: #eafaf6; }
-.mc-process-card > small { color: #9a96a8; font: 700 .6rem/1 'DM Sans', sans-serif; letter-spacing: .15em; }
-.mc-process-card h3 { margin: 10px 0 10px; color: var(--mc-ink); font-size: 1.16rem; letter-spacing: -.035em; }
-.mc-process-card > p { color: #747587; font-size: .78rem; line-height: 1.75; word-break: keep-all; }
-/* 수정된 부분 [2026-07-17]: mc-card-sketch를 "손그림 장식" 스타일에서
-   "GIF 자리 placeholder" 스타일로 전면 교체
-   이유(요청 3): JSX에서 index별 점선/곡선/아이콘 장식(before 참고)을 모두 지우고
-   Film 아이콘 + 안내 텍스트로 통일했으므로, 그 하위 셀렉터들(mc-line-long 등)도
-   더 이상 쓰이지 않아 함께 정리하고 점선 박스 스타일로 바꿈.
-   before: 배경색 실선 박스 + i(점)/svg(곡선)/mc-line-long/mc-line-short/mc-ai-line 등
-   세부 장식 셀렉터 다수
-   after: 아래 점선 박스 + 아이콘 + 텍스트 스타일로 단순화 */
-.mc-card-sketch {
-  position: absolute;
-  inset: auto 24px 21px;
-  height: 78px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  border-radius: 15px;
-  border: 1.5px dashed #cabdf2;
-  background: #f8f6ff;
-  color: #8068df;
-  font-size: .6rem;
-  font-weight: 700;
-}
-.mc-card-blue .mc-card-sketch { border-color: #c3d4f7; background: #f5f8ff; color: #5580de; }
-.mc-card-mint .mc-card-sketch { border-color: #bfe8dd; background: #f2fbf8; color: #38a78f; }
+
+/* 추가된 부분 [2026-07-20]: IntroBreak(쉬는 구간 문구) 전용 스타일
+   이유(요청 2): "쉬는 구간인 빈 공간에 문구 생성". mc-story-panel(min-height: 100svh)을
+   그대로 쓰면 다른 기능 섹션만큼 화면을 꽉 채워버려 "쉬는 구간"이 아니라 또 하나의
+   큰 섹션처럼 보이므로, 높이가 작은 전용 클래스로 가볍게 처리함.
+   (이후 여러 차례 수정 이력 요약: ①선이 텍스트를 침범해서 반투명 박스+그림자 추가
+   ②폰트를 키우고 박스/문구 max-width를 넓힘 ③박스를 컨테이너 폭까지 채우고
+   데스크톱에서 줄바꿈 없이 한 줄로 강제)
+   수정된 부분 [2026-07-20]: 박스(배경/테두리/그림자) 전체 삭제, 폰트 더 확대,
+   상하 여백 확대
+   이유(사용자 피드백): "박스 형태가 아니고 그냥 양 옆으로 공백없이 넓어지는 형태로
+   변경" + "위 아래 좀 더 넓게" + "그림자가 통일되어 있지 않고 삐죽삐죽 튀어나와있어서
+   쉬는 구간이 매우 이질적으로 보임, 전체적으로 있는 그림자를 아예 없애던가 하는
+   방안이 좋을 것 같음" — 반투명 박스 + box-shadow를 완전히 없애고, 다른 섹션들과
+   같은 표준 콘텐츠 폭(전역 .mc-panel-inner의 width: min(1160px, 100%))을 그대로
+   쓰도록 해서 "박스 안에 갇힌 카드"가 아니라 "그냥 넓게 펼쳐진 문구"가 되도록 함.
+   텍스트 자체는 position/z-index를 유지해 여정 라인(JourneyLine, z-index: 2)이
+   글자 뒤로 지나가게는 하되, 그걸 가려주던 배경 박스는 없앴으므로 글자 사이
+   빈 공간으로는 라인이 비쳐 보일 수 있음 — 박스를 없애달라는 요청과 맞바꾼
+   trade-off라 우선 이대로 두고, 다시 거슬리면 바로 알려주세요.
+   before: .mc-intro-break { position: relative; z-index: 2; padding: 130px max(5vw, 28px); text-align: center; }
+           .mc-intro-break .mc-panel-inner { position: relative; z-index: 3; display: flex;
+             flex-direction: column; align-items: center; gap: 12px; width: 100%;
+             max-width: 1160px; margin: 0 auto; padding: 200px clamp(20px, 3vw, 48px);
+             border-radius: 22px; background: rgba(252, 252, 255, .82);
+             box-shadow: 0 22px 60px rgba(59, 42, 115, .08); backdrop-filter: blur(10px); }
+           .mc-intro-break p { color: var(--mc-ink); font-size: clamp(1.3rem, 2.7vw, 2.05rem);
+             font-weight: 800; line-height: 1.5; white-space: nowrap; word-break: keep-all; }
+           .mc-intro-break span { color: var(--mc-muted); font-size: .92rem; }
+   after: 아래로 교체 (박스 스타일 전부 삭제, padding 130→190px, font-size 상한
+   2.05rem→2.45rem)
+   수정된 부분 [2026-07-20]: 한 줄 강제(white-space: nowrap) 삭제, 문구에 max-width를
+   줘서 자연스럽게 2줄로 떨어지도록 변경, 폰트 더 확대
+   이유(사용자 피드백, 참고 이미지): "아니 이런 형식 말이야" — boardmix 랜딩 페이지처럼
+   "한 줄로 우겨넣기"가 아니라, 큼직한 헤드라인이 적당한 지점에서 자연스럽게 2줄로
+   중앙 정렬되고 그 아래 옅은 색 부제가 붙는 형태를 원한 것. 문구 폭을 좁혀서(max-width)
+   nowrap 없이도 항상 비슷한 지점에서 균형 있게 줄바꿈되도록 하고, 그만큼 글자를
+   더 키워도 안전하게 함.
+   before: .mc-intro-break p { color: var(--mc-ink); font-size: clamp(1.5rem, 3vw, 2.45rem);
+             font-weight: 800; line-height: 1.5; white-space: nowrap; word-break: keep-all; }
+   after: 아래로 교체 (max-width 780px 추가, nowrap 삭제, font-size 상한 2.45rem→3.2rem)
+   수정된 부분 [2026-07-20]: 박스를 다시 추가하되, 다른 섹션의 표준 폭(1160px)에
+   맞추지 않고 옆으로 최대까지 늘어나는 풀블리드 형태로 변경
+   이유(사용자 피드백): "박스 추가해서 그냥 옆으로 최대까지 늘리는 방식으로 가" —
+   박스 없는 형태(직전 수정)에서 다시 박스가 있는 형태로 되돌리되, 이번엔 폭을
+   1160px로 제한하지 않고 섹션 좌우 여백(max(5vw, 28px))까지 꽉 채움. 이전에
+   "그림자가 삐죽삐죽 튀어나와 이질적으로 보인다"는 지적이 있었던 걸 감안해
+   box-shadow는 넣지 않고 은은한 그라디언트 배경만 사용함. 텍스트 자체는 폭이
+   넓어져도 계속 읽기 좋게 max-width 780px로 가운데 정렬 유지.
+   before: .mc-intro-break { position: relative; z-index: 2; padding: 190px max(5vw, 28px); text-align: center; }
+           .mc-intro-break .mc-panel-inner { position: relative; z-index: 3; display: flex;
+             flex-direction: column; align-items: center; gap: 20px; width: 100%; }
+           (박스 배경/테두리 없음)
+   after: 아래로 교체 (섹션 padding 축소 + panel-inner에 풀블리드 박스 배경/패딩 추가) */
+/* 수정된 부분 [2026-07-20]: 좌우 여백을 더 줄여 박스를 거의 뷰포트 끝까지 늘리고,
+   위아래 여백도 더 키움
+   이유(사용자 피드백, 스크린샷): "왼쪽에 빈 공간 발견, 그리고 위 아래로 더 많이
+   늘려" — 섹션 좌우 padding이 max(5vw, 28px)라 넓은 화면에서 박스 양옆으로
+   눈에 띄는 여백이 남아있었음. 좌우 padding을 훨씬 작은 값으로 줄여 박스가
+   뷰포트 가장자리에 거의 붙도록 하고, 박스 안쪽 세로 padding도 130px→170px로
+   늘림.
+   before: .mc-intro-break { position: relative; z-index: 2; padding: 60px max(5vw, 28px); text-align: center; }
+           .mc-intro-break .mc-panel-inner { ...; padding: 130px clamp(20px, 4vw, 64px); ... }
+   after: 아래로 교체 (좌우 padding max(5vw,28px)→max(1.5vw,14px), 세로 padding 130→170px) */
+/* 수정된 부분 [2026-07-20]: 중앙 정렬 → 좌측 정렬로 변경, 박스 내부 여백 대폭 축소
+   이유(사용자 피드백, 스크린샷): "아직도 왼쪽 상단에 공백이 있다니까" — 박스가
+   가로/세로 모두 커진 상태에서 문구는 계속 가운데 정렬이었기 때문에, 좌우 여백을
+   아무리 줄여도 박스 자체가 크고 내용은 작아서 특히 왼쪽 위 사분면이 텅 빈 것처럼
+   보이는 문제였음(패딩 숫자를 더 조정해도 정렬 방식 자체가 원인이라 해결이 안 됨).
+   문구를 좌측 정렬로 바꿔 박스 왼쪽부터 내용이 바로 시작하도록 하고, 세로 패딩도
+   170px→80px로 크게 줄여 박스가 내용에 비해 과하게 커 보이지 않도록 함.
+   before: .mc-intro-break { position: relative; z-index: 2; padding: 80px max(1.5vw, 14px); text-align: center; }
+           .mc-intro-break .mc-panel-inner { ...; align-items: center; ...; padding: 170px clamp(20px, 4vw, 64px); ... }
+           .mc-intro-break p { max-width: 780px; margin: 0 auto; ... }
+   after: 아래로 교체 (text-align left, align-items flex-start, 세로 패딩 170→80px,
+   p의 margin: 0 auto 삭제) */
+/* 수정된 부분 [2026-07-20]: 섹션 좌우 padding을 아예 0으로, 박스 모서리도 각지게
+   변경해 뷰포트 끝까지 완전히 붙도록 하고, 문구 폭/크기도 함께 키움
+   이유(사용자 피드백): "그냥 쫙 늘려 박스이되 전부 다 쫙 늘리는 방향으로" —
+   지금까지는 max(1.5vw, 14px) 정도의 최소 여백이 남아있었는데, 그 여백마저
+   완전히 없애 박스가 뷰포트 좌우 끝에 정확히 맞닿도록 함. 모서리가 둥글면
+   뷰포트 가장자리에 딱 붙었을 때 어색해 보이므로 border-radius도 제거함.
+   "전부 다 쫙 늘리는" 요청에 맞춰 문구의 max-width와 폰트 크기도 한 단계 더 키움.
+   before: .mc-intro-break { position: relative; z-index: 2; padding: 60px max(1.5vw, 14px); text-align: left; }
+           .mc-intro-break .mc-panel-inner { ...; padding: 80px clamp(32px, 6vw, 90px); border-radius: 24px; ... }
+           .mc-intro-break p { max-width: 780px; ...; font-size: clamp(1.8rem, 4vw, 3.2rem); ... }
+   after: 아래로 교체 (섹션 좌우 padding 제거, border-radius 제거, p max-width
+   780→980px, font-size 상한 3.2rem→3.6rem)
+   수정된 부분 [2026-07-20]: 박스는 엣지투엣지 그대로 두고, 텍스트 정렬만 좌측 → 가운데로 변경
+   이유(사용자 피드백): "이제 공백은 사라졌는데 텍스트만 중간으로 오게 할 수 없나?" —
+   박스 좌우 여백 문제(공백)는 해결됐으니, 이번엔 박스 폭은 그대로 두고 그 안의
+   텍스트만 중앙 정렬로 되돌려달라는 요청. 박스 자체(padding: 60px 0 등)는 손대지 않음.
+   before: .mc-intro-break { position: relative; z-index: 2; padding: 60px 0; text-align: left; }
+           .mc-intro-break .mc-panel-inner { ...; align-items: flex-start; ... }
+   after: 아래로 교체 (text-align center, align-items center) */
+/* 수정된 부분 [2026-07-20]: 박스 위아래(세로) 크기 확대
+   이유(사용자 피드백): "이제 위 아래로 늘려봐" — 박스 안쪽 세로 padding을
+   80px→150px로 늘려 상하 여백을 더 넉넉하게 키움.
+   before: .mc-intro-break .mc-panel-inner { ...; padding: 80px clamp(32px, 6vw, 90px); ... }
+   after: 아래로 교체 (세로 padding 80→150px) */
+.mc-intro-break { position: relative; z-index: 2; padding: 60px 0; text-align: center; }
+.mc-intro-break .mc-panel-inner { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 20px; width: 100%; padding: 150px clamp(32px, 6vw, 90px); background: linear-gradient(135deg, #f4f1ff, #fbfaff); }
+.mc-intro-break p { max-width: 980px; color: var(--mc-ink); font-size: clamp(1.9rem, 4.4vw, 3.6rem); font-weight: 800; line-height: 1.4; letter-spacing: -.02em; word-break: keep-all; }
+.mc-intro-break span { color: var(--mc-muted); font-size: 1.1rem; }
+/* 수정된 부분 [2026-07-20]: 프로세스 카드를 "아이콘 + 영어 문구"만 남도록 축소하고,
+   <article> → <button>이 됐으므로 버튼 기본 스타일을 리셋함
+   이유(요청 1): "번호, 한글 텍스트, 문구, GIF 추가 예정 텍스트 삭제 / 아이콘 중간
+   가운데 정렬, 크기 증가 / 영어 텍스트 아이콘 아래에 재위치". 내용이 크게 줄어든
+   만큼 카드 높이(min-height)도 355px → 내용에 맞춰 자동으로 줄임. 카드 전체를
+   세로 flex로 바꿔 아이콘을 가운데 정렬함.
+   before: .mc-process-card { ...; min-height: 355px; padding: 27px 26px 23px; ... }
+           (아래 mc-card-top/h3/p/mc-card-sketch 등 번호·제목·문구·GIF 자리 규칙들)
+   after: 아래로 교체 (아이콘 배지 mc-card-icon + is-active 강조 스타일 추가) */
+/* 수정된 부분 [2026-07-20]: 3열 → 4열 그리드로 변경, 카드 크기(패딩/아이콘/간격) 축소,
+   4번째 카드용 색상(amber) 추가
+   이유(요청 - ONE SIMPLE FLOW 카드 수정): 카드가 3개→4개(마인드맵/키워드 추출/
+   자소서 마스터/AI 생성)로 늘어나 그리드도 4열로 바꿔야 하고, "전체적으로 버튼
+   크기 축소" 요청에 맞춰 패딩·아이콘·간격을 한 단계씩 줄임.
+   before: .mc-process-grid { ...; grid-template-columns: repeat(3, 1fr); ... }
+           .mc-process-card { ...; gap: 16px; min-height: 190px; padding: 40px 20px; ... }
+           .mc-card-icon { ...; width: 68px; height: 68px; ... }
+           (mc-card-blue/mc-card-mint 2개 색상만 존재)
+   after: 아래로 교체 (grid 4열, 카드/아이콘 축소, mc-card-amber 색상 추가) */
+.mc-process-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+/* 수정된 부분 [2026-07-20]: "카드 전체에 항상 색이 깔린" 이전 버전을 되돌리고,
+   선택(active)된 카드에서만 아이콘의 색이 배경 전체로 퍼지도록 변경
+   이유(사용자 피드백): "아니 내 말은 버튼이 선택되었을때 지금 아이콘 배경의
+   색깔이 쫙 퍼지는걸 생각했어, 아이콘 주변의 색깔은 그대로 놔두고" — 직전
+   수정은 카드가 항상(선택 여부 상관없이) 색을 띠고, 아이콘은 반대로 진한
+   단색+흰 아이콘으로 바뀌는 방식이었는데, 실제로는 아이콘 배지는 원래
+   모습(옅은 색조 배경 + 색 아이콘) 그대로 두고, 카드를 선택했을 때만 그
+   색이 카드 전체로 번지는 연출을 원한 것. 아이콘(.mc-card-icon)은 이전
+   상태로 롤백하고, 카드 배경에 색을 넣는 건 .is-active가 붙었을 때만
+   적용되도록 옮김. background-color에 transition을 추가해 선택 시 색이
+   "퍼지는" 느낌이 나도록 함.
+   before: .mc-process-card { ...; background: var(--mc-lilac); ...; transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease; }
+           .mc-process-card.is-active { border-color: var(--mc-violet); box-shadow: none; }
+           .mc-card-blue { border-color: rgba(71, 117, 220, .18); background: #edf3ff; }
+           .mc-card-blue.is-active { border-color: #4775dc; }
+           .mc-card-mint { border-color: rgba(39, 148, 126, .18); background: #eafaf6; }
+           .mc-card-mint.is-active { border-color: #27947e; }
+           .mc-card-amber { border-color: rgba(192, 122, 30, .18); background: #fdf1e0; }
+           .mc-card-amber.is-active { border-color: #c07a1e; }
+           .mc-card-icon { ...; color: #fff; background: var(--mc-violet); }
+           .mc-card-blue .mc-card-icon { background: #4775dc; }
+           .mc-card-mint .mc-card-icon { background: #27947e; }
+           .mc-card-amber .mc-card-icon { background: #c07a1e; }
+   after: 아래로 교체 (카드 기본 배경 흰색으로 롤백, 색은 is-active에서만 부여,
+   아이콘 배지는 원래의 옅은 색조 스타일로 롤백) */
+.mc-process-card { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 140px; padding: 26px 14px; border: 1px solid rgba(110, 90, 179, .13); border-radius: 20px; background: rgba(255,255,255,.86); box-shadow: none; backdrop-filter: blur(12px); font-family: inherit; cursor: pointer; transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease, background-color .35s ease; }
+.mc-process-card:hover { transform: translateY(-8px); box-shadow: none; }
+/* 지금 펼쳐져 있는(Active) 카드 강조 — 아이콘의 색이 카드 전체로 퍼지는 효과 */
+.mc-process-card.is-active { border-color: var(--mc-violet); background: var(--mc-lilac); box-shadow: none; }
+.mc-card-blue.is-active { border-color: #4775dc; background: #edf3ff; }
+.mc-card-mint.is-active { border-color: #27947e; background: #eafaf6; }
+.mc-card-amber.is-active { border-color: #c07a1e; background: #fdf1e0; }
+.mc-card-icon { display: flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: 15px; color: var(--mc-violet); background: var(--mc-lilac); }
+.mc-card-blue .mc-card-icon { color: #4775dc; background: #edf3ff; }
+.mc-card-mint .mc-card-icon { color: #27947e; background: #eafaf6; }
+.mc-card-amber .mc-card-icon { color: #c07a1e; background: #fdf1e0; }
+.mc-process-card > small { color: #9a96a8; font: 700 .66rem/1.4 'Noto Sans KR', sans-serif; letter-spacing: -.01em; word-break: keep-all; }
+
+/* 추가된 부분 [2026-07-20]: 카드를 클릭하면 아래에 펼쳐지는 설명(왼쪽)/이미지 자리(오른쪽) 영역
+   이유(요청 1-1, 손그림 스케치): "카드를 누르면 아래에 새로운 빈 공간이 생기면서
+   왼쪽에는 설명하는 글, 오른쪽에는 사진을 넣을 수 있는 공간이 생기는 형식". */
+/* 수정된 부분 [2026-07-20]: 펼침 영역(설명 글 + 이미지 자리) 전체 크기 확대
+   이유(사용자 피드백, 스크린샷): "아래에 설명하는 부분과 그림 넣는 부분이 너무
+   작은데 어짜피 똑같은 크기의 사진을 집어넣을거라면 적어도 여유있는 공간이
+   있었으면 좋겠어" — 이미지 자리를 고정 min-height(130px)가 아니라 다른 GIF
+   placeholder(mc-gif-placeholder)처럼 aspect-ratio 기반으로 바꿔 칸 너비에 맞춰
+   넉넉하게 커지도록 하고, 카드 안쪽 여백/텍스트 크기도 그 규모에 맞게 키움.
+   before: .mc-process-expand { ...; gap: 40px; padding: 34px 38px; ... }
+           .mc-process-expand-text h3 { ...; font-size: 1.2rem; ... }
+           .mc-process-expand-text p { ...; font-size: .85rem; ... }
+           .mc-process-expand-media { ...; min-height: 130px; ...; font-size: .68rem; ... }
+   after: 아래로 교체 */
+.mc-process-expand { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 56px; margin-top: 22px; padding: 52px 54px; border: 1px solid rgba(110, 90, 179, .13); border-radius: 25px; background: rgba(255,255,255,.7); box-shadow: none; backdrop-filter: blur(12px); animation: mc-expand-in .35s ease; }
+.mc-process-expand-text h3 { margin: 0 0 14px; color: var(--mc-ink); font-size: 1.55rem; letter-spacing: -.03em; }
+.mc-process-expand-text p { margin: 0; color: #747587; font-size: .95rem; line-height: 1.9; word-break: keep-all; }
+.mc-process-expand-media { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; aspect-ratio: 1.3; min-height: 220px; border-radius: 18px; border: 1.5px dashed #cabdf2; background: #f8f6ff; color: #8068df; font-size: .74rem; font-weight: 700; }
+@keyframes mc-expand-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
 
 .mc-feature-layout { display: grid; grid-template-columns: .78fr 1.22fr; align-items: center; gap: clamp(58px, 8vw, 115px); }
 .mc-feature-reverse { grid-template-columns: 1.15fr .85fr; }
@@ -377,27 +562,13 @@
 .mc-inline-btn { width: fit-content; display: inline-flex; align-items: center; gap: 8px; margin-top: 29px; padding: 0 0 5px; border: 0; border-bottom: 1px solid #bbb1eb; color: var(--mc-violet-deep); background: none; font-size: .8rem; font-weight: 700; text-decoration: none; cursor: pointer; }
 .mc-inline-btn svg { transition: transform .2s ease; }
 .mc-inline-btn:hover svg { transform: translateX(4px); }
-/* 수정된 부분 [2026-07-17]: mc-document-demo를 복합 선택자에서 분리해 삭제
-   이유: AI CRAFTING 좌측 문서 미리보기 목업을 JSX에서 지운 지 오래라
-   mc-document-demo는 이제 어디서도 안 쓰임. 같은 선택자를 공유하던
-   mc-demo-frame(MIND MAP 데모 박스)은 여전히 쓰이므로 그대로 남김.
-   before: .mc-demo-frame, .mc-document-demo { ... }
-   after: .mc-demo-frame { ... } */
-.mc-demo-frame { position: relative; overflow: hidden; aspect-ratio: 1.23; border: 1px solid rgba(88, 68, 158, .13); border-radius: 25px; background: #fff; box-shadow: 0 34px 80px rgba(57, 45, 111, .13); }
-/* 수정된 부분 [2026-07-17]: justify-content: space-between → flex-start
-   이유(요청 4): "LIVE DEMO" span을 JSX에서 삭제해 자식이 small 하나만 남았는데,
-   space-between인 채로 두면 혼자 있는 small이 양 끝으로 벌어져 보이는 대신
-   그냥 가운데로 몰려버리는 문제가 있어 좌측 정렬로 변경. */
-.mc-demo-caption { height: 62px; display: flex; align-items: center; justify-content: flex-start; padding: 0 22px; border-bottom: 1px solid #eeebf6; }
-.mc-demo-caption span { display: flex; align-items: center; gap: 8px; color: #6a6480; font: 700 .59rem/1 'DM Sans', sans-serif; letter-spacing: .12em; }
-.mc-demo-caption span i { width: 7px; height: 7px; border-radius: 50%; background: #2ec5a6; box-shadow: 0 0 0 4px rgba(46,197,166,.15); }
-.mc-demo-caption small { color: #aba8b6; font-size: .6rem; }
-.mc-demo-canvas { position: relative; height: calc(100% - 62px); background: radial-gradient(circle, #ded9ee 1px, transparent 1px); background-size: 22px 22px; }
-/* 수정된 부분 [2026-07-17]: mc-demo-toast 삭제
-   이유: "새로운 연결에서 '문제 해결력'을 발견했어요" 토스트를 JSX에서 지운 지
-   오래라 더 이상 쓰이지 않음. 이 규칙이 참조하던 @keyframes mc-toast도 다른
-   곳에서 쓰이지 않아 함께 삭제(아래 keyframes 목록 참고).
-   before: .mc-demo-toast { ... animation: mc-toast 5s ...; }
+/* 수정된 부분 [2026-07-20]: mc-demo-frame / mc-demo-caption / mc-demo-canvas 규칙 삭제
+   이유(요청 3-2): MindMapFeature(01 MIND MAP)의 <div className="mc-demo-frame"> 전체를
+   mc-gif-placeholder로 교체하면서, 이 3개 클래스를 쓰는 곳이 더 이상 하나도 없어짐
+   (AI CRAFTING 섹션은 원래부터 mc-gif-placeholder만 썼음). 바로 위 주석(2026-07-17)에
+   "mc-demo-frame은 여전히 쓰이므로 남김"이라고 적혀있었는데, 이번 변경으로 그 전제가
+   깨져서 이번엔 진짜로 삭제함.
+   before: .mc-demo-frame { position: relative; overflow: hidden; aspect-ratio: 1.23; ...5개 속성 } / .mc-demo-caption(3개 규칙) / .mc-demo-canvas(1개 규칙) — 총 5개 규칙
    after: (삭제됨) */
 .mc-ai-panel { background: radial-gradient(circle at 25% 50%, rgba(228,239,255,.7), transparent 36%); }
 
@@ -440,12 +611,12 @@
    JSX에서 삭제한 지 오래라 더 이상 쓰이지 않음.
    before: .mc-community-strip(+ span/i/nth-child 하위 4개) 총 5개 규칙
    after: (삭제됨) */
-.mc-final-card { position: relative; overflow: hidden; width: min(1100px, 100%); min-height: 455px; margin: auto; padding: 78px 80px; border-radius: 31px; color: #fff; background: linear-gradient(125deg, #5c42c7 0%, #7655e8 48%, #507bd5 100%); box-shadow: 0 35px 90px rgba(78, 55, 176, .24); }
-.mc-final-card::before { content: ''; position: absolute; width: 360px; height: 360px; right: -70px; top: -130px; border: 1px solid rgba(255,255,255,.16); border-radius: 50%; box-shadow: 0 0 0 55px rgba(255,255,255,.035), 0 0 0 110px rgba(255,255,255,.025); }
+.mc-final-card { position: relative; overflow: hidden; width: min(1100px, 100%); min-height: 455px; margin: auto; padding: 78px 80px; border-radius: 31px; color: #fff; background: linear-gradient(125deg, #5c42c7 0%, #7655e8 48%, #507bd5 100%); box-shadow: none; }
+.mc-final-card::before { content: ''; position: absolute; width: 360px; height: 360px; right: -70px; top: -130px; border: 1px solid rgba(255,255,255,.16); border-radius: 50%; box-shadow: none; }
 .mc-final-card > span { position: relative; z-index: 2; display: flex; align-items: center; gap: 7px; color: #dcd5ff; }
 .mc-final-card h2 { position: relative; z-index: 2; color: #fff; font-size: clamp(2.15rem, 3vw, 3.8rem); line-height: 1.2; }
 .mc-final-card > p { position: relative; z-index: 2; margin: 19px 0 27px; color: rgba(255,255,255,.75); font-size: .88rem; }
-.mc-primary-light { position: relative; z-index: 4; color: var(--mc-violet-deep); background: #fff; box-shadow: 0 12px 30px rgba(32,22,77,.2); }
+.mc-primary-light { position: relative; z-index: 4; color: var(--mc-violet-deep); background: #fff; box-shadow: none; }
 .mc-final-map { position: absolute; z-index: 1; width: 47%; height: 100%; right: 0; top: 0; opacity: .65; }
 .mc-final-map .mc-mini-map-lines path { stroke: rgba(255,255,255,.45); }
 .mc-final-map .mc-map-node { border-color: rgba(255,255,255,.28); color: rgba(255,255,255,.9); background: rgba(255,255,255,.12); box-shadow: none; backdrop-filter: blur(5px); }
@@ -539,13 +710,13 @@
   border-radius: 12px;
   color: #fff;
   background: var(--mc-ink);
-  box-shadow: 0 12px 30px rgba(25,25,45,.22);
+  box-shadow: none;
   font-size: .75rem;
   transform: none;
   animation: mc-float-cta-in .25s ease;
 }
-.mc-page .float-cta-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 34px rgba(25,25,45,.28); }
-.mc-page .top-btn { right: 28px; bottom: 84px; width: 40px; height: 40px; border: 1px solid #e1ddec; background: rgba(255,255,255,.94); box-shadow: 0 8px 24px rgba(42,35,75,.12); }
+.mc-page .float-cta-btn:hover { transform: translateY(-3px); box-shadow: none; }
+.mc-page .top-btn { right: 28px; bottom: 84px; width: 40px; height: 40px; border: 1px solid #e1ddec; background: rgba(255,255,255,.94); box-shadow: none; }
 .mc-page .top-btn img { width: 20px; height: 20px; object-fit: contain; }
 
 [data-reveal] { opacity: 0; transform: translateY(28px); transition: opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); }
@@ -574,21 +745,30 @@
   .mc-hero-visual { width: min(680px, 92%); margin: 0 auto; }
   .mc-scroll-cue { display: none; }
   .mc-story-panel { min-height: auto; padding-block: 120px; }
-  .mc-process-grid { gap: 14px; }
-  .mc-process-card { min-height: 330px; padding-inline: 20px; }
+  /* 수정된 부분 [2026-07-20]: 980px 이하에서 4열 → 2열 그리드로 전환
+     이유: 카드가 4개로 늘어난 채 4열을 유지하면 이 폭에서 칸이 너무 좁아짐 (2x2로 배치) */
+  .mc-process-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  /* 수정된 부분 [2026-07-20]: .mc-process-card min-height 오버라이드(330px) 삭제
+     이유: 카드 내용이 아이콘+영어 문구만 남아 기본 min-height가 355px→190px로
+     줄었으므로, 이 화면폭에서 330px로 다시 늘리는 규칙은 더 이상 맞지 않음. */
   .mc-feature-layout, .mc-feature-reverse { grid-template-columns: 1fr; gap: 48px; }
   .mc-feature-copy, .mc-feature-reverse .mc-feature-copy { order: 0; max-width: 640px; }
-  .mc-demo-frame { width: min(700px, 100%); }
+  /* 수정된 부분 [2026-07-20]: .mc-demo-frame 모바일 규칙 삭제 (이유: 위 참고, 클래스 자체가 더 이상 안 쓰임) */
   .mc-journey-line { opacity: .52; }
   .mc-feature-panel:nth-of-type(2) .mc-feature-copy { margin-left: auto; }
   .mc-final-card { padding: 65px 50px; }
   .mc-final-map { opacity: .32; }
+  /* 수정된 부분 [2026-07-20]: .mc-intro-break p { white-space: normal; } 규칙 삭제
+     이유: 기본 규칙에서 white-space: nowrap 자체를 없앴으므로(자연스러운 2줄
+     줄바꿈으로 변경), 좁은 화면에서 이를 다시 normal로 되돌릴 필요가 없어짐. */
 }
 
 @media (max-width: 720px) {
   .mc-page .nav { height: 66px; padding-inline: 18px; }
-  .mc-page .nav .logo-text { font-size: .9rem; }
-  .mc-page .nav .logo img { width: 30px !important; height: 30px !important; }
+  /* 수정된 부분 [2026-07-20]: 모바일 로고도 데스크톱과 같은 비율로 확대
+     이유: 위 데스크톱 규칙과 같은 방향, 66px 헤더 안에서 여백 남는 값으로 조정 */
+  .mc-page .nav .logo-text { font-size: 1.05rem; }
+  .mc-page .nav .logo img { width: 46px !important; height: 46px !important; }
   .mc-page .nav-btn { padding: .55rem .85rem; font-size: .68rem; }
   .mc-hero { min-height: auto; padding: 115px 20px 85px; }
   .mc-hero h1 { font-size: clamp(2.35rem, 12vw, 3.4rem); }
@@ -605,19 +785,27 @@
   .mc-note-top { right: -5px; top: 10%; }
   .mc-note-bottom { left: -4px; bottom: -18px; }
   .mc-story-panel { padding: 100px 20px 85px; }
+  .mc-intro-break { padding: 60px 0; }
+  /* 수정된 부분 [2026-07-20]: 데스크톱과 동일하게 좌우 여백 완전 제거, 각진 모서리로 통일
+     이유: 위 데스크톱 규칙과 같은 방향(뷰포트 끝까지 완전히 늘리기) */
+  .mc-intro-break .mc-panel-inner { padding: 100px 20px; }
   .mc-section-heading { margin-bottom: 38px; }
   .mc-section-heading h2 { font-size: 2rem; }
   .mc-section-heading p { font-size: .82rem; line-height: 1.7; }
   .mc-process-grid { grid-template-columns: 1fr; }
-  .mc-process-card { min-height: 330px; }
-  .mc-card-sketch { height: 62px; }
+  /* 수정된 부분 [2026-07-20]: .mc-process-card min-height(330px)/.mc-card-sketch 규칙 삭제
+     이유: 위와 동일 — 카드 내용이 줄어 min-height가 190px로 바뀌었고, mc-card-sketch
+     클래스는 이제 어디서도 안 쓰임. 대신 펼침 영역(mc-process-expand)이 좁은 화면에서
+     1열로 쌓이도록 규칙 추가. */
+  .mc-process-expand { grid-template-columns: 1fr; gap: 20px; padding: 26px 22px; }
+  .mc-process-expand-media { min-height: 150px; }
   .mc-journey-line { left: 0; right: auto; width: 100%; transform: none; opacity: .25; }
   .mc-feature-copy h2 { font-size: 2.25rem; }
   .mc-feature-copy > p { font-size: .82rem; }
   .mc-feature-copy li { align-items: flex-start; line-height: 1.6; }
   .mc-feature-copy li svg { margin-top: 2px; flex: none; }
-  .mc-demo-frame { aspect-ratio: .96; border-radius: 18px; }
-  .mc-demo-caption small { display: none; }
+  /* 수정된 부분 [2026-07-20]: .mc-demo-frame / .mc-demo-caption small 모바일 규칙 삭제
+     이유: 위(1024px 구간)와 동일 — 해당 클래스가 더 이상 어디서도 안 쓰임 */
   .mc-metric-row { grid-template-columns: 1fr; }
   .mc-metric-row div { display: flex; justify-content: space-between; align-items: center; }
   .mc-metric-row span { margin-top: 0; }
