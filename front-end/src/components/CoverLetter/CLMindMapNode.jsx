@@ -49,7 +49,9 @@ function CLMindMapNode({ data }) {
     >
       {/* Handle: React Flow가 엣지(부모-자식 연결선)를 그리기 위한 연결점.
           opacity: 0으로 화면엔 안 보이게 하되, 엣지 계산 자체는 정상 동작하게 둠 */}
-      <Handle type="target" position={Position.Top} style={{ opacity: 0 }} />
+      <Handle type="target" position={Position.Top} style={{ opacity: 0 }} 
+      style={{ opacity: 0, top: '50%', left: '50%' }}
+      />
 
       {/* 라벨만 표시 — 클릭/더블클릭 핸들러 자체가 없어서 눌러도 아무 일도 안 일어남 */}
       <div className="mm-node-label" style={{ color: customStyle.color }}>
@@ -69,7 +71,9 @@ function CLMindMapNode({ data }) {
         </div>
       )}
 
-      <Handle type="source" position={Position.Bottom} style={{ opacity: 0 }} />
+      <Handle type="source" position={Position.Bottom} style={{ opacity: 0 }} 
+      style={{ opacity: 0, top: '50%', left: '50%' }}
+      />
     </div>
   );
 }
