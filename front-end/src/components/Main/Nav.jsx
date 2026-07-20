@@ -35,8 +35,18 @@ function Nav({ isMember, onLoginClick }) {
             before: <a href="#features">사용 방법</a>
             before: <a href="#faq">FAQ</a>
             after: 아래 4개 링크로 교체 */}
+        {/* 수정된 부분 [2026-07-20]: "마인드맵"과 "AI 자기소개서" 사이에 링크 2개 추가
+            (키워드 추출, 자소서 마스터)
+            이유(요청 3-1): "마인드맵 옆에 키워드 추출, 키워드 추출 옆에 자소서 마스터"
+            — Main.jsx에 새로 추가된 KeywordFeature(id="keyword")/MasterFeature
+            (id="master") 섹션으로 이동할 수 있는 헤더 링크가 필요해짐.
+            before: <a href="#mindmap">마인드맵</a>
+                    <a href="#features">AI 자기소개서</a>
+            after: 아래처럼 마인드맵과 AI 자기소개서 사이에 2개 삽입 */}
         <a href="#journey">서비스 소개</a>
         <a href="#mindmap">마인드맵</a>
+        <a href="#keyword">키워드 추출</a>
+        <a href="#master">자소서 마스터</a>
         <a href="#features">AI 자기소개서</a>
         <a href="#faq">FAQ</a>
         {/* 수정된 부분: "마이페이지로 이동" 버튼 → ProfileDropdown으로 교체
