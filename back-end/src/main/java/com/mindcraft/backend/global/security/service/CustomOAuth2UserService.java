@@ -58,6 +58,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     user.getName(),
                     user.getEmail(),
                     null,
+                    user.isVerified(),
                     attributes);
         }
         // 4. 신규 유저 정보 dto 생성
@@ -78,6 +79,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 newUser.getName(),
                 newUser.getEmail(),
                 null,
+                newUser.isVerified(),
                 attributes);
     }
 

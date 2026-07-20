@@ -19,12 +19,18 @@ public class UserSecurityDto extends User implements OAuth2User {
     private String name;
     private String email;
     private String password;
+    private boolean isVerified;
 
     // OAuth2User가 요구하는 attribure(raw 데이터 by google) 원본
     private Map<String, Object> attributes;
 
-    // 이메일 로그인 생성자
+    // JWTCheckFilter용, isVerified는 true로 고정 - 이미 인증된 사용자만 토큰을 가짐
     public UserSecurityDto(Long id, String name, String email, String password) {
+        this(id, name, email, password, true);
+    }
+
+    // 이메일 로그인 생성자
+    public UserSecurityDto(Long id, String name, String email, String password, boolean isVerified) {
         // 추후 role 업데이트시 변경필요
         super(email, password, List.of());
 
@@ -32,13 +38,14 @@ public class UserSecurityDto extends User implements OAuth2User {
         this.name = name;
         this.email = email;
         this.password = password;
+        this.isVerified = isVerified;
     }
 
     // 소셜 로그인 생성자
-    public UserSecurityDto(Long id, String name, String email, String password,
+    public UserSecurityDto(Long id, String name, String email, String password, boolean isVerified,
                            Map<String, Object> attributes) {
         // 추후 role 업데이트시 변경필요
-        this(id, name, email, password);
+        this(id, name, email, password, isVerified);
         this.attributes = attributes;
     }
 
@@ -61,5 +68,11 @@ public class UserSecurityDto extends User implements OAuth2User {
     @Override
     public String getName() {
         return email;
+    }
+
+    // 이메일 인증 안된 계정은 로그인 차단
+    @Override
+    public boolean isEnabled() {
+        return isVerified;
     }
 }

@@ -60,6 +60,12 @@ public class JWTCheckFilter extends OncePerRequestFilter {
         if (path.startsWith("/health")) {
             return true;
         }
+        if (path.startsWith("/auth/verify-email")) {
+            return true;
+        }
+        if (path.startsWith("/auth/resend-code")) {
+            return true;
+        }
 
         return false;
     }
