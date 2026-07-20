@@ -55,7 +55,9 @@ const MindMapNode = (props) => {
       className={`mm-map-node ${depthClass} ${isRoot ? 'is-root' : ''} ${selected ? 'selected' : ''}`}
       style={customStyle}
     >
-      <Handle type="target" position={Position.Top} className="mm-node-handle" />
+      <Handle type="target" position={Position.Top} className="mm-node-handle"
+        style={{ opacity: 0, top: '50%', left: '50%' }}
+      />
 
       <div className="mm-node-main">
         <div className="mm-node-content">
@@ -95,7 +97,9 @@ const MindMapNode = (props) => {
         </div>
       </div>
 
-      <Handle type="source" position={Position.Bottom} className="mm-node-handle" />
+      <Handle type="source" position={Position.Bottom} className="mm-node-handle"
+        style={{ opacity: 0, top: '50%', left: '50%' }}
+      />
 
       {/* 노드 팝오버 — selected일 때 CSS로 표시됨 (바깥클릭=selected 해제로 자동 닫힘) */}
       <div
