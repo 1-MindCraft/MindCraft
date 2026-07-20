@@ -16,7 +16,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-public class TokenController {
+public class TokenController implements TokenApiSpec{
     // 1. Access Token 만료 여부 확인
     // 2. Refresh Token 검증
     // 3. 새로운 Access Token 생성
@@ -24,6 +24,7 @@ public class TokenController {
     // 5. 클라이언트에게 반환
 
     @GetMapping("/users/refresh")
+    @Override
     public Map<String, Object> refresh (
             @RequestHeader("Authorization") String authHeader,
             @RequestParam("refreshToken") String refreshToken

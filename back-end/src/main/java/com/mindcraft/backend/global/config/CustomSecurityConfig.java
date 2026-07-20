@@ -87,7 +87,7 @@ public class CustomSecurityConfig {
                         .authorizationRequestRepository(new HttpCookieOAuth2AuthorizationRequestRepository()))
                 .userInfoEndpoint(endpoint -> endpoint.userService(customOAuth2UserService))
                 .successHandler(new OAuth2SuccessHandler(frontendUrl))
-                .failureHandler(new OAuth2FailHandler())
+                .failureHandler(new OAuth2FailHandler(frontendUrl))
         );
 
         // 만들어놓은 필터체인 리턴

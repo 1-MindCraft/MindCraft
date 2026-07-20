@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class HealthCheckController {
+public class HealthCheckController implements HealthCheckApiSpec {
 
     @GetMapping("/health")
     public ResponseEntity healthCheck() {

@@ -27,6 +27,18 @@ export function nodeBackground(hex, depth) {
     return `hsl(${h}, ${s}%, ${bgL}%)`;
 }
 
+// 팝오버 색 스와치용 - 기본색(null) + 프리셋
+export const NODE_COLOR_OPTIONS = [
+    { label: '기본색', value: null },
+    { label: '블루', value: '#2563eb' },
+    { label: '보라', value: '#7c3aed' },
+    { label: '청록', value: '#0d9488' },
+    { label: '빨강', value: '#dc2626' },
+    { label: '주황', value: '#ea580c' },
+    { label: '초록', value: '#16a34a' },
+    { label: '회색', value: '#4b5563' },
+];
+
 // 노드 스타일 — 배경은 연한 틴트, 테두리는 진한 색, 글자는 검/흰(모드 따라)
 // depth로 갈수록 배경은 더 하얘지고 테두리는 더 밝아짐 (부모 진하고 자식 연하게)
 // 색으로 꽉 채우지 않고 "연한 배경 + 진한 테두리"라 가독성 좋고 눈이 편함
@@ -39,7 +51,7 @@ export function nodeStyle(hex, depth, isDark = false) {
             ? `hsl(${h}, ${Math.max(s - 30, 12)}%, ${Math.max(20 - depth * 2, 12)}%)`
             : `hsl(${h}, ${Math.max(s - 22, 15)}%, ${bgL}%)`,
         border: `1.5px solid hsl(${h}, ${s}%, ${borderL}%)`,
-        color: nodeDefaultTextColor(isDark),  
+        color: nodeDefaultTextColor(isDark),
     };
 }
 

@@ -36,7 +36,11 @@ public class CoverLetter {
 
     private String title;
     private String companyName;
+
+    @Column(columnDefinition = "TEXT")
     private String companyIdeal;
+
+    @Column(columnDefinition = "TEXT")
     private String jobDescription;
 
     // regDate 필드를 created_at 컬럼과 매핑
