@@ -46,7 +46,6 @@ import {
   BriefcaseBusiness,
   Check,
   ChevronDown,
-  Film,
   MousePointer2,
   Network,
   Play,
@@ -73,6 +72,28 @@ import './MainExperience.css';
 // 이유(요청 8, 9): Footer와 새로 추가하는 introduction 영역에서 lucide 아이콘 대신
 // 실제 MindCraft 로고 이미지를 쓰기 위해 추가. Nav.jsx와 동일한 자산/경로 재사용.
 import LOGO_SRC from '../../assets/MindCraft-Logo1.png';
+
+// 추가된 부분 [2026-07-20]: ONE SIMPLE FLOW 카드 펼침 영역에 넣을 GIF 4개 import
+// 이유(요청): "이제 카드 부분에 GIF 넣자, 순서대로 넣는거야" — 4단계(마인드맵 노드
+// 연결/키워드 추출/자소서 마스터/AI로 자소서 생성) 순서에 맞춰 GIF 파일을 매칭.
+// 업로드된 원본 파일명(1-.gif, 2-.gif, 3-.gif, 4-.gif)은 내용을 알 수 없어
+// 각 단계를 알아볼 수 있는 이름으로 바꿔 assets에 저장함.
+import ProcessGifMindmap from '../../assets/process-mindmap.gif';
+import ProcessGifKeyword from '../../assets/process-keyword.gif';
+import ProcessGifMaster from '../../assets/process-master.gif';
+import ProcessGifAi from '../../assets/process-ai.gif';
+
+// 추가된 부분 [2026-07-21]: 4개 기능 패널(마인드맵/키워드 추출/자소서 마스터/
+// AI로 자소서 생성)의 실제 화면 캡처 이미지 import
+// 이유(요청): "아니 그거 말고 이거 말이야" — 앞서 논의하던 GIF 리사이즈 건과
+// 별개로, 이 4개 기능 패널의 "GIF/영상 추가 예정" placeholder 자리에 넣을
+// 실제 화면 이미지를 새로 주셔서 추가함. 업로드된 파일명(마인드맵_이미지.png
+// 등)이 이미 어떤 패널용인지 명확히 알려주고 있어 그대로 이름만 영문화해서
+// assets에 저장함.
+import FeatureImgMindmap from '../../assets/feature-mindmap.png';
+import FeatureImgKeyword from '../../assets/feature-keyword.png';
+import FeatureImgMaster from '../../assets/feature-master.png';
+import FeatureImgAi from '../../assets/feature-ai.png';
 
 import Nav from '../../components/Main/Nav';
 import TopButton from '../../components/Main/TopButton';
@@ -116,6 +137,21 @@ import useScrollButtons from '../../hooks/useScrollButtons';
 //   (CSS: mc-card-amber, 아래 CSS 파일 참고).
 // before: 3개 항목(번호 01~03, eyebrow CAPTURE/CONNECT/CRAFT, PenLine/Network/WandSparkles)
 // after: 아래 4개 항목으로 교체
+// 수정된 부분 [2026-07-20]: 각 항목에 gif 필드 추가
+// 이유(요청): "이제 카드 부분에 GIF 넣자, 순서대로 넣는거야 / 마인드맵 노드 연결
+// 1-.gif / 키워드추출 2-.gif / 자소서 마스터 3-.gif / AI로 자소서 생성 4-.gif" —
+// 카드 클릭 시 펼쳐지는 mc-process-expand-media 자리에 "이미지 추가 예정"
+// placeholder 대신 실제 GIF를 순서대로 표시하기 위해 데이터에 매핑.
+// before: 각 항목에 gif 필드 없음
+// after: 4개 항목 전부에 gif: <import한 파일> 추가
+// 수정된 부분 [2026-07-21]: 각 항목의 gif 필드 → media로 이름 변경, 값도 GIF → 정적 이미지로 교체
+// 이유(요청): "위치 수정하자 카드 쪽에는 이미지가 들어가야되고 gif는 단계별로
+// 들어가야 해" — 지금까지는 반대로(카드=GIF, 단계별 기능 패널=이미지) 들어가
+// 있었는데, 이번 요청으로 서로 자리를 맞바꿈. 카드 펼침 영역(mc-process-expand-media)에는
+// 이제 정적 이미지(feature-*.png)가 들어가고, GIF(process-*.gif)는 아래
+// MindMapFeature/KeywordFeature/MasterFeature/AiFeature 각 패널로 옮김.
+// before: gif: ProcessGifMindmap / ProcessGifKeyword / ProcessGifMaster / ProcessGifAi
+// after: media: FeatureImgMindmap / FeatureImgKeyword / FeatureImgMaster / FeatureImgAi
 const processSteps = [
   {
     number: '01',
@@ -124,6 +160,7 @@ const processSteps = [
     title: '나만의 경험을 모아보세요',
     description: '마인드맵에서 프로젝트, 활동, 강점 등 흩어진 경험을 자유롭게 정리하고 연결합니다.',
     color: 'violet',
+    media: FeatureImgMindmap,
   },
   {
     number: '02',
@@ -132,14 +169,28 @@ const processSteps = [
     title: '경험 속에서 핵심 키워드를 뽑아내요',
     description: '마인드맵에 쌓아둔 경험을 AI가 분석해서, 자기소개서에 바로 쓸 수 있는 핵심 키워드와 역량을 자동으로 정리해요.',
     color: 'blue',
+    media: FeatureImgKeyword,
   },
   {
     number: '03',
     icon: Settings,
+    // 수정된 부분 [2026-07-20]: eyebrow '자소서 마스터' → '직무 맞춤 설정'으로 변경
+    // 이유(git 머지 충돌 해결): GitHub Desktop에서 확인된 충돌 — 다른 브랜치
+    // (69c3d73)에서 이미 이 카드 라벨을 '직무 맞춤 설정'으로 바꿔둔 상태였는데,
+    // 이 대화의 로컬 파일은 그 변경 이전 이름('자소서 마스터')을 그대로 갖고 있어
+    // 충돌이 남. 다른 브랜치의 최신 이름으로 맞춤(다른 필드는 변경 없음).
+    // ※ 참고: 카드 라벨만 바뀌었고, 이 카드와 연결된 03 · PERSONAL STATEMENT
+    // MASTER 기능 패널(id="master")의 제목/설명/FAQ 문구는 여전히 "자소서
+    // 마스터"라는 이름을 쓰고 있어서 라벨과 내용이 살짝 어긋나 보일 수 있습니다.
+    // 카드 라벨 하나만 콕 집어 바뀐 충돌이라 이번엔 그 부분만 맞췄어요 —
+    // 전체적으로 이름을 통일하고 싶으시면 말씀해주세요.
+    // before: eyebrow: '자소서 마스터',
+    // after: eyebrow: '직무 맞춤 설정',
     eyebrow: '직무 맞춤 설정',
     title: '지원 직무에 맞게 설정하세요',
     description: '자소서 마스터를 만들고 회사 정보와 직무, 인재상 등을 입력해 AI가 참고할 기준을 설정합니다.',
     color: 'mint',
+    media: FeatureImgMaster,
   },
   {
     number: '04',
@@ -148,6 +199,7 @@ const processSteps = [
     title: 'AI가 자기소개서를 작성합니다',
     description: '항목을 생성한 뒤 버튼 한 번으로 마인드맵과 자소서 마스터를 기반으로 자기소개서 초안을 완성합니다.',
     color: 'amber',
+    media: FeatureImgAi,
   },
 ];
 
@@ -665,14 +717,23 @@ function ProcessSection() {
             <h3>{activeData.title}</h3>
             <p>{activeData.description}</p>
           </div>
-          <div className="mc-process-expand-media" aria-hidden="true">
-            {/* 수정된 부분 [2026-07-20]: Film 아이콘 크기 28 → 34
-                이유(사용자 피드백): "설명하는 부분과 그림 넣는 부분이 너무 작은데
-                여유있는 공간이 있었으면 좋겠어" — 이미지 자리 자체를 키우면서
-                (CSS: mc-process-expand-media 참고) 안의 아이콘도 다른 GIF
-                placeholder(mc-gif-placeholder, size 34)와 같은 크기로 맞춤. */}
-            <Film size={34} />
-            <span>이미지 추가 예정</span>
+          {/* 수정된 부분 [2026-07-20]: Film 아이콘 + "이미지 추가 예정" placeholder →
+              실제 GIF(<img>)로 교체
+              이유(요청): "이제 카드 부분에 GIF 넣자, 순서대로 넣는거야" — 각 단계의
+              실제 사용 화면 GIF가 준비되어, activeData.gif를 그대로 렌더링함.
+              alt 텍스트는 접근성을 위해 eyebrow(단계 이름)를 사용.
+              before: <div className="mc-process-expand-media" aria-hidden="true">
+                        <Film size={34} /><span>이미지 추가 예정</span>
+                      </div>
+              after: 아래 <img>로 교체 (aria-hidden 삭제, alt로 대체) */}
+          {/* 수정된 부분 [2026-07-21]: activeData.gif → activeData.media로 변경
+              이유(요청): "위치 수정하자 카드 쪽에는 이미지가 들어가야되고 gif는
+              단계별로 들어가야 해" — 카드 펼침 영역은 이제 GIF가 아니라 정적
+              이미지를 보여줌(GIF는 아래 4개 기능 패널로 옮김).
+              before: <img src={activeData.gif} alt={`${activeData.eyebrow} 사용 화면`} />
+              after: 아래로 교체 */}
+          <div className="mc-process-expand-media">
+            <img src={activeData.media} alt={`${activeData.eyebrow} 사용 화면`} />
           </div>
         </div>
       </div>
@@ -710,20 +771,20 @@ function MindMapFeature() {
               after: 아래로 교체 */}
           <a className="mc-inline-btn" href="#keyword">키워드 추출 살펴보기 <ArrowRight size={17} /></a>
         </div>
-        <div className="mc-gif-placeholder" aria-hidden="true">
-          {/* 수정된 부분 [2026-07-20]: mc-demo-frame(캡션 + 가짜 마인드맵 데모) 전체 삭제,
-              AiFeature와 동일한 GIF 추가 자리(mc-gif-placeholder)로 교체
-              이유(요청 3-2): "MINDMAP 기존 가짜 마인드맵 삭제, GIF 추가 공간 추가" —
-              히어로/편집 상태를 예시로 보여주려 만든 정지 화면 목업 대신, 실제 기능을
-              보여줄 GIF/영상을 나중에 넣을 수 있도록 자리만 마련. AiFeature 섹션에서
-              이미 쓰고 있는 것과 같은 자리(디자인 통일)로 맞춤.
-              before: <div className="mc-demo-frame">
-                        <div className="mc-demo-caption"><small>자기소개서에 활용할 경험을 연결해 보세요</small></div>
-                        <div className="mc-demo-canvas"><MiniMindMap variant="editing" /></div>
-                      </div>
-              after: 아래 Film 아이콘 + 안내 텍스트로 통일 (AiFeature와 동일 패턴) */}
-          <Film size={34} />
-          <span>GIF/영상 추가 예정</span>
+        <div className="mc-gif-placeholder">
+          {/* 수정된 부분 [2026-07-21]: Film 아이콘 + "GIF/영상 추가 예정" placeholder →
+              실제 화면 이미지(<img>)로 교체
+              이유(요청): "아니 그거 말고 이거 말이야" — 마인드맵 화면 실제 캡처
+              이미지가 준비되어 반영함.
+              before: <Film size={34} /><span>GIF/영상 추가 예정</span>
+              after: 아래 <img>로 교체 (aria-hidden 삭제, alt로 대체)
+              수정된 부분 [2026-07-21]: 정적 이미지 → GIF로 재교체
+              이유(요청): "위치 수정하자 카드 쪽에는 이미지가 들어가야되고 gif는
+              단계별로 들어가야 해" — 카드(ProcessSection)와 이 기능 패널의
+              미디어를 서로 맞바꿈. 여기는 이제 GIF를 보여줌.
+              before: <img src={FeatureImgMindmap} alt="마인드맵 화면" />
+              after: 아래로 교체 */}
+          <img src={ProcessGifMindmap} alt="마인드맵 화면" />
         </div>
       </div>
     </section>
@@ -750,9 +811,10 @@ function KeywordFeature() {
           </ul>
           <a className="mc-inline-btn" href="#master">자소서 마스터 설정하러 가기 <ArrowRight size={17} /></a>
         </div>
-        <div className="mc-gif-placeholder" aria-hidden="true">
-          <Film size={34} />
-          <span>GIF/영상 추가 예정</span>
+        {/* 수정된 부분 [2026-07-21]: placeholder → 실제 화면 이미지로 교체 (이유는 위 MindMapFeature 참고)
+            수정된 부분 [2026-07-21]: 정적 이미지 → GIF로 재교체 (카드↔패널 미디어 맞바꿈, 이유는 위 MindMapFeature 참고) */}
+        <div className="mc-gif-placeholder">
+          <img src={ProcessGifKeyword} alt="키워드 추출 화면" />
         </div>
       </div>
     </section>
@@ -779,9 +841,10 @@ function MasterFeature() {
           </ul>
           <a className="mc-inline-btn" href="#features">AI 자기소개서 생성 보기 <ArrowRight size={17} /></a>
         </div>
-        <div className="mc-gif-placeholder" aria-hidden="true">
-          <Film size={34} />
-          <span>GIF/영상 추가 예정</span>
+        {/* 수정된 부분 [2026-07-21]: placeholder → 실제 화면 이미지로 교체 (이유는 위 MindMapFeature 참고)
+            수정된 부분 [2026-07-21]: 정적 이미지 → GIF로 재교체 (카드↔패널 미디어 맞바꿈, 이유는 위 MindMapFeature 참고) */}
+        <div className="mc-gif-placeholder">
+          <img src={ProcessGifMaster} alt="자소서 마스터 화면" />
         </div>
       </div>
     </section>
@@ -825,17 +888,10 @@ function AiFeature() {
           </div>
           <a className="mc-inline-btn" href="#faq">자주 묻는 질문 보기 <ArrowRight size={17} /></a>
         </div>
-        {/* 수정된 부분 [2026-07-17]: 왼쪽(mc-feature-reverse라 실제로는 좌측에 렌더링되는)
-            자기소개서 미리보기 목업(mc-document-demo) 전체 삭제, GIF/영상을 넣을 수 있는
-            빈 자리로 교체
-            이유(요청 5): 정적 목업 대신 실제 기능을 보여줄 GIF/영상을 나중에 넣을 수
-            있도록 자리만 마련해달라는 요청. 안에 있던 toolbar/문서 내용/타이핑 애니메이션을
-            모두 제거하고 큰 점선 박스 하나로 대체함(CSS: mc-gif-placeholder, 아래 CSS 파일 참고).
-            before: <div className="mc-document-demo"> ... (toolbar + 문서 내용 전체) ... </div>
-            after: 아래 mc-gif-placeholder 박스로 교체 */}
-        <div className="mc-gif-placeholder" aria-hidden="true">
-          <Film size={34} />
-          <span>GIF/영상 추가 예정</span>
+        {/* 수정된 부분 [2026-07-21]: placeholder → 실제 화면 이미지로 교체 (이유는 위 MindMapFeature 참고)
+            수정된 부분 [2026-07-21]: 정적 이미지 → GIF로 재교체 (카드↔패널 미디어 맞바꿈, 이유는 위 MindMapFeature 참고) */}
+        <div className="mc-gif-placeholder">
+          <img src={ProcessGifAi} alt="AI로 자소서 생성 화면" />
         </div>
       </div>
     </section>
@@ -1020,12 +1076,18 @@ function MainPage() {
   const {
     storyRef, lineRef, ghostPathRef, pathRef, glowRef,
   } = useScrollJourney();
-  // 수정된 부분 [2026-07-16]: useScrollButtons 파라미터 조정
-  // 이유: 새 페이지는 스크롤 길이가 훨씬 길어짐. 플로팅 CTA가 마지막 FinalCta/FAQ/푸터
-  // 구역(약 520px)과 겹치지 않도록 bottomOffset을 크게 늘리고, 탑 버튼 노출 시점도 소폭 앞당김.
-  // before: useScrollButtons({ threshold: 0.5, bottomOffset: 80 })
-  // after: useScrollButtons({ threshold: 0.45, bottomOffset: 520 })
-  const { showTopBtn, showFloatCta } = useScrollButtons({ threshold: 0.45, bottomOffset: 520 });
+  // 수정된 부분 [2026-07-20]: threshold 0.45 → 0.13로 하향 (등장 시점을 훨씬 앞당김)
+  // 이유(사용자 피드백, 스크린샷): "top 버튼이 떠오르는 시점이 너무 늦은 것 같아요.
+  // 첨부한 이미지의 위치쯤부터 나타났으면 좋겠어" — 첨부 이미지는 히어로를 지나
+  // ONE SIMPLE FLOW(프로세스 섹션) 초입에 막 들어선 지점이었음. 페이지 전체 길이
+  // (히어로 100vh + 프로세스 100vh + 쉬는구간 + 기능 패널 4개×100vh + 클로징/FAQ/푸터)
+  // 기준으로 그 지점은 대략 전체 스크롤의 12~15% 정도라 threshold를 0.13으로 낮춤.
+  // 참고: useScrollButtons 훅 자체(스크롤 비율을 어떻게 계산하는지)는 이번에 받은
+  // 파일에 포함되어 있지 않아 직접 보지 못했고, Main.jsx에서 넘기는 파라미터
+  // 값만 조정했습니다 — 실제로 보시고 위치가 안 맞으면 이 숫자만 더 조절하면 돼요.
+  // before: useScrollButtons({ threshold: 0.45, bottomOffset: 520 })
+  // after: useScrollButtons({ threshold: 0.13, bottomOffset: 520 })
+  const { showTopBtn, showFloatCta } = useScrollButtons({ threshold: 0.13, bottomOffset: 520 });
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignupOpen, setIsSignupOpen] = useState(false);
 

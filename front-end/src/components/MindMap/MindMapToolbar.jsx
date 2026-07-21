@@ -19,8 +19,14 @@ import { getDescendantIds } from '../../utils/mindmapTree';
 // 노드 색상 프리셋
 // 이유: 팔레트 버튼 색. 어두운~중간 톤 위주 → 명도 올려도 글자 대비 유지
 const COLOR_PRESETS = [
-  '#2563eb', '#7c3aed', '#0d9488', '#dc2626',
-  '#ea580c', '#16a34a', '#db2777', '#4b5563',
+  '#2563eb',
+  '#7c3aed',
+  '#0d9488',
+  '#dc2626',
+  '#ea580c',
+  '#16a34a',
+  '#db2777',
+  '#4b5563',
 ];
 
 function MindMapToolbar({
@@ -80,7 +86,9 @@ function MindMapToolbar({
       // 떠 있는 동안에도 뒤에서 추출중 오버레이(TextShimmerWave)가 계속 겹쳐 보였음.
       // 추출이 끝나는 즉시 오버레이부터 닫고, 그 다음에 알림 모달을 띄우면 겹치지 않음
       setExtracting(false);
-      await alert('키워드 추출이 완료되었습니다.\n노드를 클릭하면 키워드를 볼 수 있어요.');
+      await alert(
+        '키워드 추출이 완료되었습니다.\n노드를 클릭하면 키워드를 볼 수 있어요.'
+      );
     } catch {
       // 수정된 부분 [2026-07-15]: 실패 시에도 알림 띄우기 전에 오버레이부터 먼저 닫음 (이유 동일)
       setExtracting(false);
@@ -109,7 +117,9 @@ function MindMapToolbar({
   const handleColorPick = async (color) => {
     const selected = nodes.filter((n) => n.selected);
     if (selected.length === 0) {
-      await alert('색을 바꿀 노드를 먼저 선택해주세요.\n(선택 도구로 노드를 클릭/드래그)');
+      await alert(
+        '색을 바꿀 노드를 먼저 선택해주세요.\n(선택 도구로 노드를 클릭/드래그)'
+      );
       return;
     }
     // 선택된 노드 + 각 노드의 모든 자손 id를 합침 (중복은 Set으로 제거)
@@ -127,152 +137,159 @@ function MindMapToolbar({
     // 형제 엘리먼트로 같이 반환하려면 여러 개를 감쌀 최상위 태그가 필요해서 Fragment로 감쌈
     // before: return (\n    <div className="mm-toolbar">\n  after:
     <>
-    <div className="mm-toolbar">
-      {/* ── 왼쪽 고정: 저장 + 저장됨 ── */}
-      <div className="mm-toolbar-left">
-        <button
-          className={`mm-btn-save-toolbar ${isSaving ? 'saving' : ''}`}
-          onClick={onSave}
-          disabled={isSaving}
-          title="저장"
-        >
-          {isSaving ? (
-            <span></span>
-          ) : (
-            <img src={SAVE_SRC} alt="저장" className="mm-tool-icon" />
+      <div className="mm-toolbar">
+        {/* ── 왼쪽 고정: 저장 + 저장됨 ── */}
+        <div className="mm-toolbar-left">
+          <button
+            className={`mm-btn-save-toolbar ${isSaving ? 'saving' : ''}`}
+            onClick={onSave}
+            disabled={isSaving}
+            title="저장"
+          >
+            {isSaving ? (
+              <span></span>
+            ) : (
+              <img src={SAVE_SRC} alt="저장" className="mm-tool-icon" />
+            )}
+            {isSaving ? '저장 중...' : '저장'}
+          </button>
+
+          <div className="mm-toolbar-divider" />
+
+          {savedTime && !isSaving && (
+            <span className="mm-toolbar-saved">
+              <span className="mm-save-icon">✓</span> 저장됨
+            </span>
           )}
-          {isSaving ? '저장 중...' : '저장'}
-        </button>
+        </div>
 
-        <div className="mm-toolbar-divider" />
-
-        {savedTime && !isSaving && (
-          <span className="mm-toolbar-saved">
-            <span className="mm-save-icon">✓</span> 저장됨 
-          </span>
-        )}
-      </div>
-
-      {/* ── 중앙: 도구 / undo/redo / 줌 ── */}
-      <div className="mm-toolbar-center">
-        <div className="mm-toolbar-group">
-          <button
-            className={`mm-tool-btn mm-tool-img-btn ${tool === 'drag' ? 'active' : ''}`}
-            onClick={() => onToolChange('drag')}
-            title="드래그 (공간 이동)"
-          >
-            <img src={HAND_SRC} alt="드래그" className="mm-tool-icon" />
-          </button>
-          <button
-            className={`mm-tool-btn mm-tool-img-btn ${tool === 'select' ? 'active' : ''}`}
-            onClick={() => onToolChange('select')}
-            title="선택 (드래그로 여러 노드 선택)"
-          >
-            <svg
-              className="mm-tool-icon"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 50 50"
-              fill="currentColor"
+        {/* ── 중앙: 도구 / undo/redo / 줌 ── */}
+        <div className="mm-toolbar-center">
+          <div className="mm-toolbar-group">
+            <button
+              className={`mm-tool-btn mm-tool-img-btn ${tool === 'drag' ? 'active' : ''}`}
+              onClick={() => onToolChange('drag')}
+              title="드래그 (공간 이동)"
             >
-              <path d="M14.78 5a1 1 0 00-.69.28L15 6.28 36.69 27.59l-9.38.81a1 1 0 00-.77 1.53L32.78 43.5l-2.56 1.16-6-13.84a1 1 0 00-1.6-.34L16 36.69V8.28l20.69 19.31-9.38.81z" />
-            </svg>
-          </button>
-          {/* undo/redo: 드래그 도구 바로 옆 */}
-          <button
-            className="mm-icon-btn"
-            title="실행 취소"
-            onClick={onUndo}
-            disabled={!canUndo}
-          >
-            ↩
-          </button>
-          <button
-            className="mm-icon-btn"
-            title="다시 실행"
-            onClick={onRedo}
-            disabled={!canRedo}
-          >
-            ↪
-          </button>
-        </div>
+              <img src={HAND_SRC} alt="드래그" className="mm-tool-icon" />
+            </button>
+            <button
+              className={`mm-tool-btn mm-tool-img-btn ${tool === 'select' ? 'active' : ''}`}
+              onClick={() => onToolChange('select')}
+              title="선택 (드래그로 여러 노드 선택)"
+            >
+              <svg
+                className="mm-tool-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 50 50"
+                fill="currentColor"
+              >
+                <path d="M14.78 5a1 1 0 00-.69.28L15 6.28 36.69 27.59l-9.38.81a1 1 0 00-.77 1.53L32.78 43.5l-2.56 1.16-6-13.84a1 1 0 00-1.6-.34L16 36.69V8.28l20.69 19.31-9.38.81z" />
+              </svg>
+            </button>
+            {/* undo/redo: 드래그 도구 바로 옆 */}
+            <button
+              className="mm-icon-btn"
+              title="실행 취소"
+              onClick={onUndo}
+              disabled={!canUndo}
+            >
+              ↩
+            </button>
+            <button
+              className="mm-icon-btn"
+              title="다시 실행"
+              onClick={onRedo}
+              disabled={!canRedo}
+            >
+              ↪
+            </button>
+          </div>
 
-        <div className="mm-toolbar-divider" />
+          <div className="mm-toolbar-divider" />
 
-        <div className="mm-toolbar-group">
-          <button
-            className="mm-tool-btn"
-            onClick={() => zoomOut({ duration: 200 })}
-            title="축소"
-          >
-            −
-          </button>
-          <span className="mm-zoom-label">{zoomPercent}%</span>
-          <button
-            className="mm-tool-btn"
-            onClick={() => zoomIn({ duration: 200 })}
-            title="확대"
-          >
-            +
-          </button>
-          <button
-            className="mm-tool-btn"
-            onClick={() => fitView({ duration: 300 })}
-            title="화면에 맞추기"
-          >
-            ⛶
-          </button>
-        </div>
-        {/* 수정된 부분: "테마 ▾" 버튼과 그 앞 구분선을 여기서 삭제함
+          <div className="mm-toolbar-group">
+            <button
+              className="mm-tool-btn"
+              onClick={() => zoomOut({ duration: 200 })}
+              title="축소"
+            >
+              −
+            </button>
+            <span className="mm-zoom-label">{zoomPercent}%</span>
+            <button
+              className="mm-tool-btn"
+              onClick={() => zoomIn({ duration: 200 })}
+              title="확대"
+            >
+              +
+            </button>
+            <button
+              className="mm-tool-btn"
+              onClick={() => fitView({ duration: 300 })}
+              title="화면에 맞추기"
+            >
+              ⛶
+            </button>
+          </div>
+          {/* 수정된 부분: "테마 ▾" 버튼과 그 앞 구분선을 여기서 삭제함
             이유: 아직 미완성 기능이라 보류 중이었는데, 나중에 추가하는 방식으로 논의를 결정해서 삭제 */}
-      </div>
+        </div>
 
-      {/* 추가된 부분 [2026-07-15]: 오른쪽 고정 — [ 전체 삭제 ] / [ 키워드 추출 ] / [ 생성하기 ]
+        {/* 추가된 부분 [2026-07-15]: 오른쪽 고정 — [ 전체 삭제 ] / [ 키워드 추출 ] / [ 생성하기 ]
           이유: 기존 MindMapHeader.jsx 헤더에 있던 두 버튼을 툴바 오른쪽으로 옮김.
           전체 삭제는 파괴적 동작이라 divider로 주요 액션과 분리 */}
-      <div className="mm-toolbar-right">
-        {/* 색상 팔레트 - 선택 노드 + 하위 노드에 색 적용 */}
-        <div className="mm-color-palette">
-          {COLOR_PRESETS.map((c) => (
-            <button
-              key={c}
-              className="mm-color-swatch"
-              style={{ background: c }}
-              onClick={() => handleColorPick(c)}
-              title="이 색으로 변경"
-            />
-          ))}
+        <div className="mm-toolbar-right">
+          {/* 색상 팔레트 - 선택 노드 + 하위 노드에 색 적용 */}
+          <div className="mm-color-palette">
+            {COLOR_PRESETS.map((c) => (
+              <button
+                key={c}
+                className="mm-color-swatch"
+                style={{ background: c }}
+                onClick={() => handleColorPick(c)}
+                title="이 색으로 변경"
+              />
+            ))}
+          </div>
+          <div className="mm-toolbar-divider" />
+          <button
+            className="mm-btn-clear"
+            onClick={handleClearAll}
+            title="루트 제외 전체 삭제"
+          >
+            🗑 전체 삭제
+          </button>
+          <div className="mm-toolbar-divider" />
+          <button
+            className="mm-btn-keyword"
+            onClick={handleExtractKeywords}
+            disabled={extracting}
+          >
+            <span>✦</span> {extracting ? '추출 중...' : '키워드 추출'}
+          </button>
+          <button
+            className="mm-btn-export"
+            onClick={() => navigate('/coverletter')}
+          >
+            <img
+              src={theme === 'dark' ? EXPORT_WHITE_SRC : EXPORT_SRC}
+              alt="생성하기"
+              className="mm-header-btn-icon"
+            />{' '}
+            생성하기
+          </button>
         </div>
-        <div className="mm-toolbar-divider" />
-        <button className="mm-btn-clear" onClick={handleClearAll} title="루트 제외 전체 삭제">
-          🗑 전체 삭제
-        </button>
-        <div className="mm-toolbar-divider" />
-        <button
-          className="mm-btn-keyword"
-          onClick={handleExtractKeywords}
-          disabled={extracting}
-        >
-          <span>✦</span> {extracting ? '추출 중...' : '키워드 추출'}
-        </button>
-        <button className="mm-btn-export" onClick={() => navigate('/coverletter')}>
-          <img
-            src={theme === 'dark' ? EXPORT_WHITE_SRC : EXPORT_SRC}
-            alt="생성하기"
-            className="mm-header-btn-icon"
-          />{' '}
-          생성하기
-        </button>
       </div>
-    </div>
-    {/* 추가된 부분 [2026-07-15]: [ 키워드 추출 ] 클릭 후 추출 중일 때 뜨는 오버레이
+      {/* 추가된 부분 [2026-07-15]: [ 키워드 추출 ] 클릭 후 추출 중일 때 뜨는 오버레이
         이유: 화면을 어둡게 덮고 중앙에 TextShimmerWave 애니메이션을 보여줌.
         position: fixed라서 이 컴포넌트(툴바) 안에 있어도 화면 전체를 덮을 수 있음.
         (기존 MindMapHeader.jsx에 있던 것을 그대로 옮겨옴) */}
-    {extracting && (
-      <div className="mm-extracting-overlay">
-        <TextShimmerWave>AI가 키워드를 추출하고 있습니다!</TextShimmerWave>
-      </div>
-    )}
+      {extracting && (
+        <div className="mm-extracting-overlay">
+          <TextShimmerWave>AI가 키워드를 추출하고 있습니다!</TextShimmerWave>
+        </div>
+      )}
     </>
   );
 }

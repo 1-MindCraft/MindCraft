@@ -523,15 +523,80 @@
            .mc-process-expand-text p { ...; font-size: .85rem; ... }
            .mc-process-expand-media { ...; min-height: 130px; ...; font-size: .68rem; ... }
    after: 아래로 교체 */
-.mc-process-expand { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 56px; margin-top: 22px; padding: 52px 54px; border: 1px solid rgba(110, 90, 179, .13); border-radius: 25px; background: rgba(255,255,255,.7); box-shadow: none; backdrop-filter: blur(12px); animation: mc-expand-in .35s ease; }
+/* 수정된 부분 [2026-07-21]: align-items: start → center로 되돌림
+   이유(사용자 피드백, 스크린샷): "글자가 위에 있는데 이걸 사진 기준으로 중간으로
+   위치해" — 직전에 이미지를 훨씬 크고 길게 늘리면서 align-items를 start로
+   바꿨더니, 텍스트가 커진 이미지 대비 위쪽에 붕 떠 보이는 문제가 생김. 텍스트를
+   이미지의 세로 중앙에 맞춰 정렬되도록 다시 center로 되돌림(이미지 크기/비율
+   자체는 그대로 유지).
+   before: .mc-process-expand { display: grid; grid-template-columns: .85fr 1.15fr; align-items: start; ...; }
+   after: 아래로 교체 (align-items: center) */
+.mc-process-expand { display: grid; grid-template-columns: .85fr 1.15fr; align-items: center; gap: 56px; margin-top: 22px; padding: 52px 54px; border: 1px solid rgba(110, 90, 179, .13); border-radius: 25px; background: rgba(255,255,255,.7); box-shadow: none; backdrop-filter: blur(12px); animation: mc-expand-in .35s ease; }
 .mc-process-expand-text h3 { margin: 0 0 14px; color: var(--mc-ink); font-size: 1.55rem; letter-spacing: -.03em; }
 .mc-process-expand-text p { margin: 0; color: #747587; font-size: .95rem; line-height: 1.9; word-break: keep-all; }
-.mc-process-expand-media { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; aspect-ratio: 1.3; min-height: 220px; border-radius: 18px; border: 1.5px dashed #cabdf2; background: #f8f6ff; color: #8068df; font-size: .74rem; font-weight: 700; }
+/* 수정된 부분 [2026-07-20]: placeholder(점선 박스 + 아이콘/텍스트) 스타일 →
+   실제 GIF(<img>)를 담는 프레임 스타일로 변경
+   이유(요청): 실제 GIF가 들어오면서 "이미지 추가 예정" 안내 텍스트/아이콘이
+   더 이상 필요 없어짐. 점선 테두리를 실선으로 바꾸고 overflow:hidden으로
+   모서리를 둥글게 잘라내며, 내부 img가 프레임을 꽉 채우도록 함. 실제 GIF
+   비율(800×430 ≈ 1.86)에 맞춰 aspect-ratio도 조정.
+   before: .mc-process-expand-media { ...; aspect-ratio: 1.3; ...; border: 1.5px dashed #cabdf2;
+             background: #f8f6ff; color: #8068df; font-size: .74rem; font-weight: 700; }
+   after: 아래로 교체 (dashed→solid, aspect-ratio 1.3→1.86, overflow:hidden 추가,
+   색/폰트 관련 속성 삭제, img 규칙 추가) */
+/* 수정된 부분 [2026-07-21]: 이미지 박스 비율을 훨씬 세로로 길게 변경
+   이유(사용자 피드백): "아래쪽으로 엄청 많이 확장해봐" — 가로로 넓적했던 비율
+   (1.86, 가로가 세로의 약 2배)을 훨씬 정사각형에 가까운 1.05로 바꿔 이미지가
+   아래로 크게 늘어나도록 함. 비율을 바꾸면 기존 이미지 파일(1000x538, 1.86
+   비율로 맞춰뒀던 것)이 새 박스 비율과 안 맞아 또 잘리므로, 이미지 파일도
+   1000x952(1.05 비율)로 함께 다시 만듦(별도 첨부).
+   before: .mc-process-expand-media { overflow: hidden; aspect-ratio: 1.86; min-height: 220px; ... }
+   after: 아래로 교체 (aspect-ratio 1.86→1.05, min-height 220→380px) */
+.mc-process-expand-media { overflow: hidden; aspect-ratio: 1.05; min-height: 380px; border-radius: 18px; border: 1px solid rgba(110, 90, 179, .13); background: #f8f6ff; }
+.mc-process-expand-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
 @keyframes mc-expand-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
 
+/* 수정된 부분 [2026-07-21]: 이미지 컬럼 폭을 더 넓힘(텍스트 컬럼은 좁아짐)
+   이유(사용자 피드백, 스크린샷): "내 말은 이 크기에서 양쪽으로 넓히라는
+   말이었어 줄이라는 말이 아니고" — 직전에 mc-gif-placeholder의 aspect-ratio를
+   1.18→1.86으로 바꾼 것 자체는 GIF가 안 잘리게 하려는 목적이 맞았지만,
+   이미지 컬럼의 실제 폭(fr 비율)은 그대로 둔 채 비율만 바꿔서 결과적으로
+   박스가 가로 폭은 그대로인 채 세로만 줄어들어(1.18→1.86이면 같은 폭에서
+   높이가 작아짐) 이전보다 작아 보였음. 폭 자체를 넓혀서 "잘리지 않으면서도
+   더 커 보이게" 함.
+   before: .mc-feature-layout { display: grid; grid-template-columns: .78fr 1.22fr; ...; }
+           .mc-feature-reverse { grid-template-columns: 1.15fr .85fr; }
+   after: 아래로 교체 (이미지 컬럼 비율 확대) */
+/* 수정된 부분 [2026-07-21]: 그리드 컬럼 비율을 원래 텍스트가 편했던 값으로 되돌리고,
+   이미지만 텍스트 반대쪽(바깥쪽)으로 튀어나오게(bleed) 확장하는 방식으로 변경
+   이유(사용자 피드백): "전부 다 왼쪽으로 옮기니까 글자가 깨져보여 / 마인드맵은
+   글자가 왼쪽에 있으니까 직사각형의 크기를 오른쪽으로 늘리고 키워드는 글자가
+   오른쪽에 있으니까 직사각형의 크기를 왼쪽으로 늘리는 방식" — 직전 수정(양쪽
+   컬럼 비율을 .5:1.5로 동일하게 바꾸는 방식)은 텍스트 컬럼까지 함께 좁아져
+   글자가 부자연스럽게 끊겼음. 대신 텍스트 컬럼 폭은 원래 값(.78/.85)으로
+   되돌리고, 이미지 쪽만 "텍스트에서 먼 방향"으로 컨테이너 밖으로 튀어나오게
+   함: 마인드맵/자소서마스터(텍스트가 왼쪽=일반 배치)는 이미지가 오른쪽으로,
+   키워드/AI(텍스트가 오른쪽=mc-feature-reverse)는 이미지가 왼쪽으로 늘어남.
+   before: .mc-feature-layout { display: grid; grid-template-columns: .5fr 1.5fr; ...; }
+           .mc-feature-reverse { grid-template-columns: 1.5fr .5fr; }
+           (mc-gif-placeholder 자체의 위치/폭 확장 규칙 없음)
+   after: 아래로 교체 (컬럼 비율 원복 + mc-gif-placeholder bleed 규칙 추가) */
 .mc-feature-layout { display: grid; grid-template-columns: .78fr 1.22fr; align-items: center; gap: clamp(58px, 8vw, 115px); }
 .mc-feature-reverse { grid-template-columns: 1.15fr .85fr; }
 .mc-feature-reverse .mc-feature-copy { order: 2; }
+/* 수정된 부분 [2026-07-21]: bleed 폭을 110px → 220px로 확대
+   이유(사용자 피드백): "이게 위 아래 늘리면 또 잘리네 또 왼쪽 오른쪽 늘려봐" —
+   비율(aspect-ratio)을 낮춰 세로로 늘리면 GIF 원본 비율(1.86)과 안 맞아 다시
+   잘리는 문제가 생기므로, 비율은 1.86(잘림 없음)으로 유지한 채 좌우 bleed
+   폭을 키워서 가로/세로 모두 더 커지도록 함(비율이 고정이라 폭이 늘면 높이도
+   비례해서 늘어남).
+   before: .mc-feature-layout .mc-gif-placeholder { width: calc(100% + 110px); margin-left: 0; margin-right: -110px; }
+           .mc-feature-reverse .mc-gif-placeholder { width: calc(100% + 110px); margin-left: -110px; margin-right: 0; }
+   after: 아래로 교체 (110px → 220px) */
+/* 텍스트가 왼쪽(일반 배치)인 마인드맵/자소서 마스터 — 이미지를 오른쪽 바깥으로 확장 */
+.mc-feature-layout .mc-gif-placeholder { width: calc(100% + 220px); margin-left: 0; margin-right: -220px; }
+/* 텍스트가 오른쪽(reverse 배치)인 키워드 추출/AI 크래프팅 — 이미지를 왼쪽 바깥으로 확장 */
+.mc-feature-reverse .mc-gif-placeholder { width: calc(100% + 220px); margin-left: -220px; margin-right: 0; }
 /* 수정된 부분 [2026-07-17]: mc-feature-copy(MIND MAP / AI CRAFTING 섹션의 텍스트
    컬럼)에도 동일한 이유(요청 0)로 박스 배경을 추가. 두 섹션 모두 좌우 배치에 따라
    여정 라인이 텍스트 컬럼 쪽으로 지나가는 경우가 있어 카드형 박스로 감싸 침범을 막음.
@@ -575,22 +640,51 @@
 /* 추가된 부분 [2026-07-17]: AI CRAFTING 섹션 좌측 GIF/영상 placeholder 박스
    이유(요청 5): 정적 문서 목업(mc-document-demo)을 지우고 그 자리에 넣은
    빈 박스. 기존 mc-document-demo와 비슷한 비율(aspect-ratio)과 카드 톤(radius,
-   shadow)을 맞춰서 레이아웃이 갑자기 어색해지지 않도록 함. */
+   shadow)을 맞춰서 레이아웃이 갑자기 어색해지지 않도록 함.
+   수정된 부분 [2026-07-21]: placeholder(점선 박스 + 아이콘/텍스트) 스타일 →
+   실제 화면 이미지(<img>)를 담는 프레임 스타일로 변경
+   이유(요청): "아니 그거 말고 이거 말이야" — 4개 기능 패널 전부에 실제 화면
+   이미지가 들어오면서 "GIF/영상 추가 예정" 안내가 더 이상 필요 없어짐. 점선
+   테두리를 실선으로 바꾸고 overflow:hidden으로 모서리를 둥글게 잘라내며,
+   내부 img가 프레임을 꽉 채우도록 함(mc-process-expand-media와 동일한 접근).
+   before: .mc-gif-placeholder { ...; border: 2px dashed #cabdf2; background: linear-gradient(135deg, #f8f6ff, #f2effc);
+             color: #8068df; font-size: .78rem; font-weight: 700; }
+           .mc-gif-placeholder svg { width: 34px; height: 34px; opacity: .75; }
+   after: 아래로 교체 (dashed→solid, overflow:hidden 추가, svg 규칙 삭제, img 규칙 추가) */
+/* 수정된 부분 [2026-07-21]: 박스 비율을 GIF 실제 화면 비율(1.86)에 맞춤
+   이유(사용자 피드백): "GIF 넣었는데 잘려서 보이네 전체화면이라서 확대되어
+   보이는 점도 있고 / 그냥 직사각형으로 양쪽을 늘려서 전체화면 다 보게 하자" —
+   GIF 원본이 800x430(비율 1.86, 가로로 넓은 화면 녹화본)인데 박스는 1.18(거의
+   정사각형)이라 object-fit: cover가 양옆을 잘라내고 가운데만 확대해서 보여주고
+   있었음. 박스를 GIF와 같은 1.86 비율로 늘려서 전체 화면이 잘리지 않고 다
+   보이도록 함.
+   before: .mc-gif-placeholder { overflow: hidden; aspect-ratio: 1.18; ...; }
+   after: 아래로 교체 (aspect-ratio 1.18→1.86) */
+/* 수정된 부분 [2026-07-21]: 박스를 위아래로 늘림 (aspect-ratio 1.86 → 1.5)
+   이유(사용자 피드백): "이제 이 상태에서 직사각형의 크기를 위 아래 늘려볼래?" —
+   좌우 bleed는 그대로 두고, 비율 값을 낮춰 세로로 더 커지게 함.
+   참고: GIF 원본 비율은 여전히 1.86이라, 박스가 그보다 좁은 비율(1.5)이 되면
+   object-fit: cover가 이번엔 좌우를 약간 잘라내게 됨(위아래를 늘린 만큼의
+   트레이드오프). 잘리는 정도는 크지 않지만(양옆 각각 약 10% 안팎), 완전히
+   안 잘리길 원하시면 알려주세요 — 그러면 비율을 유지한 채 다른 방식으로
+   크기를 키우는 쪽으로 다시 조정할 수 있습니다.
+   before: .mc-gif-placeholder { overflow: hidden; aspect-ratio: 1.86; ...; }
+   after: 아래로 교체 (aspect-ratio 1.86→1.5) */
+/* 수정된 부분 [2026-07-21]: aspect-ratio를 GIF 원본 비율(1.86)로 되돌림
+   이유(사용자 피드백): "이게 위 아래 늘리면 또 잘리네 또 왼쪽 오른쪽 늘려봐" —
+   1.5로 낮춰 세로를 늘렸더니 GIF 원본 비율(1.86)과 안 맞아 좌우가 잘렸음.
+   비율을 다시 1.86으로 맞춰 잘림을 없애고, 크기 확대는 위쪽 bleed 폭(220px)
+   조정만으로 처리함(비율 고정 + 폭 확대 → 높이도 비례해서 함께 커짐).
+   before: .mc-gif-placeholder { overflow: hidden; aspect-ratio: 1.5; ...; }
+   after: 아래로 교체 (aspect-ratio 1.5→1.86) */
 .mc-gif-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  aspect-ratio: 1.18;
-  border: 2px dashed #cabdf2;
+  overflow: hidden;
+  aspect-ratio: 1.86;
+  border: 1px solid rgba(110, 90, 179, .13);
   border-radius: 25px;
-  background: linear-gradient(135deg, #f8f6ff, #f2effc);
-  color: #8068df;
-  font-size: .78rem;
-  font-weight: 700;
+  background: #f8f6ff;
 }
-.mc-gif-placeholder svg { width: 34px; height: 34px; opacity: .75; }
+.mc-gif-placeholder img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .mc-metric-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 27px; }
 .mc-metric-row div { padding: 13px 10px; border: 1px solid #e9e5f3; border-radius: 11px; background: rgba(255,255,255,.65); }
 .mc-metric-row b, .mc-metric-row span { display: block; }
@@ -701,21 +795,41 @@
    after: grid-column: 3, justify-self: end 추가로 grid에서도 계속 오른쪽 유지 */
 .mc-intro-copyright { grid-column: 3; justify-self: end; color: #6d6a7c; font-size: .65rem; }
 
+/* 수정된 부분 [2026-07-20]: 플로팅 CTA 버튼("마인드맵 바로가기") 위치를
+   화면 우측 하단(top 버튼과 같은 모서리) → 화면 정중앙 하단으로 변경, 더
+   눈에 띄도록 크기/색을 키움
+   이유(사용자 피드백, 스크린샷): "마인드맵 바로가기 버튼도... top 버튼 아래가
+   아니라 화면 정중앙 아래였으면 좋겠어 버튼이 더 잘보여도 좋을 것 같아" —
+   기존엔 top 버튼과 같은 우측 하단에 쌓여있어서 존재감이 약했음. 가로 중앙
+   정렬(left:50% + transform: translateX(-50%))로 옮기고, 배경을 어두운
+   잉크색 pill → mc-primary-btn과 같은 선명한 보라색 그라디언트로 바꾸고
+   패딩/폰트도 키워서 더 잘 보이게 함. 호버 시 위로 뜨는 효과와 등장
+   애니메이션(mc-float-cta-in)도 translateX(-50%)를 계속 유지하도록 함께
+   수정(안 그러면 transform이 덮어써져서 중앙 정렬이 풀리고 왼쪽으로
+   튕겨나감). 보라 그라디언트 자체가 라이트/다크 배경 모두에서 잘 보여서
+   다크모드 전용 배경 교체는 더 이상 필요 없어짐(아래 다크모드 섹션에서 정리).
+   before: .mc-page .float-cta-btn { left: auto; right: 28px; bottom: 28px; width: auto;
+             padding: .8rem 1.3rem; border-radius: 12px; color: #fff; background: var(--mc-ink);
+             box-shadow: none; font-size: .75rem; transform: none; animation: mc-float-cta-in .25s ease; }
+           .mc-page .float-cta-btn:hover { transform: translateY(-3px); box-shadow: none; }
+           @keyframes mc-float-cta-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+   after: 아래로 교체 */
 .mc-page .float-cta-btn {
-  left: auto;
-  right: 28px;
+  left: 50%;
+  right: auto;
   bottom: 28px;
   width: auto;
-  padding: .8rem 1.3rem;
-  border-radius: 12px;
+  padding: 1rem 1.9rem;
+  border-radius: 14px;
   color: #fff;
-  background: var(--mc-ink);
+  background: linear-gradient(135deg, #7a5ff2, #5a3bdb);
   box-shadow: none;
-  font-size: .75rem;
-  transform: none;
+  font-size: .85rem;
+  font-weight: 700;
+  transform: translateX(-50%);
   animation: mc-float-cta-in .25s ease;
 }
-.mc-page .float-cta-btn:hover { transform: translateY(-3px); box-shadow: none; }
+.mc-page .float-cta-btn:hover { transform: translate(-50%, -3px); box-shadow: none; }
 .mc-page .top-btn { right: 28px; bottom: 84px; width: 40px; height: 40px; border: 1px solid #e1ddec; background: rgba(255,255,255,.94); box-shadow: none; }
 .mc-page .top-btn img { width: 20px; height: 20px; object-fit: contain; }
 
@@ -733,7 +847,12 @@
    쓰던 애니메이션인데 그 요소들을 JSX에서 이미 삭제해서 참조하는 곳이 없어짐.
    before: @keyframes mc-toast {...} / @keyframes mc-type {...} / @keyframes mc-progress {...}
    after: (삭제됨) */
-@keyframes mc-float-cta-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+/* 수정된 부분 [2026-07-20]: float-cta-btn이 가로 중앙 정렬(translateX(-50%))로
+   바뀌면서, 이 keyframe의 도착 지점(transform: none)이 그 정렬을 지워버리는
+   문제가 생겨 함께 수정 — 자세한 이유는 위 float-cta-btn 규칙 주석 참고.
+   before: @keyframes mc-float-cta-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+   after: 아래로 교체 */
+@keyframes mc-float-cta-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
 
 @media (max-width: 980px) {
   .mc-page .nav-links a { display: none; }
@@ -753,6 +872,12 @@
      줄었으므로, 이 화면폭에서 330px로 다시 늘리는 규칙은 더 이상 맞지 않음. */
   .mc-feature-layout, .mc-feature-reverse { grid-template-columns: 1fr; gap: 48px; }
   .mc-feature-copy, .mc-feature-reverse .mc-feature-copy { order: 0; max-width: 640px; }
+  /* 추가된 부분 [2026-07-21]: 980px 이하에서는 mc-gif-placeholder의 좌우 bleed 해제
+     이유: 이 폭부터는 텍스트/이미지가 1열로 쌓이는데, 데스크톱용 bleed(컨테이너
+     밖으로 튀어나오는 음수 마진)를 그대로 두면 좁은 화면에서 이미지가 옆으로
+     삐져나와 어색해 보임. 폭 100%, 마진 0으로 되돌려 다른 요소들과 폭을 맞춤. */
+  .mc-feature-layout .mc-gif-placeholder,
+  .mc-feature-reverse .mc-gif-placeholder { width: 100%; margin-left: 0; margin-right: 0; }
   /* 수정된 부분 [2026-07-20]: .mc-demo-frame 모바일 규칙 삭제 (이유: 위 참고, 클래스 자체가 더 이상 안 쓰임) */
   .mc-journey-line { opacity: .52; }
   .mc-feature-panel:nth-of-type(2) .mc-feature-copy { margin-left: auto; }
@@ -828,7 +953,10 @@
   .mc-intro-row { grid-template-columns: 1fr; justify-items: center; gap: 16px; text-align: center; }
   .mc-intro-left { grid-column: 1; justify-content: center; }
   .mc-intro-copyright { grid-column: 1; justify-self: center; }
-  .mc-page .float-cta-btn { right: 18px; bottom: 18px; }
+  /* 수정된 부분 [2026-07-20]: right: 18px 삭제 (이유: 이제 left:50%+translateX(-50%)로
+     가로 중앙 정렬하므로, 남아있는 right 값이 width:auto 요소를 양쪽에서
+     당겨 중앙 정렬을 깨뜨릴 수 있어 제거하고 bottom 간격만 유지) */
+  .mc-page .float-cta-btn { bottom: 18px; }
   .mc-page .top-btn { right: 18px; bottom: 73px; }
 }
 
@@ -838,41 +966,169 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   추가된 부분 [2026-07-16]: 다크모드 충돌 방지 오버라이드 (Claude가 재검토 중 발견)
-   이유(충돌 내용): 기존 Main.css 하단에 [data-theme='dark'] .mindcraft-page ...
-   다크모드 규칙들이 있음(특이도 0,3,0). 새 디자인의 .mc-page ... 규칙(0,2,0)보다
-   특이도가 높아서, 사용자가 마인드맵/자소서 화면에서 다크모드를 켠 뒤
-   메인화면으로 돌아오면(테마는 localStorage 'mc-theme'로 유지됨)
-   페이지 배경이 #16161f로 어두워지고 nav/버튼 색이 뒤섞여 새 라이트 디자인이 깨짐.
-   해결: 새 디자인이 실제로 사용하는 요소(루트 배경, nav, 로고, nav 링크,
-   플로팅 CTA, 탑 버튼)에 한해 같은 특이도(0,3,0)로 라이트 값을 복원.
-   이 파일이 Main.css보다 나중에 import되므로 동일 특이도에서 우선 적용됨.
-   참고: 로그인/회원가입 모달의 다크모드 스타일은 모달 내부에서 자체적으로
-   일관되므로 건드리지 않음(요청 범위 외 확장 방지).
+   수정된 부분 [2026-07-20]: "다크모드 충돌 방지"(라이트 강제 복원) 블록을
+   진짜 다크모드 스타일로 전면 교체
+   이유(사용자 피드백): "메인화면에 다크모드는 없는데 다크모드 만들어줘" — 이
+   블록은 원래 다크모드를 지원하려던 게 아니라, 구 Main.css의 다크모드 규칙이
+   새 리디자인에 새어 들어오는 걸 막으려고 일부러 라이트 값으로 되돌리는
+   용도였음(주석 참고: "새 디자인이 실제로 사용하는 요소에 한해... 라이트 값을
+   복원"). 즉 지금까지 이 페이지는 테마를 껐다 켜도 항상 라이트로만 보였음.
+   이번엔 반대로, 같은 [data-theme='dark'] .mc-page 스코프 안에 실제 다크
+   배경/텍스트/카드 색을 채워 넣음. 특이도는 기존과 동일하게 유지(0,3,0
+   내외)해서 Main.css의 구 다크모드 규칙보다 여전히 이 파일이 우선 적용됨.
+   접근 방식: 공용 CSS 변수(--mc-ink, --mc-muted 등)는 nav-btn/float-cta-btn
+   배경("잉크색 버튼")에도 쓰이고 있어 변수 자체를 뒤집으면 그 버튼들이
+   dark-on-dark로 깨지므로, 변수는 건드리지 않고 실제로 화면에 보이는 각
+   요소(히어로, 프로세스 카드, 기능 패널, FAQ 등)를 직접 지정하는 방식으로 함.
+   Nav의 테마 토글(ProfileDropdown showTheme, 기본값 true)은 이미 노출되어
+   있어 Nav.jsx는 따로 손대지 않음. 클로징 카드(mc-final-card)와 하단
+   footer(mc-intro)는 원래도 항상 짙은 보라/검정 배경이라 테마와 무관하게
+   그대로 두었음(변경 없음).
    ═══════════════════════════════════════════════════════════════ */
-[data-theme='dark'] .mindcraft-page.mc-page {
-  background: #fcfcff;
-  color: var(--mc-ink);
+
+/* 루트 배경/텍스트 */
+[data-theme='dark'] .mindcraft-page.mc-page { background: #100e1a; color: #eeecf7; }
+
+/* 헤더 */
+[data-theme='dark'] .mc-page .nav { background: rgba(16, 14, 26, .82); border-bottom-color: rgba(148, 124, 255, .16); }
+[data-theme='dark'] .mc-page .nav .logo-text { color: #f4f2fb; }
+[data-theme='dark'] .mc-page .nav-links a { color: #b3aec9; }
+[data-theme='dark'] .mc-page .nav-links a:hover { color: #f4f2fb; }
+[data-theme='dark'] .mc-page .nav-btn { background: #fff; color: #16182b; }
+
+/* 히어로 */
+[data-theme='dark'] .mc-hero {
+  background:
+    linear-gradient(rgba(148, 124, 255, .06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 124, 255, .06) 1px, transparent 1px),
+    radial-gradient(circle at 52% 28%, rgba(122, 95, 242, .16) 0, transparent 35%),
+    #100e1a;
 }
-[data-theme='dark'] .mc-page .nav {
-  background: rgba(252, 252, 255, .82);
-  border-bottom-color: rgba(109, 88, 190, .1);
-}
-[data-theme='dark'] .mc-page .nav .logo-text {
-  color: var(--mc-ink);
-}
-[data-theme='dark'] .mc-page .nav-links a {
-  color: #5f6072;
-}
-[data-theme='dark'] .mc-page .nav-links a:hover {
-  color: var(--mc-ink);
-}
-[data-theme='dark'] .mc-page .float-cta-btn {
-  background: var(--mc-ink);
-  color: #fff;
-  border: none;
-}
-[data-theme='dark'] .mc-page .top-btn {
-  background: rgba(255, 255, 255, .94);
-  border-color: #e1ddec;
-}
+[data-theme='dark'] .mc-hero::after { background: linear-gradient(transparent, #100e1a); }
+/* 수정된 부분 [2026-07-20]: .mc-intro-break p를 다크모드 밝은 텍스트 그룹에 추가
+   이유(버그 리포트, 스크린샷): "오류 발생" — 쉬는 구간 큰 타이틀(.mc-intro-break p)이
+   var(--mc-ink)를 직접 쓰는데, 이 선택자를 아래 다크모드 override 그룹에 넣는 걸
+   빠뜨려서 라이트모드의 어두운 잉크색(#16182b)이 다크 배경 위에 그대로 남아
+   거의 안 보였음. 헤딩용 밝은 텍스트 그룹에 추가해 해결함.
+   before: [data-theme='dark'] .mc-hero h1, ..., .mc-faq-heading h2 { color: #f4f2fb; }
+           (.mc-intro-break p 없음)
+   after: 목록에 .mc-intro-break p 추가 */
+[data-theme='dark'] .mc-hero h1,
+[data-theme='dark'] .mc-section-heading h2,
+[data-theme='dark'] .mc-feature-copy h2,
+[data-theme='dark'] .mc-faq-heading h2,
+[data-theme='dark'] .mc-intro-break p,
+[data-theme='dark'] .mc-process-expand-text h3 { color: #f4f2fb; }
+[data-theme='dark'] .mc-hero-copy > p,
+[data-theme='dark'] .mc-section-heading p,
+[data-theme='dark'] .mc-intro-break span,
+[data-theme='dark'] .mc-feature-copy > p { color: #a7a3c2; }
+[data-theme='dark'] .mc-pill { border-color: #352f52; background: rgba(28, 24, 46, .72); color: #c7bdfa; }
+[data-theme='dark'] .mc-text-link { color: #c8c5db; }
+[data-theme='dark'] .mc-trust-row { color: #918da8; }
+[data-theme='dark'] .mc-trust-row b { color: #d9d6ea; }
+[data-theme='dark'] .mc-avatar-stack i { border-color: #100e1a; }
+
+/* 히어로 오른쪽 미니 마인드맵 창 */
+[data-theme='dark'] .mc-window-shadow { background: rgba(122, 95, 242, .3); }
+[data-theme='dark'] .mc-product-window { border-color: rgba(148, 124, 255, .22); background: #171429; }
+[data-theme='dark'] .mc-window-top { border-bottom-color: #2a2540; color: #b9b5d2; }
+[data-theme='dark'] .mc-window-dots i { background: #363050; }
+[data-theme='dark'] .mc-live { color: #9490ab; }
+[data-theme='dark'] .mc-window-body { background: radial-gradient(circle, #322c4c 1.1px, transparent 1.1px); background-size: 23px 23px; }
+[data-theme='dark'] .mc-map-node { border-color: #362f52; background: #1c1830; color: #cdc9e4; }
+[data-theme='dark'] .mc-map-node-b { border-color: #2d4666; background: #16233a; color: #8fbdf0; }
+[data-theme='dark'] .mc-map-node-c { border-color: #235142; background: #112a22; color: #6fd2b3; }
+[data-theme='dark'] .mc-floating-note { border-color: #332d4d; background: rgba(28, 24, 48, .9); color: #cfccdf; }
+[data-theme='dark'] .mc-note-top { color: #4cd9b4; }
+[data-theme='dark'] .mc-note-bottom small { color: #8d89a3; }
+[data-theme='dark'] .mc-orb-two { background: #16261f; }
+[data-theme='dark'] .mc-scroll-cue { color: #7c7896; }
+[data-theme='dark'] .mc-scroll-cue i { border-color: #34304a; }
+
+/* 스크롤 스토리 배경 + 여정 라인 + 섹션 헤딩 카드 */
+[data-theme='dark'] .mc-scroll-story { background: linear-gradient(180deg, #100e1a 0, #120f1e 36%, #0f111c 68%, #0d1512 100%); }
+[data-theme='dark'] .mc-path-ghost { stroke: #2b2740; }
+[data-theme='dark'] .mc-section-heading { background: rgba(24, 21, 38, .82); }
+
+/* 프로세스 카드 (ONE SIMPLE FLOW) */
+[data-theme='dark'] .mc-process-card { border-color: rgba(148, 124, 255, .16); background: #1a1729; }
+[data-theme='dark'] .mc-card-blue { border-color: rgba(79, 124, 255, .22); background: #131c33; }
+[data-theme='dark'] .mc-card-mint { border-color: rgba(43, 198, 166, .22); background: #0f231d; }
+[data-theme='dark'] .mc-card-amber { border-color: rgba(224, 150, 60, .22); background: #2a1f0f; }
+[data-theme='dark'] .mc-process-card.is-active { background: rgba(115, 87, 238, .18); }
+[data-theme='dark'] .mc-card-blue.is-active { background: rgba(79, 124, 255, .18); }
+[data-theme='dark'] .mc-card-mint.is-active { background: rgba(43, 198, 166, .18); }
+[data-theme='dark'] .mc-card-amber.is-active { background: rgba(224, 150, 60, .18); }
+[data-theme='dark'] .mc-process-card > small { color: #9490ab; }
+/* 수정된 부분 [2026-07-20]: 박스를 되살리되, 카드가 Active일 때만 사라지게 변경
+   이유(사용자 피드백): "음 아니다 박스는 추가하자 Active 일때만 박스 사라지게
+   하고" — 바로 직전에 박스를 아예 없앴는데, 다시 보니 평소엔 박스가 있는 게
+   낫고 카드가 선택(active)됐을 때만 박스가 사라지는 쪽을 원한 것으로 정정.
+   기본 상태의 배지 배경(반투명 다크 톤)을 되살리고, `.mc-process-card.is-active`
+   상태일 때만 배지 배경을 none으로 덮어써서 박스가 사라지도록 별도 규칙을 추가함.
+   before: [data-theme='dark'] .mc-card-icon { color: #b9a6ff; background: none; }
+           [data-theme='dark'] .mc-card-blue .mc-card-icon { color: #8fbdf0; background: none; }
+           [data-theme='dark'] .mc-card-mint .mc-card-icon { color: #6fd2b3; background: none; }
+           [data-theme='dark'] .mc-card-amber .mc-card-icon { color: #f0b268; background: none; }
+   after: 아래로 교체 (기본 배지 배경 복원 + is-active 전용 규칙 추가) */
+[data-theme='dark'] .mc-card-icon { color: #b9a6ff; background: rgba(115, 87, 238, .18); }
+[data-theme='dark'] .mc-card-blue .mc-card-icon { color: #8fbdf0; background: rgba(79, 124, 255, .18); }
+[data-theme='dark'] .mc-card-mint .mc-card-icon { color: #6fd2b3; background: rgba(43, 198, 166, .18); }
+[data-theme='dark'] .mc-card-amber .mc-card-icon { color: #f0b268; background: rgba(224, 150, 60, .18); }
+[data-theme='dark'] .mc-process-card.is-active .mc-card-icon { background: none; }
+
+/* 카드 펼침 영역(설명 + 이미지 자리) */
+[data-theme='dark'] .mc-process-expand { border-color: rgba(148, 124, 255, .16); background: rgba(255, 255, 255, .03); }
+[data-theme='dark'] .mc-process-expand-text p { color: #a7a3c2; }
+/* 수정된 부분 [2026-07-20]: 실제 GIF 프레임으로 바뀌면서 텍스트 색(color)이
+   더 이상 필요 없어짐 - 배경/테두리만 유지
+   before: [data-theme='dark'] .mc-process-expand-media { border-color: #493f78; background: #1c1830; color: #b3a4f2; }
+   after: 아래로 교체 (color 삭제) */
+[data-theme='dark'] .mc-process-expand-media { border-color: #493f78; background: #1c1830; }
+
+/* 쉬는 구간(IntroBreak) */
+[data-theme='dark'] .mc-intro-break .mc-panel-inner { background: linear-gradient(135deg, #1c1730, #14111f); }
+
+/* 기능 패널(마인드맵/키워드 추출/자소서 설정/AI 크래프팅) */
+[data-theme='dark'] .mc-feature-copy { background: rgba(24, 21, 38, .82); }
+[data-theme='dark'] .mc-feature-copy li { color: #c2bfd6; }
+[data-theme='dark'] .mc-inline-btn { color: #b9a6ff; border-bottom-color: #4b3f7a; }
+[data-theme='dark'] .mc-ai-panel { background: radial-gradient(circle at 25% 50%, rgba(79, 124, 255, .14), transparent 36%); }
+/* 수정된 부분 [2026-07-21]: 실제 이미지 프레임으로 바뀌면서 텍스트 색(color)이
+   더 이상 필요 없어짐 - 배경/테두리만 유지
+   before: [data-theme='dark'] .mc-gif-placeholder { border-color: #493f78; background: linear-gradient(135deg, #1c1830, #171325); color: #b3a4f2; }
+   after: 아래로 교체 (color 삭제, background 단색으로 단순화) */
+[data-theme='dark'] .mc-gif-placeholder { border-color: #493f78; background: #1c1830; }
+[data-theme='dark'] .mc-metric-row div { border-color: #2a2540; background: rgba(255, 255, 255, .04); }
+[data-theme='dark'] .mc-metric-row b { color: #b9a6ff; }
+[data-theme='dark'] .mc-metric-row span { color: #8d89a3; }
+
+/* 클로징 배경(카드 자체는 항상 짙은 보라라 그대로 둠) + FAQ */
+[data-theme='dark'] .mc-closing { background: #100e1a; }
+[data-theme='dark'] .mc-faq-list article,
+[data-theme='dark'] .mc-faq-list article:first-child { border-color: #29253c; }
+[data-theme='dark'] .mc-faq-list button { color: #e4e1f2; }
+[data-theme='dark'] .mc-faq-list button svg { color: #8d89a3; }
+[data-theme='dark'] .mc-faq-list article > div > p { color: #a29ebd; }
+
+/* 우측 하단 플로팅 버튼 */
+/* 수정된 부분 [2026-07-20]: float-cta-btn 다크모드 전용 오버라이드(흰 배경+어두운 글자) 삭제
+   이유: float-cta-btn 배경이 어두운 잉크색 pill → 선명한 보라 그라디언트로
+   바뀌면서, 그 자체로 라이트/다크 배경 모두에서 잘 보이게 됨. 다크모드에서만
+   따로 흰 배경으로 뒤집을 필요가 없어져 삭제함.
+   before: [data-theme='dark'] .mc-page .float-cta-btn { background: #fff; color: #16182b; border: none; }
+   after: (삭제됨)
+   추가된 부분 [2026-07-20]: 다크모드에서 float-cta-btn만 다른 색(민트 그라디언트)으로 지정
+   이유(사용자 피드백): "다크모드일때 마인드맵 바로가기 버튼 색만 다른걸로 바꿔봐" —
+   라이트모드와 똑같은 보라 그라디언트 대신, 다크모드에서는 카드 색상 중 하나인
+   민트 톤 그라디언트를 써서 눈에 띄게 다른 색으로 구분함.
+   수정된 부분 [2026-07-20]: 글자 색을 흰색으로 명시적으로 지정
+   이유(사용자 피드백): "글자 색을 흰색으로" — 기존 .float-cta-btn 기본 규칙에도
+   color: #fff가 있긴 하지만, 민트 배경에서도 확실히 흰 글자로 보이도록 이
+   다크모드 규칙에도 명시적으로 함께 지정함.
+   before: [data-theme='dark'] .mc-page .float-cta-btn { background: linear-gradient(135deg, #2bc6a6, #1a9b82); }
+   after: 아래로 교체 (color: #fff 추가) */
+[data-theme='dark'] .mc-page .float-cta-btn { background: linear-gradient(135deg, #2bc6a6, #1a9b82); color: #fff; }
+[data-theme='dark'] .mc-page .top-btn { background: #1c1830; border-color: #332d4d; }
+[data-theme='dark'] .mc-page .top-btn img { filter: invert(1); }
