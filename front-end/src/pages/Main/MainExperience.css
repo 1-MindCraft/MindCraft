@@ -523,7 +523,15 @@
            .mc-process-expand-text p { ...; font-size: .85rem; ... }
            .mc-process-expand-media { ...; min-height: 130px; ...; font-size: .68rem; ... }
    after: 아래로 교체 */
-.mc-process-expand { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 56px; margin-top: 22px; padding: 52px 54px; border: 1px solid rgba(110, 90, 179, .13); border-radius: 25px; background: rgba(255,255,255,.7); box-shadow: none; backdrop-filter: blur(12px); animation: mc-expand-in .35s ease; }
+/* 수정된 부분 [2026-07-21]: align-items: start → center로 되돌림
+   이유(사용자 피드백, 스크린샷): "글자가 위에 있는데 이걸 사진 기준으로 중간으로
+   위치해" — 직전에 이미지를 훨씬 크고 길게 늘리면서 align-items를 start로
+   바꿨더니, 텍스트가 커진 이미지 대비 위쪽에 붕 떠 보이는 문제가 생김. 텍스트를
+   이미지의 세로 중앙에 맞춰 정렬되도록 다시 center로 되돌림(이미지 크기/비율
+   자체는 그대로 유지).
+   before: .mc-process-expand { display: grid; grid-template-columns: .85fr 1.15fr; align-items: start; ...; }
+   after: 아래로 교체 (align-items: center) */
+.mc-process-expand { display: grid; grid-template-columns: .85fr 1.15fr; align-items: center; gap: 56px; margin-top: 22px; padding: 52px 54px; border: 1px solid rgba(110, 90, 179, .13); border-radius: 25px; background: rgba(255,255,255,.7); box-shadow: none; backdrop-filter: blur(12px); animation: mc-expand-in .35s ease; }
 .mc-process-expand-text h3 { margin: 0 0 14px; color: var(--mc-ink); font-size: 1.55rem; letter-spacing: -.03em; }
 .mc-process-expand-text p { margin: 0; color: #747587; font-size: .95rem; line-height: 1.9; word-break: keep-all; }
 /* 수정된 부분 [2026-07-20]: placeholder(점선 박스 + 아이콘/텍스트) 스타일 →
@@ -536,13 +544,59 @@
              background: #f8f6ff; color: #8068df; font-size: .74rem; font-weight: 700; }
    after: 아래로 교체 (dashed→solid, aspect-ratio 1.3→1.86, overflow:hidden 추가,
    색/폰트 관련 속성 삭제, img 규칙 추가) */
-.mc-process-expand-media { overflow: hidden; aspect-ratio: 1.86; min-height: 220px; border-radius: 18px; border: 1px solid rgba(110, 90, 179, .13); background: #f8f6ff; }
+/* 수정된 부분 [2026-07-21]: 이미지 박스 비율을 훨씬 세로로 길게 변경
+   이유(사용자 피드백): "아래쪽으로 엄청 많이 확장해봐" — 가로로 넓적했던 비율
+   (1.86, 가로가 세로의 약 2배)을 훨씬 정사각형에 가까운 1.05로 바꿔 이미지가
+   아래로 크게 늘어나도록 함. 비율을 바꾸면 기존 이미지 파일(1000x538, 1.86
+   비율로 맞춰뒀던 것)이 새 박스 비율과 안 맞아 또 잘리므로, 이미지 파일도
+   1000x952(1.05 비율)로 함께 다시 만듦(별도 첨부).
+   before: .mc-process-expand-media { overflow: hidden; aspect-ratio: 1.86; min-height: 220px; ... }
+   after: 아래로 교체 (aspect-ratio 1.86→1.05, min-height 220→380px) */
+.mc-process-expand-media { overflow: hidden; aspect-ratio: 1.05; min-height: 380px; border-radius: 18px; border: 1px solid rgba(110, 90, 179, .13); background: #f8f6ff; }
 .mc-process-expand-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
 @keyframes mc-expand-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
 
+/* 수정된 부분 [2026-07-21]: 이미지 컬럼 폭을 더 넓힘(텍스트 컬럼은 좁아짐)
+   이유(사용자 피드백, 스크린샷): "내 말은 이 크기에서 양쪽으로 넓히라는
+   말이었어 줄이라는 말이 아니고" — 직전에 mc-gif-placeholder의 aspect-ratio를
+   1.18→1.86으로 바꾼 것 자체는 GIF가 안 잘리게 하려는 목적이 맞았지만,
+   이미지 컬럼의 실제 폭(fr 비율)은 그대로 둔 채 비율만 바꿔서 결과적으로
+   박스가 가로 폭은 그대로인 채 세로만 줄어들어(1.18→1.86이면 같은 폭에서
+   높이가 작아짐) 이전보다 작아 보였음. 폭 자체를 넓혀서 "잘리지 않으면서도
+   더 커 보이게" 함.
+   before: .mc-feature-layout { display: grid; grid-template-columns: .78fr 1.22fr; ...; }
+           .mc-feature-reverse { grid-template-columns: 1.15fr .85fr; }
+   after: 아래로 교체 (이미지 컬럼 비율 확대) */
+/* 수정된 부분 [2026-07-21]: 그리드 컬럼 비율을 원래 텍스트가 편했던 값으로 되돌리고,
+   이미지만 텍스트 반대쪽(바깥쪽)으로 튀어나오게(bleed) 확장하는 방식으로 변경
+   이유(사용자 피드백): "전부 다 왼쪽으로 옮기니까 글자가 깨져보여 / 마인드맵은
+   글자가 왼쪽에 있으니까 직사각형의 크기를 오른쪽으로 늘리고 키워드는 글자가
+   오른쪽에 있으니까 직사각형의 크기를 왼쪽으로 늘리는 방식" — 직전 수정(양쪽
+   컬럼 비율을 .5:1.5로 동일하게 바꾸는 방식)은 텍스트 컬럼까지 함께 좁아져
+   글자가 부자연스럽게 끊겼음. 대신 텍스트 컬럼 폭은 원래 값(.78/.85)으로
+   되돌리고, 이미지 쪽만 "텍스트에서 먼 방향"으로 컨테이너 밖으로 튀어나오게
+   함: 마인드맵/자소서마스터(텍스트가 왼쪽=일반 배치)는 이미지가 오른쪽으로,
+   키워드/AI(텍스트가 오른쪽=mc-feature-reverse)는 이미지가 왼쪽으로 늘어남.
+   before: .mc-feature-layout { display: grid; grid-template-columns: .5fr 1.5fr; ...; }
+           .mc-feature-reverse { grid-template-columns: 1.5fr .5fr; }
+           (mc-gif-placeholder 자체의 위치/폭 확장 규칙 없음)
+   after: 아래로 교체 (컬럼 비율 원복 + mc-gif-placeholder bleed 규칙 추가) */
 .mc-feature-layout { display: grid; grid-template-columns: .78fr 1.22fr; align-items: center; gap: clamp(58px, 8vw, 115px); }
 .mc-feature-reverse { grid-template-columns: 1.15fr .85fr; }
 .mc-feature-reverse .mc-feature-copy { order: 2; }
+/* 수정된 부분 [2026-07-21]: bleed 폭을 110px → 220px로 확대
+   이유(사용자 피드백): "이게 위 아래 늘리면 또 잘리네 또 왼쪽 오른쪽 늘려봐" —
+   비율(aspect-ratio)을 낮춰 세로로 늘리면 GIF 원본 비율(1.86)과 안 맞아 다시
+   잘리는 문제가 생기므로, 비율은 1.86(잘림 없음)으로 유지한 채 좌우 bleed
+   폭을 키워서 가로/세로 모두 더 커지도록 함(비율이 고정이라 폭이 늘면 높이도
+   비례해서 늘어남).
+   before: .mc-feature-layout .mc-gif-placeholder { width: calc(100% + 110px); margin-left: 0; margin-right: -110px; }
+           .mc-feature-reverse .mc-gif-placeholder { width: calc(100% + 110px); margin-left: -110px; margin-right: 0; }
+   after: 아래로 교체 (110px → 220px) */
+/* 텍스트가 왼쪽(일반 배치)인 마인드맵/자소서 마스터 — 이미지를 오른쪽 바깥으로 확장 */
+.mc-feature-layout .mc-gif-placeholder { width: calc(100% + 220px); margin-left: 0; margin-right: -220px; }
+/* 텍스트가 오른쪽(reverse 배치)인 키워드 추출/AI 크래프팅 — 이미지를 왼쪽 바깥으로 확장 */
+.mc-feature-reverse .mc-gif-placeholder { width: calc(100% + 220px); margin-left: -220px; margin-right: 0; }
 /* 수정된 부분 [2026-07-17]: mc-feature-copy(MIND MAP / AI CRAFTING 섹션의 텍스트
    컬럼)에도 동일한 이유(요청 0)로 박스 배경을 추가. 두 섹션 모두 좌우 배치에 따라
    여정 라인이 텍스트 컬럼 쪽으로 지나가는 경우가 있어 카드형 박스로 감싸 침범을 막음.
@@ -586,22 +640,51 @@
 /* 추가된 부분 [2026-07-17]: AI CRAFTING 섹션 좌측 GIF/영상 placeholder 박스
    이유(요청 5): 정적 문서 목업(mc-document-demo)을 지우고 그 자리에 넣은
    빈 박스. 기존 mc-document-demo와 비슷한 비율(aspect-ratio)과 카드 톤(radius,
-   shadow)을 맞춰서 레이아웃이 갑자기 어색해지지 않도록 함. */
+   shadow)을 맞춰서 레이아웃이 갑자기 어색해지지 않도록 함.
+   수정된 부분 [2026-07-21]: placeholder(점선 박스 + 아이콘/텍스트) 스타일 →
+   실제 화면 이미지(<img>)를 담는 프레임 스타일로 변경
+   이유(요청): "아니 그거 말고 이거 말이야" — 4개 기능 패널 전부에 실제 화면
+   이미지가 들어오면서 "GIF/영상 추가 예정" 안내가 더 이상 필요 없어짐. 점선
+   테두리를 실선으로 바꾸고 overflow:hidden으로 모서리를 둥글게 잘라내며,
+   내부 img가 프레임을 꽉 채우도록 함(mc-process-expand-media와 동일한 접근).
+   before: .mc-gif-placeholder { ...; border: 2px dashed #cabdf2; background: linear-gradient(135deg, #f8f6ff, #f2effc);
+             color: #8068df; font-size: .78rem; font-weight: 700; }
+           .mc-gif-placeholder svg { width: 34px; height: 34px; opacity: .75; }
+   after: 아래로 교체 (dashed→solid, overflow:hidden 추가, svg 규칙 삭제, img 규칙 추가) */
+/* 수정된 부분 [2026-07-21]: 박스 비율을 GIF 실제 화면 비율(1.86)에 맞춤
+   이유(사용자 피드백): "GIF 넣었는데 잘려서 보이네 전체화면이라서 확대되어
+   보이는 점도 있고 / 그냥 직사각형으로 양쪽을 늘려서 전체화면 다 보게 하자" —
+   GIF 원본이 800x430(비율 1.86, 가로로 넓은 화면 녹화본)인데 박스는 1.18(거의
+   정사각형)이라 object-fit: cover가 양옆을 잘라내고 가운데만 확대해서 보여주고
+   있었음. 박스를 GIF와 같은 1.86 비율로 늘려서 전체 화면이 잘리지 않고 다
+   보이도록 함.
+   before: .mc-gif-placeholder { overflow: hidden; aspect-ratio: 1.18; ...; }
+   after: 아래로 교체 (aspect-ratio 1.18→1.86) */
+/* 수정된 부분 [2026-07-21]: 박스를 위아래로 늘림 (aspect-ratio 1.86 → 1.5)
+   이유(사용자 피드백): "이제 이 상태에서 직사각형의 크기를 위 아래 늘려볼래?" —
+   좌우 bleed는 그대로 두고, 비율 값을 낮춰 세로로 더 커지게 함.
+   참고: GIF 원본 비율은 여전히 1.86이라, 박스가 그보다 좁은 비율(1.5)이 되면
+   object-fit: cover가 이번엔 좌우를 약간 잘라내게 됨(위아래를 늘린 만큼의
+   트레이드오프). 잘리는 정도는 크지 않지만(양옆 각각 약 10% 안팎), 완전히
+   안 잘리길 원하시면 알려주세요 — 그러면 비율을 유지한 채 다른 방식으로
+   크기를 키우는 쪽으로 다시 조정할 수 있습니다.
+   before: .mc-gif-placeholder { overflow: hidden; aspect-ratio: 1.86; ...; }
+   after: 아래로 교체 (aspect-ratio 1.86→1.5) */
+/* 수정된 부분 [2026-07-21]: aspect-ratio를 GIF 원본 비율(1.86)로 되돌림
+   이유(사용자 피드백): "이게 위 아래 늘리면 또 잘리네 또 왼쪽 오른쪽 늘려봐" —
+   1.5로 낮춰 세로를 늘렸더니 GIF 원본 비율(1.86)과 안 맞아 좌우가 잘렸음.
+   비율을 다시 1.86으로 맞춰 잘림을 없애고, 크기 확대는 위쪽 bleed 폭(220px)
+   조정만으로 처리함(비율 고정 + 폭 확대 → 높이도 비례해서 함께 커짐).
+   before: .mc-gif-placeholder { overflow: hidden; aspect-ratio: 1.5; ...; }
+   after: 아래로 교체 (aspect-ratio 1.5→1.86) */
 .mc-gif-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  aspect-ratio: 1.18;
-  border: 2px dashed #cabdf2;
+  overflow: hidden;
+  aspect-ratio: 1.86;
+  border: 1px solid rgba(110, 90, 179, .13);
   border-radius: 25px;
-  background: linear-gradient(135deg, #f8f6ff, #f2effc);
-  color: #8068df;
-  font-size: .78rem;
-  font-weight: 700;
+  background: #f8f6ff;
 }
-.mc-gif-placeholder svg { width: 34px; height: 34px; opacity: .75; }
+.mc-gif-placeholder img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .mc-metric-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 27px; }
 .mc-metric-row div { padding: 13px 10px; border: 1px solid #e9e5f3; border-radius: 11px; background: rgba(255,255,255,.65); }
 .mc-metric-row b, .mc-metric-row span { display: block; }
@@ -789,6 +872,12 @@
      줄었으므로, 이 화면폭에서 330px로 다시 늘리는 규칙은 더 이상 맞지 않음. */
   .mc-feature-layout, .mc-feature-reverse { grid-template-columns: 1fr; gap: 48px; }
   .mc-feature-copy, .mc-feature-reverse .mc-feature-copy { order: 0; max-width: 640px; }
+  /* 추가된 부분 [2026-07-21]: 980px 이하에서는 mc-gif-placeholder의 좌우 bleed 해제
+     이유: 이 폭부터는 텍스트/이미지가 1열로 쌓이는데, 데스크톱용 bleed(컨테이너
+     밖으로 튀어나오는 음수 마진)를 그대로 두면 좁은 화면에서 이미지가 옆으로
+     삐져나와 어색해 보임. 폭 100%, 마진 0으로 되돌려 다른 요소들과 폭을 맞춤. */
+  .mc-feature-layout .mc-gif-placeholder,
+  .mc-feature-reverse .mc-gif-placeholder { width: 100%; margin-left: 0; margin-right: 0; }
   /* 수정된 부분 [2026-07-20]: .mc-demo-frame 모바일 규칙 삭제 (이유: 위 참고, 클래스 자체가 더 이상 안 쓰임) */
   .mc-journey-line { opacity: .52; }
   .mc-feature-panel:nth-of-type(2) .mc-feature-copy { margin-left: auto; }
@@ -1006,7 +1095,11 @@
 [data-theme='dark'] .mc-feature-copy li { color: #c2bfd6; }
 [data-theme='dark'] .mc-inline-btn { color: #b9a6ff; border-bottom-color: #4b3f7a; }
 [data-theme='dark'] .mc-ai-panel { background: radial-gradient(circle at 25% 50%, rgba(79, 124, 255, .14), transparent 36%); }
-[data-theme='dark'] .mc-gif-placeholder { border-color: #493f78; background: linear-gradient(135deg, #1c1830, #171325); color: #b3a4f2; }
+/* 수정된 부분 [2026-07-21]: 실제 이미지 프레임으로 바뀌면서 텍스트 색(color)이
+   더 이상 필요 없어짐 - 배경/테두리만 유지
+   before: [data-theme='dark'] .mc-gif-placeholder { border-color: #493f78; background: linear-gradient(135deg, #1c1830, #171325); color: #b3a4f2; }
+   after: 아래로 교체 (color 삭제, background 단색으로 단순화) */
+[data-theme='dark'] .mc-gif-placeholder { border-color: #493f78; background: #1c1830; }
 [data-theme='dark'] .mc-metric-row div { border-color: #2a2540; background: rgba(255, 255, 255, .04); }
 [data-theme='dark'] .mc-metric-row b { color: #b9a6ff; }
 [data-theme='dark'] .mc-metric-row span { color: #8d89a3; }
